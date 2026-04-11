@@ -1,0 +1,205 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --navy:       #0a0e1a;
+  --navy-2:     #111827;
+  --navy-3:     #1a2235;
+  --navy-4:     #243048;
+  --gold:       #f5c518;
+  --gold-dim:   #c9a014;
+  --gold-glow:  rgba(245, 197, 24, 0.15);
+  --white:      #ffffff;
+  --white-80:   rgba(255,255,255,0.8);
+  --white-50:   rgba(255,255,255,0.5);
+  --white-20:   rgba(255,255,255,0.2);
+  --white-10:   rgba(255,255,255,0.1);
+  --white-05:   rgba(255,255,255,0.05);
+  --red:        #e63946;
+  --green:      #2dce89;
+  --font-display: 'Barlow Condensed', sans-serif;
+  --font-body:    'Barlow', sans-serif;
+  --radius:     8px;
+  --radius-lg:  14px;
+  --transition: 0.18s ease;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  background-color: var(--navy);
+  color: var(--white);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* Noise texture overlay for depth */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.4;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+button {
+  font-family: var(--font-display);
+  cursor: pointer;
+  border: none;
+  outline: none;
+  transition: all var(--transition);
+}
+
+button:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+input {
+  font-family: var(--font-body);
+  outline: none;
+}
+
+/* ── Utility ── */
+.screen {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 24px;
+  position: relative;
+}
+
+.game-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--gold);
+  text-shadow: 0 0 40px var(--gold-glow);
+  line-height: 1;
+}
+
+.subtitle {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.1rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--white-50);
+  margin-top: 6px;
+}
+
+/* ── Primary Button ── */
+.btn-primary {
+  background: var(--gold);
+  color: var(--navy);
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 14px 48px;
+  border-radius: var(--radius);
+  transition: all var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: white;
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(245, 197, 24, 0.35);
+}
+
+.btn-primary:hover::after { opacity: 0.1; }
+.btn-primary:active { transform: translateY(0); }
+.btn-primary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ── Secondary Button ── */
+.btn-secondary {
+  background: transparent;
+  color: var(--white-80);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 10px 28px;
+  border-radius: var(--radius);
+  border: 1px solid var(--white-20);
+  transition: all var(--transition);
+}
+
+.btn-secondary:hover {
+  border-color: var(--white-50);
+  color: var(--white);
+  background: var(--white-05);
+}
+
+/* ── Card ── */
+.card {
+  background: var(--navy-3);
+  border: 1px solid var(--white-10);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+}
+
+/* ── Divider ── */
+.divider {
+  width: 60px;
+  height: 2px;
+  background: var(--gold);
+  border-radius: 2px;
+  margin: 16px auto;
+  opacity: 0.6;
+}
+
+/* ── Fade-in animation ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.fade-up {
+  animation: fadeUp 0.4s ease both;
+}
+
+@keyframes pulse-gold {
+  0%, 100% { box-shadow: 0 0 0 0 var(--gold-glow); }
+  50%       { box-shadow: 0 0 0 8px transparent; }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--navy-2); }
+::-webkit-scrollbar-thumb { background: var(--white-20); border-radius: 3px; }

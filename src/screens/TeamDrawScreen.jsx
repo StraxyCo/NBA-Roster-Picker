@@ -1,0 +1,130 @@
+import { useState, useEffect, useRef } from 'react'
+import { NBA_TEAMS, getLogoUrl } from '../data/teams.js'
+import { fetchRoster } from '../hooks/useRoster.js'
+import styles from './TeamDrawScreen.module.css'
+
+const REEL_DURATION = 2800  // ms total
+const TICK_START    = 60    // ms between ticks (fast)
+const TICK_END      = 220   // ms between ticks (slow)
+
+export default function TeamDrawScreen({ drawnTeams, eliminateTeams, apiKey, onTeamDrawn }) {
+  const [phase, setPhase]         = useState('ready')   // ready | spinning | settling | loading | done
+  const [displayTeam, setDisplay] = useState(null)
+  const [chosenTeam, setChosen]   = useState(null)
+  const [loadingRoster, setLoadingRoster] = useState(false)
+  const [error, setError]         = useState(null)
+  const rafRef = useRef(null)
+
+  const availableTeams = eliminateTeams
+    ? NBA_TEAMS.filter(t => !drawnTeams.includes(t.id))
+    : NBA_TEAMS
+
+  function pickRandom(arr) {
+    return arr[Math.floor(Math.random() * arr.length)]
+  }
+
+  async function startSpin() {
+    if (availableTeams.length === 0) {
+      setError('All teams have been drawn!')
+      return
+    }
+
+    const winner = pickRandom(availableTeams)
+    setChosen(winner)
+    setPhase('spinning')
+
+    const startTime = Date.now()
+
+    function tick() {
+      const elapsed = Date.now() - startTime
+      const progress = Math.min(elapsed / REEL_DURATION, 1)
+
+      // Ease-in: fast at start, slow at end
+      const interval = TICK_START + (TICK_END - TICK_START) * Math.pow(progress, 2)
+
+      if (progress < 1) {
+        setDisplay(pickRandom(availableTeams))
+        rafRef.current = setTimeout(tick, interval)
+      } else {
+        // Land on winner
+        setDisplay(winner)
+        setPhase('settling')
+        setTimeout(async () => {
+          setPhase('loading')
+          setLoadingRoster(true)
+          try {
+            const players = await fetchRoster(winner.id, apiKey)
+            setLoadingRoster(false)
+            setPhase('done')
+            setTimeout(() => onTeamDrawn(winner, players), 900)
+          } catch {
+            setLoadingRoster(false)
+            setError('Could not load roster. Check your connection.')
+          }
+        }, 600)
+      }
+    }
+
+    tick()
+  }
+
+  useEffect(() => () => clearTimeout(rafRef.current), [])
+
+  const team = displayTeam || NBA_TEAMS[0]
+
+  return (
+    <div className={styles.screen}>
+      <div className={styles.content}>
+        <div className={styles.eyebrow}>Team Draw</div>
+
+        {error ? (
+          <div className={styles.error}>{error}</div>
+        ) : (
+          <>
+            <div className={`${styles.logoBox} ${phase === 'settling' || phase === 'loading' || phase === 'done' ? styles.logoBoxLocked : ''} ${phase === 'spinning' ? styles.logoBoxSpinning : ''}`}>
+              {phase === 'ready' ? (
+                <div className={styles.logoPlaceholder}>
+                  <span className={styles.questionMark}>?</span>
+                </div>
+              ) : (
+                <img
+                  key={team.slug}
+                  src={getLogoUrl(team.slug)}
+                  alt={team.name}
+                  className={styles.logo}
+                  onError={e => { e.target.style.opacity = '0.3' }}
+                />
+              )}
+            </div>
+
+            {(phase === 'settling' || phase === 'loading' || phase === 'done') && chosenTeam && (
+              <div className={`${styles.teamName} fade-up`}>
+                {chosenTeam.name}
+              </div>
+            )}
+
+            {phase === 'loading' && (
+              <div className={styles.loadingMsg}>
+                Loading roster<span className={styles.dots}></span>
+              </div>
+            )}
+
+            {phase === 'done' && (
+              <div className={styles.successMsg}>Roster loaded ✓</div>
+            )}
+
+            {phase === 'ready' && (
+              <button className={styles.spinBtn} onClick={startSpin}>
+                Draw Team
+              </button>
+            )}
+
+            {phase === 'spinning' && displayTeam && (
+              <div className={styles.spinningName}>{displayTeam.name}</div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  )
+}

@@ -1,0 +1,207 @@
+.screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 48px 24px 80px;
+}
+
+.content {
+  width: 100%;
+  max-width: 680px;
+  animation: fadeUp 0.4s ease both;
+}
+
+/* Hero */
+.hero {
+  text-align: center;
+  margin-bottom: 40px;
+  padding-bottom: 40px;
+  border-bottom: 1px solid var(--white-10);
+}
+
+.eyebrow {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+
+.playerName {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(3rem, 10vw, 5.5rem);
+  line-height: 0.95;
+  text-transform: uppercase;
+  color: var(--white);
+  margin-bottom: 24px;
+  text-shadow: 0 0 60px rgba(245,197,24,0.15);
+}
+
+.progress {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+.progressBar {
+  flex: 1;
+  height: 4px;
+  background: var(--white-10);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--gold);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.progressLabel {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 0.05em;
+  color: var(--white-50);
+  white-space: nowrap;
+}
+
+/* Rosters grid */
+.rostersGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 36px;
+}
+
+.rosterCard {
+  background: var(--navy-3);
+  border: 1px solid var(--white-10);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  transition: border-color 0.2s;
+}
+
+.rosterCardActive {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 1px var(--gold), 0 0 24px var(--gold-glow);
+}
+
+.rosterHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--white-10);
+}
+
+.rosterPlayerName {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.1rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--white);
+}
+
+.rosterCardActive .rosterPlayerName {
+  color: var(--gold);
+}
+
+.rosterCount {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--white-50);
+}
+
+.rosterSlots {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rosterSlot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--white-05);
+}
+
+.rosterSlot:last-child {
+  border-bottom: none;
+}
+
+.rosterSlotLabel {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  color: var(--white-30);
+  width: 28px;
+  flex-shrink: 0;
+  color: var(--white-20);
+}
+
+.rosterSlotFilled .rosterSlotLabel {
+  color: var(--gold);
+}
+
+.rosterSlotPlayer {
+  font-size: 0.85rem;
+  color: var(--white-40);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--white-30);
+}
+
+.rosterSlotPlayer em {
+  font-style: normal;
+  color: var(--white-20);
+}
+
+.rosterSlotFilled .rosterSlotPlayer {
+  color: var(--white-80);
+}
+
+/* Draw button */
+.drawBtn {
+  display: block;
+  width: 100%;
+  background: var(--gold);
+  color: var(--navy);
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 16px;
+  border-radius: var(--radius);
+  transition: all 0.18s ease;
+}
+
+.drawBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(245, 197, 24, 0.4);
+}
+
+.drawBtn:active { transform: translateY(0); }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 520px) {
+  .rostersGrid { grid-template-columns: 1fr; }
+}

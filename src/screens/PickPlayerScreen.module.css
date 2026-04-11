@@ -1,0 +1,321 @@
+.screen {
+  min-height: 100vh;
+  padding: 32px 24px 80px;
+  display: flex;
+  justify-content: center;
+}
+
+.content {
+  width: 100%;
+  max-width: 900px;
+  animation: fadeUp 0.4s ease both;
+}
+
+/* Team header */
+.teamHeader {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 28px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--white-10);
+}
+
+.teamLogo {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.teamInfo {
+  flex: 1;
+}
+
+.eyebrow {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 4px;
+}
+
+.teamName {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--white);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.hint {
+  font-size: 0.8rem;
+  color: var(--white-40);
+}
+
+/* Two-panel layout */
+.panels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+  align-items: start;
+}
+
+@media (max-width: 620px) {
+  .panels { grid-template-columns: 1fr; }
+}
+
+/* Panel */
+.panel {
+  background: var(--navy-3);
+  border: 1px solid var(--white-10);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.panelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--white-10);
+  background: var(--navy-4);
+}
+
+.panelTitle {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--white-80);
+}
+
+.panelCount {
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--white-40);
+}
+
+/* NBA player list */
+.nbaList {
+  max-height: 420px;
+  overflow-y: auto;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nbaPlayer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s;
+  user-select: none;
+}
+
+.nbaPlayer:hover:not(.nbaPlayerPicked) {
+  background: var(--navy-4);
+  border-color: var(--white-20);
+}
+
+.nbaPlayerPicked {
+  opacity: 0.35;
+  cursor: default;
+  text-decoration: line-through;
+  text-decoration-color: var(--white-20);
+}
+
+.nbaPlayerSelected {
+  background: rgba(245, 197, 24, 0.1) !important;
+  border-color: var(--gold) !important;
+}
+
+.playerPos {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  color: var(--white-30);
+  width: 28px;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.playerName {
+  flex: 1;
+  font-size: 0.9rem;
+  color: var(--white-80);
+}
+
+.pickedBadge {
+  font-size: 0.75rem;
+  color: var(--green);
+  flex-shrink: 0;
+}
+
+.selectedArrow {
+  font-size: 0.9rem;
+  color: var(--gold);
+  flex-shrink: 0;
+}
+
+/* Slot list */
+.slotList {
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.slot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: var(--radius);
+  border: 1px dashed var(--white-10);
+  cursor: pointer;
+  transition: all 0.15s;
+  min-height: 40px;
+  user-select: none;
+}
+
+.slot:hover {
+  border-color: var(--white-30);
+  background: var(--navy-4);
+}
+
+.slotFilled {
+  border-style: solid;
+  border-color: var(--white-20);
+  background: var(--navy-4);
+}
+
+.slotFilled:hover {
+  border-color: var(--white-50);
+}
+
+.slotSelected {
+  border-color: var(--gold) !important;
+  background: rgba(245, 197, 24, 0.08) !important;
+}
+
+.slotTarget {
+  border-color: var(--gold);
+  border-style: dashed;
+  background: rgba(245, 197, 24, 0.05);
+  animation: pulse 1.2s ease infinite;
+}
+
+.slotTargetFilled {
+  border-color: var(--gold);
+  border-style: solid;
+}
+
+@keyframes pulse {
+  0%, 100% { border-color: rgba(245, 197, 24, 0.5); }
+  50%       { border-color: var(--gold); }
+}
+
+.slotLabel {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  color: var(--white-30);
+  width: 28px;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.slotFilled .slotLabel { color: var(--gold); }
+
+.slotContent {
+  flex: 1;
+  font-size: 0.9rem;
+  color: var(--white-80);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.slotEmpty {
+  font-style: normal;
+  color: var(--white-20);
+  font-size: 0.82rem;
+}
+
+.removeBtn {
+  width: 20px;
+  height: 20px;
+  background: var(--white-10);
+  border-radius: 50%;
+  color: var(--white-50);
+  font-size: 0.9rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s;
+  cursor: pointer;
+  border: none;
+}
+
+.removeBtn:hover {
+  background: var(--red);
+  color: var(--white);
+}
+
+.empty {
+  padding: 16px;
+  text-align: center;
+  color: var(--white-30);
+  font-size: 0.85rem;
+}
+
+/* Validate button */
+.validateBtn {
+  display: block;
+  width: 100%;
+  background: var(--gold);
+  color: var(--navy);
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 16px;
+  border-radius: var(--radius);
+  transition: all 0.18s ease;
+}
+
+.validateBtn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(245, 197, 24, 0.4);
+}
+
+.validateBtn:active:not(:disabled) { transform: translateY(0); }
+
+.validateBtn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
