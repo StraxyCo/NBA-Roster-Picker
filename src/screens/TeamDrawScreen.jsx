@@ -34,7 +34,6 @@ export default function TeamDrawScreen({ drawnTeams, eliminateTeams, onTeamDrawn
   }
 
   async function startSpin() {
-    console.log('API KEY:', import.meta.env.VITE_BALLDONTLIE_KEY)
     if (availableTeams.length === 0) {
       setError('All teams have been drawn!')
       return
@@ -62,12 +61,7 @@ export default function TeamDrawScreen({ drawnTeams, eliminateTeams, onTeamDrawn
           try {
             const result = await fetchRoster(winner.id)
             if (result?.error) {
-              const msg = result.error === 'NO_API_KEY'
-                ? 'An API key is required. Add yours on the setup screen.'
-                : result.error === 'INVALID_KEY'
-                ? 'Invalid API key. Check it on the setup screen.'
-                : 'Could not load roster. Check your connection.'
-              setError(msg)
+              setError('Could not load roster. Check your connection and try again.')
               return
             }
             setPhase('done')
