@@ -34,6 +34,7 @@ export default function TeamDrawScreen({ drawnTeams, eliminateTeams, onTeamDrawn
   }
 
   async function startSpin() {
+    console.log('API KEY:', import.meta.env.VITE_BALLDONTLIE_KEY)
     if (availableTeams.length === 0) {
       setError('All teams have been drawn!')
       return
