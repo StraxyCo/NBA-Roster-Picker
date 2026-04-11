@@ -11,42 +11,26 @@ function shuffle(arr) {
 }
 
 export default function OrderDrawScreen({ players, onOrderDrawn }) {
-  const [phase, setPhase]           = useState('idle')    // idle | rolling | revealed
-  const [rollingName, setRollingName] = useState('')
-  const [order, setOrder]           = useState([])
-  const [revealedCount, setRevealedCount] = useState(0)
+  const [phase, setPhase]             = useState('idle')   // idle | rolling | revealed
+  const [rollingNames, setRollingNames] = useState([])     // random names shown during roll
+  const [order, setOrder]             = useState([])
   const intervalRef = useRef(null)
-  const finalOrder  = useRef([])
 
   function startDraw() {
-    finalOrder.current = shuffle(players)
-    setOrder(finalOrder.current)
+    const finalOrder = shuffle(players)
+    setOrder(finalOrder)
     setPhase('rolling')
-    setRevealedCount(0)
 
-    let revealIdx = 0
-    // Reveal one by one with a rolling effect
-    revealNext(revealIdx)
-  }
-
-  function revealNext(idx) {
-    if (idx >= finalOrder.current.length) {
-      setPhase('revealed')
-      return
-    }
-
-    // Roll for 1.2s then settle
+    // Rapidly shuffle all slots simultaneously for 1.4s, then snap to result
     let ticks = 0
-    const totalTicks = 14
+    const totalTicks = 18
     intervalRef.current = setInterval(() => {
-      const randomName = players[Math.floor(Math.random() * players.length)]
-      setRollingName(randomName)
+      // Show random names in all slots at once
+      setRollingNames(finalOrder.map(() => players[Math.floor(Math.random() * players.length)]))
       ticks++
       if (ticks >= totalTicks) {
         clearInterval(intervalRef.current)
-        setRollingName('')
-        setRevealedCount(idx + 1)
-        setTimeout(() => revealNext(idx + 1), 400)
+        setPhase('revealed')
       }
     }, 80)
   }
@@ -81,19 +65,11 @@ export default function OrderDrawScreen({ players, onOrderDrawn }) {
         {phase === 'rolling' && (
           <div className={styles.rollingState}>
             <div className={styles.slotMachine}>
-              {finalOrder.current.map((name, i) => (
-                <div
-                  key={i}
-                  className={`${styles.slot} ${i < revealedCount ? styles.slotRevealed : ''} ${i === revealedCount ? styles.slotActive : ''}`}
-                >
+              {order.map((_, i) => (
+                <div key={i} className={`${styles.slot} ${styles.slotActive}`}>
                   <span className={styles.slotPos}>{i + 1}</span>
                   <span className={styles.slotName}>
-                    {i < revealedCount
-                      ? name
-                      : i === revealedCount
-                        ? rollingName || '…'
-                        : '?'
-                    }
+                    {rollingNames[i] || '…'}
                   </span>
                 </div>
               ))}
@@ -108,7 +84,7 @@ export default function OrderDrawScreen({ players, onOrderDrawn }) {
                 <div
                   key={i}
                   className={`${styles.slot} ${styles.slotRevealed}`}
-                  style={{ animationDelay: `${i * 0.08}s` }}
+                  style={{ animationDelay: `${i * 0.06}s` }}
                 >
                   <span className={styles.slotPos}>{i + 1}</span>
                   <span className={styles.slotName}>{name}</span>

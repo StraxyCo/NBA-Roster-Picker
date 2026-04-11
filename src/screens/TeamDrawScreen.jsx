@@ -3,17 +3,27 @@ import { NBA_TEAMS, getLogoUrl } from '../data/teams.js'
 import { fetchRoster } from '../hooks/useRoster.js'
 import styles from './TeamDrawScreen.module.css'
 
-const REEL_DURATION = 2800  // ms total
-const TICK_START    = 60    // ms between ticks (fast)
-const TICK_END      = 220   // ms between ticks (slow)
+const REEL_DURATION = 2800
+const TICK_START    = 60
+const TICK_END      = 220
+
+// Preload all logos into the browser cache immediately
+function preloadLogos() {
+  NBA_TEAMS.forEach(team => {
+    const img = new Image()
+    img.src = getLogoUrl(team.slug)
+  })
+}
 
 export default function TeamDrawScreen({ drawnTeams, eliminateTeams, apiKey, onTeamDrawn }) {
-  const [phase, setPhase]         = useState('ready')   // ready | spinning | settling | loading | done
+  const [phase, setPhase]         = useState('ready')
   const [displayTeam, setDisplay] = useState(null)
   const [chosenTeam, setChosen]   = useState(null)
-  const [loadingRoster, setLoadingRoster] = useState(false)
   const [error, setError]         = useState(null)
   const rafRef = useRef(null)
+
+  // Kick off preload as soon as this screen mounts
+  useEffect(() => { preloadLogos() }, [])
 
   const availableTeams = eliminateTeams
     ? NBA_TEAMS.filter(t => !drawnTeams.includes(t.id))
@@ -38,27 +48,21 @@ export default function TeamDrawScreen({ drawnTeams, eliminateTeams, apiKey, onT
     function tick() {
       const elapsed = Date.now() - startTime
       const progress = Math.min(elapsed / REEL_DURATION, 1)
-
-      // Ease-in: fast at start, slow at end
       const interval = TICK_START + (TICK_END - TICK_START) * Math.pow(progress, 2)
 
       if (progress < 1) {
         setDisplay(pickRandom(availableTeams))
         rafRef.current = setTimeout(tick, interval)
       } else {
-        // Land on winner
         setDisplay(winner)
         setPhase('settling')
         setTimeout(async () => {
           setPhase('loading')
-          setLoadingRoster(true)
           try {
             const players = await fetchRoster(winner.id, apiKey)
-            setLoadingRoster(false)
             setPhase('done')
             setTimeout(() => onTeamDrawn(winner, players), 900)
           } catch {
-            setLoadingRoster(false)
             setError('Could not load roster. Check your connection.')
           }
         }, 600)
