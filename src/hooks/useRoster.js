@@ -12,7 +12,9 @@ export async function fetchRoster(teamId) {
     return { error: 'NO_API_KEY' };
   }
 
-  const url = `https://api.balldontlie.io/nba/v1/players/active?team_ids[]=${teamId}&per_page=100`;
+  // /nba/v1/players is available on the free tier and supports team_ids[] filtering.
+  // Note: this is the NEW base URL (nba.balldontlie.io path), not the old /v1/players.
+  const url = `https://api.balldontlie.io/nba/v1/players?team_ids[]=${teamId}&per_page=100`;
 
   try {
     const res = await fetch(url, { headers: { Authorization: API_KEY } });
