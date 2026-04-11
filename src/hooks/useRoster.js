@@ -1,39 +1,33 @@
-// Cache to avoid re-fetching same team in a session
+// Session cache to avoid re-fetching same team
 const rosterCache = {};
 
-// Current NBA season (2024 = the 2024-25 season)
-const CURRENT_SEASON = 2024;
+// Key is injected at build time via Vite env variable.
+// Set VITE_BALLDONTLIE_KEY in your Vercel environment settings.
+const API_KEY = import.meta.env.VITE_BALLDONTLIE_KEY;
 
-export async function fetchRoster(teamId, apiKey) {
+export async function fetchRoster(teamId) {
   if (rosterCache[teamId]) return rosterCache[teamId];
 
-  const headers = apiKey ? { Authorization: apiKey } : {};
+  if (!API_KEY) {
+    return { error: 'NO_API_KEY' };
+  }
 
-  // Use season averages endpoint — this reliably returns only players
-  // who actually played for the team this season, not historical records.
-  // We fetch two pages to cover full rosters (some teams have 20+ entries).
-  const base = `https://api.balldontlie.io/nba/v1/season_averages/general?season=${CURRENT_SEASON}&season_type=regular&type=base&team_ids[]=${teamId}&per_page=100`;
+  const url = `https://api.balldontlie.io/nba/v1/players/active?team_ids[]=${teamId}&per_page=100`;
 
   try {
-    const res = await fetch(base, { headers });
+    const res = await fetch(url, { headers: { Authorization: API_KEY } });
+
+    if (res.status === 401) return { error: 'INVALID_KEY' };
     if (!res.ok) throw new Error(`API error: ${res.status}`);
+
     const data = await res.json();
 
-    // Deduplicate by player id (a player may appear multiple times if traded)
-    const seen = new Set();
-    const players = [];
-    for (const entry of (data.data || [])) {
-      const p = entry.player;
-      if (!p || seen.has(p.id)) continue;
-      seen.add(p.id);
-      players.push({
-        id: p.id,
-        name: `${p.first_name} ${p.last_name}`,
-        position: p.position || "—",
-      });
-    }
+    const players = (data.data || []).map((p) => ({
+      id: p.id,
+      name: `${p.first_name} ${p.last_name}`,
+      position: p.position || '—',
+    }));
 
-    // Sort alphabetically by last name
     players.sort((a, b) => {
       const la = a.name.split(' ').slice(-1)[0];
       const lb = b.name.split(' ').slice(-1)[0];
@@ -43,7 +37,7 @@ export async function fetchRoster(teamId, apiKey) {
     rosterCache[teamId] = players;
     return players;
   } catch (err) {
-    console.error("Failed to fetch roster:", err);
-    return [];
+    console.error('Failed to fetch roster:', err);
+    return { error: 'FETCH_FAILED' };
   }
 }

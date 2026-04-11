@@ -24,7 +24,7 @@ export const NBA_TEAMS = [
   { id: 26, name: "Orlando Magic",          abbr: "ORL", slug: "orlando-magic" },
   { id: 27, name: "Philadelphia 76ers",     abbr: "PHI", slug: "philadelphia-76ers" },
   { id: 28, name: "Phoenix Suns",           abbr: "PHX", slug: "phoenix-suns" },
-  { id: 29, name: "Portland Trail Blazers", abbr: "POR", slug: "portland-trail-blazers" },
+  { id: 29, name: "Portland Trail Blazers", abbr: "POR", slug: "portland-trailblazers" },
   { id: 30, name: "Sacramento Kings",       abbr: "SAC", slug: "sacramento-kings" },
   { id: 31, name: "San Antonio Spurs",      abbr: "SAS", slug: "san-antonio-spurs" },
   { id: 38, name: "Toronto Raptors",        abbr: "TOR", slug: "toronto-raptors" },

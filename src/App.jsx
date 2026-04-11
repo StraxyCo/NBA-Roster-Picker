@@ -25,10 +25,9 @@ export default function App() {
   const [screen, setScreen] = useState(SCREENS.SETUP)
 
   // Config from setup
-  const [players, setPlayers]           = useState([])   // ["Alice", "Bob", ...]
+  const [players, setPlayers]           = useState([])
   const [rosterSize, setRosterSize]     = useState(6)
   const [eliminateTeams, setEliminate]  = useState(true)
-  const [apiKey, setApiKey]             = useState('')
 
   // Game state
   const [turnOrder, setTurnOrder]       = useState([])   // ["Alice", "Bob", ...] shuffled
@@ -40,11 +39,10 @@ export default function App() {
 
   // ── Handlers ──────────────────────────────────────────────
 
-  function handleSetupStart({ players, rosterSize, eliminateTeams, apiKey }) {
+  function handleSetupStart({ players, rosterSize, eliminateTeams }) {
     setPlayers(players)
     setRosterSize(rosterSize)
     setEliminate(eliminateTeams)
-    setApiKey(apiKey)
     // Init empty rosters
     const emptyRosters = {}
     players.forEach(p => { emptyRosters[p] = buildEmptyRoster(rosterSize) })
@@ -128,7 +126,6 @@ export default function App() {
         <TeamDrawScreen
           drawnTeams={drawnTeams}
           eliminateTeams={eliminateTeams}
-          apiKey={apiKey}
           onTeamDrawn={handleTeamDrawn}
         />
       )}

@@ -15,7 +15,7 @@ function preloadLogos() {
   })
 }
 
-export default function TeamDrawScreen({ drawnTeams, eliminateTeams, apiKey, onTeamDrawn }) {
+export default function TeamDrawScreen({ drawnTeams, eliminateTeams, onTeamDrawn }) {
   const [phase, setPhase]         = useState('ready')
   const [displayTeam, setDisplay] = useState(null)
   const [chosenTeam, setChosen]   = useState(null)
@@ -59,9 +59,18 @@ export default function TeamDrawScreen({ drawnTeams, eliminateTeams, apiKey, onT
         setTimeout(async () => {
           setPhase('loading')
           try {
-            const players = await fetchRoster(winner.id, apiKey)
+            const result = await fetchRoster(winner.id)
+            if (result?.error) {
+              const msg = result.error === 'NO_API_KEY'
+                ? 'An API key is required. Add yours on the setup screen.'
+                : result.error === 'INVALID_KEY'
+                ? 'Invalid API key. Check it on the setup screen.'
+                : 'Could not load roster. Check your connection.'
+              setError(msg)
+              return
+            }
             setPhase('done')
-            setTimeout(() => onTeamDrawn(winner, players), 900)
+            setTimeout(() => onTeamDrawn(winner, result), 900)
           } catch {
             setError('Could not load roster. Check your connection.')
           }

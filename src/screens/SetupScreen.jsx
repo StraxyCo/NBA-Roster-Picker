@@ -5,7 +5,6 @@ export default function SetupScreen({ onStart }) {
   const [names, setNames]           = useState(['', '', '', ''])
   const [rosterSize, setRosterSize] = useState(6)
   const [eliminate, setEliminate]   = useState(true)
-  const [apiKey, setApiKey]         = useState('')
 
   const activePlayers = names.filter(n => n.trim() !== '')
   const canStart = activePlayers.length >= 1
@@ -20,7 +19,6 @@ export default function SetupScreen({ onStart }) {
       players: activePlayers,
       rosterSize,
       eliminateTeams: eliminate,
-      apiKey: apiKey.trim(),
     })
   }
 
@@ -98,25 +96,6 @@ export default function SetupScreen({ onStart }) {
                 <span className={styles.toggleKnob} />
               </button>
             </div>
-          </section>
-
-          {/* API Key (optional) */}
-          <section className={styles.section}>
-            <h2 className={styles.sectionLabel}>
-              BallDontLie API Key
-              <span className={styles.optional}> — optional</span>
-            </h2>
-            <input
-              className={styles.input}
-              type="text"
-              placeholder="Paste your API key for higher rate limits"
-              value={apiKey}
-              onChange={e => setApiKey(e.target.value)}
-            />
-            <p className={styles.hint}>
-              Free at <a href="https://www.balldontlie.io" target="_blank" rel="noreferrer">balldontlie.io</a>.
-              Without a key, rate limit is 5 req/min — enough for most games.
-            </p>
           </section>
         </div>
 
