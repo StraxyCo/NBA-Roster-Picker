@@ -287,3 +287,9 @@
 @media (max-width: 520px) {
   .rostersGrid { grid-template-columns: 1fr; }
 }
+
+.savingNote {
+  font-size: 0.8rem;
+  color: var(--white-40);
+  font-weight: 400;
+}

@@ -2,20 +2,22 @@ import { useState } from 'react'
 import { SLOT_LABELS } from '../data/teams.js'
 import styles from './FinalScreen.module.css'
 
-export default function FinalScreen({ rosters, turnOrder, rosterSize, onRestart }) {
-  const [winner, setWinner] = useState(null)  // player name or null
+export default function FinalScreen({ rosters, turnOrder, rosterSize, onDeclareWinner, onRestart }) {
+  const [winner, setWinner]     = useState(null)
   const [declared, setDeclared] = useState(false)
+  const [saving, setSaving]     = useState(false)
 
-  function declareWinner(player) {
+  async function declareWinner(player) {
     setWinner(player)
     setDeclared(true)
+    setSaving(true)
+    try { await onDeclareWinner(player) } catch (e) { console.error(e) }
+    setSaving(false)
   }
 
   return (
     <div className={styles.screen}>
       <div className={styles.content}>
-
-        {/* Header */}
         <header className={styles.header}>
           {declared ? (
             <div className={styles.winnerHero}>
@@ -41,50 +43,30 @@ export default function FinalScreen({ rosters, turnOrder, rosterSize, onRestart 
           )}
         </header>
 
-        {/* Rosters grid */}
         <div className={styles.rostersGrid}>
           {turnOrder.map((player) => {
             const roster = rosters[player] || []
             const isWinner = declared && winner === player
             return (
-              <div
-                key={player}
-                className={`${styles.rosterCard} ${isWinner ? styles.rosterCardWinner : ''}`}
-              >
+              <div key={player} className={`${styles.rosterCard} ${isWinner ? styles.rosterCardWinner : ''}`}>
                 <div className={styles.rosterHeader}>
                   <span className={styles.rosterName}>{player}</span>
-                  <span className={styles.rosterPicks}>
-                    {roster.filter(Boolean).length} / {rosterSize}
-                  </span>
+                  <span className={styles.rosterPicks}>{roster.filter(Boolean).length} / {rosterSize}</span>
                 </div>
                 <div className={styles.rosterSlots}>
                   {Array.from({ length: rosterSize }).map((_, i) => {
                     const entry = roster[i]
                     return (
-                      <div
-                        key={i}
-                        className={`${styles.slot} ${entry ? styles.slotFilled : styles.slotEmpty}`}
-                      >
-                        <span className={styles.slotLabel}>
-                          {SLOT_LABELS[i] || i + 1}
-                        </span>
-                        <span className={styles.slotPlayer}>
-                          {entry ? entry.name : <em>—</em>}
-                        </span>
-                        {entry && (
-                          <span className={styles.slotPos}>{entry.position}</span>
-                        )}
+                      <div key={i} className={`${styles.slot} ${entry ? styles.slotFilled : styles.slotEmpty}`}>
+                        <span className={styles.slotLabel}>{SLOT_LABELS[i] || i + 1}</span>
+                        <span className={styles.slotPlayer}>{entry ? entry.name : <em>—</em>}</span>
+                        {entry && <span className={styles.slotPos}>{entry.position}</span>}
                       </div>
                     )
                   })}
                 </div>
-
-                {/* Per-player winner button if not yet declared */}
                 {!declared && (
-                  <button
-                    className={styles.declareBtn}
-                    onClick={() => declareWinner(player)}
-                  >
+                  <button className={styles.declareBtn} onClick={() => declareWinner(player)}>
                     🏆 {player} wins!
                   </button>
                 )}
@@ -93,16 +75,14 @@ export default function FinalScreen({ rosters, turnOrder, rosterSize, onRestart 
           })}
         </div>
 
-        {/* Bottom actions */}
         <div className={styles.actions}>
           {declared && (
             <div className={styles.wonMessage}>
               Congratulations, <strong>{winner}</strong>! 🎉
+              {saving && <span className={styles.savingNote}> Saving…</span>}
             </div>
           )}
-          <button className={styles.restartBtn} onClick={onRestart}>
-            New Game
-          </button>
+          <button className={styles.restartBtn} onClick={onRestart}>New Game</button>
         </div>
       </div>
     </div>
