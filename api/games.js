@@ -1,14 +1,11 @@
-import { Redis } from '@upstash/redis'
+const { Redis } = require('@upstash/redis')
 
 const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN,
+  url: process.env.KV_REST_API_URL,
+  token: process.env.KV_REST_API_TOKEN,
 })
 
-// Games stored as a list of JSON objects under key "games"
-// Each game: { id, date, playerIds, playerNames, winnerId, winnerName }
-
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
@@ -18,7 +15,6 @@ export default async function handler(req, res) {
     if (req.method === 'GET') {
       const raw = await redis.get('games')
       const games = raw ? (typeof raw === 'string' ? JSON.parse(raw) : raw) : []
-      // Most recent first
       games.sort((a, b) => b.date - a.date)
       return res.status(200).json(games)
     }
@@ -28,27 +24,21 @@ export default async function handler(req, res) {
       if (!playerIds?.length || !winnerId) {
         return res.status(400).json({ error: 'playerIds and winnerId required' })
       }
-
-      // Load current games
       const raw = await redis.get('games')
       const games = raw ? (typeof raw === 'string' ? JSON.parse(raw) : raw) : []
-
       const newGame = {
         id: Date.now().toString(),
         date: Date.now(),
-        playerIds,
-        playerNames,
-        winnerId,
-        winnerName,
+        playerIds, playerNames, winnerId, winnerName,
       }
       games.push(newGame)
       await redis.set('games', JSON.stringify(games))
 
       // Update player stats
       for (const pid of playerIds) {
-        const raw = await redis.hget('players', pid)
-        if (!raw) continue
-        const player = typeof raw === 'string' ? JSON.parse(raw) : raw
+        const pRaw = await redis.hget('players', pid)
+        if (!pRaw) continue
+        const player = typeof pRaw === 'string' ? JSON.parse(pRaw) : pRaw
         player.gamesPlayed = (player.gamesPlayed || 0) + 1
         if (pid === winnerId) player.wins = (player.wins || 0) + 1
         await redis.hset('players', { [pid]: JSON.stringify(player) })
@@ -60,7 +50,6 @@ export default async function handler(req, res) {
     if (req.method === 'DELETE') {
       const { id } = req.query
       if (!id) return res.status(400).json({ error: 'id required' })
-
       const raw = await redis.get('games')
       let games = raw ? (typeof raw === 'string' ? JSON.parse(raw) : raw) : []
       const game = games.find(g => g.id === id)
@@ -68,9 +57,9 @@ export default async function handler(req, res) {
 
       // Revert player stats
       for (const pid of (game.playerIds || [])) {
-        const raw = await redis.hget('players', pid)
-        if (!raw) continue
-        const player = typeof raw === 'string' ? JSON.parse(raw) : raw
+        const pRaw = await redis.hget('players', pid)
+        if (!pRaw) continue
+        const player = typeof pRaw === 'string' ? JSON.parse(pRaw) : pRaw
         player.gamesPlayed = Math.max(0, (player.gamesPlayed || 0) - 1)
         if (pid === game.winnerId) player.wins = Math.max(0, (player.wins || 0) - 1)
         await redis.hset('players', { [pid]: JSON.stringify(player) })
