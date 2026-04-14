@@ -119,6 +119,7 @@ export default function App() {
         <TurnScreen
           currentPlayer={currentPlayer} picksCount={picksCount}
           rosterSize={rosterSize} rosters={rosters} turnOrder={turnOrder}
+          multiSeason={seasons.length > 1}
           onDraw={() => setScreen(SCREENS.TEAM_DRAW)}
         />
       )}

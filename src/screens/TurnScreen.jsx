@@ -1,7 +1,7 @@
 import styles from './TurnScreen.module.css'
 import { SLOT_LABELS } from '../data/teams.js'
 
-export default function TurnScreen({ currentPlayer, picksCount, rosterSize, rosters, turnOrder, onDraw }) {
+export default function TurnScreen({ currentPlayer, picksCount, rosterSize, rosters, turnOrder, multiSeason, onDraw }) {
   return (
     <div className={styles.screen}>
       <div className={styles.content}>
@@ -47,7 +47,10 @@ export default function TurnScreen({ currentPlayer, picksCount, rosterSize, rost
                             {SLOT_LABELS[i] || i + 1}
                           </span>
                           <span className={styles.rosterSlotPlayer}>
-                            {entry ? entry.name : <em>empty</em>}
+                            {entry
+                              ? <>{entry.name}{multiSeason && entry.season && <span className={styles.seasonTag}>{entry.season}</span>}</>
+                              : <em>empty</em>
+                            }
                           </span>
                         </div>
                       )
