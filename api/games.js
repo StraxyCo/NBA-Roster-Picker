@@ -10,10 +10,9 @@ async function redisGet(key) {
 }
 
 async function redisSet(key, value) {
-  const res = await fetch(`${BASE}/set/${encodeURIComponent(key)}/${encodeURIComponent(value)}`, {
+  await fetch(`${BASE}/set/${encodeURIComponent(key)}/${encodeURIComponent(value)}`, {
     headers: { Authorization: `Bearer ${TOKEN}` },
   })
-  return res.ok
 }
 
 async function hget(key, field) {
@@ -25,13 +24,12 @@ async function hget(key, field) {
 }
 
 async function hset(key, field, value) {
-  const res = await fetch(`${BASE}/hset/${encodeURIComponent(key)}/${encodeURIComponent(field)}/${encodeURIComponent(value)}`, {
+  await fetch(`${BASE}/hset/${encodeURIComponent(key)}/${encodeURIComponent(field)}/${encodeURIComponent(value)}`, {
     headers: { Authorization: `Bearer ${TOKEN}` },
   })
-  return res.ok
 }
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
@@ -96,7 +94,7 @@ module.exports = async function handler(req, res) {
 
     res.status(405).json({ error: 'Method not allowed' })
   } catch (err) {
-    console.error('Games API error:', err)
+    console.error('[games] error:', err.message)
     res.status(500).json({ error: err.message })
   }
 }
