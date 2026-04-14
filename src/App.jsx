@@ -133,12 +133,14 @@ export default function App() {
         <PickPlayerScreen
           currentPlayer={currentPlayer} team={currentTeam} season={currentSeason}
           nbaRoster={currentRoster} userRoster={currentUserRoster}
-          rosterSize={rosterSize} onValidate={handlePickValidated}
+          rosterSize={rosterSize} multiSeason={seasons.length > 1}
+          onValidate={handlePickValidated}
         />
       )}
       {screen === SCREENS.FINAL && (
         <FinalScreen
           rosters={rosters} turnOrder={turnOrder} rosterSize={rosterSize}
+          multiSeason={seasons.length > 1}
           onDeclareWinner={handleDeclareWinner}
           onRestart={handleRestart}
         />

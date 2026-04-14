@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import { SLOT_LABELS, getLogoUrl } from '../data/teams.js'
 import styles from './PickPlayerScreen.module.css'
 
-export default function PickPlayerScreen({ currentPlayer, team, season, nbaRoster, userRoster, rosterSize, onValidate }) {
+export default function PickPlayerScreen({ currentPlayer, team, season, nbaRoster, userRoster, rosterSize, multiSeason, onValidate }) {
   // Working copy of the user's roster for this session
   const [myRoster, setMyRoster] = useState([...userRoster])
   // Track which players from nbaRoster have been picked (by player id)
@@ -44,10 +44,10 @@ export default function PickPlayerScreen({ currentPlayer, team, season, nbaRoste
     }
 
     if (selectedSource.type === 'nba') {
-      // Place NBA player into slot
+      // Place NBA player into slot — attach season
       const prev = myRoster[slotIdx]
       const newRoster = [...myRoster]
-      newRoster[slotIdx] = selectedSource.player
+      newRoster[slotIdx] = { ...selectedSource.player, season }
 
       const newPicked = new Set(pickedIds)
       newPicked.add(selectedSource.player.id)
@@ -110,7 +110,7 @@ export default function PickPlayerScreen({ currentPlayer, team, season, nbaRoste
       if (pickedIds.has(src.player.id)) return
       const prev = myRoster[slotIdx]
       const newRoster = [...myRoster]
-      newRoster[slotIdx] = src.player
+      newRoster[slotIdx] = { ...src.player, season }
       const newPicked = new Set(pickedIds)
       newPicked.add(src.player.id)
       if (prev) newPicked.delete(prev.id)
@@ -213,7 +213,15 @@ export default function PickPlayerScreen({ currentPlayer, team, season, nbaRoste
                   >
                     <span className={styles.slotLabel}>{SLOT_LABELS[i] || i + 1}</span>
                     <span className={styles.slotContent}>
-                      {player ? player.name : <em className={styles.slotEmpty}>Drop here</em>}
+                      {player
+                        ? <>
+                            {player.name}
+                            {multiSeason && player.season && (
+                              <span className={styles.slotSeasonTag}>{player.season}</span>
+                            )}
+                          </>
+                        : <em className={styles.slotEmpty}>Drop here</em>
+                      }
                     </span>
                     {player && (
                       <button

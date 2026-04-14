@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { SLOT_LABELS } from '../data/teams.js'
 import styles from './FinalScreen.module.css'
 
-export default function FinalScreen({ rosters, turnOrder, rosterSize, onDeclareWinner, onRestart }) {
+export default function FinalScreen({ rosters, turnOrder, rosterSize, multiSeason, onDeclareWinner, onRestart }) {
   const [winner, setWinner]     = useState(null)
   const [declared, setDeclared] = useState(false)
   const [saving, setSaving]     = useState(false)
@@ -59,7 +59,12 @@ export default function FinalScreen({ rosters, turnOrder, rosterSize, onDeclareW
                     return (
                       <div key={i} className={`${styles.slot} ${entry ? styles.slotFilled : styles.slotEmpty}`}>
                         <span className={styles.slotLabel}>{SLOT_LABELS[i] || i + 1}</span>
-                        <span className={styles.slotPlayer}>{entry ? entry.name : <em>—</em>}</span>
+                        <span className={styles.slotPlayer}>
+                          {entry
+                            ? <>{entry.name}{multiSeason && entry.season && <span className={styles.slotSeasonTag}>{entry.season}</span>}</>
+                            : <em>—</em>
+                          }
+                        </span>
                         {entry && <span className={styles.slotPos}>{entry.position}</span>}
                       </div>
                     )
