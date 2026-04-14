@@ -196,3 +196,17 @@
 @media (max-width: 400px) {
   .logoBox { width: 200px; height: 200px; }
 }
+
+.teamSeason {
+  display: block;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--gold);
+  letter-spacing: 0.1em;
+  margin-top: 2px;
+}
+
+.spinningSeason {
+  font-size: 0.85rem;
+  color: var(--white-40);
+}

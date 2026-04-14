@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import { SLOT_LABELS, getLogoUrl } from '../data/teams.js'
 import styles from './PickPlayerScreen.module.css'
 
-export default function PickPlayerScreen({ currentPlayer, team, nbaRoster, userRoster, rosterSize, onValidate }) {
+export default function PickPlayerScreen({ currentPlayer, team, season, nbaRoster, userRoster, rosterSize, onValidate }) {
   // Working copy of the user's roster for this session
   const [myRoster, setMyRoster] = useState([...userRoster])
   // Track which players from nbaRoster have been picked (by player id)
@@ -145,7 +145,7 @@ export default function PickPlayerScreen({ currentPlayer, team, nbaRoster, userR
           />
           <div className={styles.teamInfo}>
             <div className={styles.eyebrow}>{currentPlayer}'s pick</div>
-            <h1 className={styles.teamName}>{team.name}</h1>
+            <h1 className={styles.teamName}>{team.name}{season ? <span className={styles.teamSeason}> · {season}</span> : ''}</h1>
             <p className={styles.hint}>Click a player, then click a slot — or drag & drop</p>
           </div>
         </div>

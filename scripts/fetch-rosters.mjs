@@ -1,7 +1,21 @@
-// Run locally with: node scripts/fetch-rosters.mjs
-// Generates public/rosters.json — commit and push to GitHub
+// node scripts/fetch-rosters.mjs
+//
+// First run  → fetches all seasons from 2005-06 to current, writes public/rosters.json
+// Later runs → detects existing seasons, only re-fetches the current season
+//
+// Output structure: { "2005-06": { "1": [...players], "2": [...] }, "2006-07": { ... }, ... }
 
-import { writeFileSync } from 'fs';
+import { writeFileSync, readFileSync, existsSync } from 'fs';
+
+const CURRENT_SEASON = '2025-26';
+
+const ALL_SEASONS = [
+  '2005-06','2006-07','2007-08','2008-09','2009-10',
+  '2010-11','2011-12','2012-13','2013-14','2014-15',
+  '2015-16','2016-17','2017-18','2018-19','2019-20',
+  '2020-21','2021-22','2022-23','2023-24','2024-25',
+  '2025-26',
+];
 
 const TEAMS = {
   1:  { nbaId: '1610612737', name: 'Atlanta Hawks' },
@@ -36,7 +50,7 @@ const TEAMS = {
   41: { nbaId: '1610612764', name: 'Washington Wizards' },
 };
 
-const HEADERS = {
+const NBA_HEADERS = {
   'Accept': 'application/json, text/plain, */*',
   'Accept-Language': 'en-US,en;q=0.9',
   'Origin': 'https://www.nba.com',
@@ -46,14 +60,14 @@ const HEADERS = {
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
 };
 
-async function fetchTeam(teamId, nbaId, name) {
-  const url = `https://stats.nba.com/stats/commonteamroster?TeamID=${nbaId}&Season=2025-26`;
-  const res = await fetch(url, { headers: HEADERS });
-  if (!res.ok) throw new Error(`${res.status} for ${name}`);
+async function fetchTeamRoster(nbaId, name, season) {
+  const url = `https://stats.nba.com/stats/commonteamroster?TeamID=${nbaId}&Season=${season}`;
+  const res = await fetch(url, { headers: NBA_HEADERS });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const data = await res.json();
 
   const rosterSet = data.resultSets?.find(s => s.name === 'CommonTeamRoster');
-  if (!rosterSet) throw new Error(`No roster set for ${name}`);
+  if (!rosterSet) throw new Error('No CommonTeamRoster in response');
 
   const h = rosterSet.headers;
   return rosterSet.rowSet.map((row, i) => ({
@@ -64,21 +78,63 @@ async function fetchTeam(teamId, nbaId, name) {
   }));
 }
 
-const rosters = {};
+// ── Load existing data ──────────────────────────────────────────────────────
 
-for (const [teamId, { nbaId, name }] of Object.entries(TEAMS)) {
-  process.stdout.write(`Fetching ${name}... `);
-  try {
-    await new Promise(r => setTimeout(r, 600));
-    const players = await fetchTeam(teamId, nbaId, name);
-    rosters[teamId] = players;
-    console.log(`✓ ${players.length} players`);
-  } catch (err) {
-    console.log(`✗ ${err.message}`);
-    rosters[teamId] = [];
+const OUTPUT = 'public/rosters.json';
+let existing = {};
+
+if (existsSync(OUTPUT)) {
+  existing = JSON.parse(readFileSync(OUTPUT, 'utf8'));
+  console.log(`📂 Found existing rosters.json with seasons: ${Object.keys(existing).join(', ')}\n`);
+} else {
+  console.log('📂 No existing rosters.json — full fetch from scratch.\n');
+}
+
+// ── Decide which seasons to fetch ──────────────────────────────────────────
+
+const existingSeasons = new Set(Object.keys(existing));
+const seasonsToFetch = ALL_SEASONS.filter(s =>
+  !existingSeasons.has(s) || s === CURRENT_SEASON
+);
+
+if (seasonsToFetch.length === 1 && seasonsToFetch[0] === CURRENT_SEASON) {
+  console.log(`🔄 All historical seasons already present. Refreshing current season only: ${CURRENT_SEASON}\n`);
+} else {
+  const newSeasons = seasonsToFetch.filter(s => s !== CURRENT_SEASON);
+  console.log(`🆕 New seasons to fetch: ${newSeasons.join(', ')}`);
+  console.log(`🔄 Also refreshing current season: ${CURRENT_SEASON}\n`);
+}
+
+// ── Fetch ───────────────────────────────────────────────────────────────────
+
+const result = { ...existing };
+let totalFetched = 0;
+let totalFailed  = 0;
+
+for (const season of seasonsToFetch) {
+  console.log(`\n── Season ${season} ──`);
+  result[season] = result[season] || {};
+
+  for (const [teamId, { nbaId, name }] of Object.entries(TEAMS)) {
+    process.stdout.write(`  ${name}... `);
+    try {
+      await new Promise(r => setTimeout(r, 500));
+      const players = await fetchTeamRoster(nbaId, name, season);
+      result[season][teamId] = players;
+      console.log(`✓ ${players.length} players`);
+      totalFetched++;
+    } catch (err) {
+      // Some teams didn't exist in early seasons (e.g. Pelicans pre-2002)
+      // Keep existing data if any, otherwise store empty array
+      result[season][teamId] = result[season][teamId] || [];
+      console.log(`✗ ${err.message}`);
+      totalFailed++;
+    }
   }
 }
 
-writeFileSync('public/rosters.json', JSON.stringify(rosters, null, 2));
-console.log('\n✅ Written to public/rosters.json');
-console.log('Now commit and push this file to GitHub.');
+// ── Write ───────────────────────────────────────────────────────────────────
+
+writeFileSync(OUTPUT, JSON.stringify(result, null, 2));
+console.log(`\n✅ Done. Fetched: ${totalFetched}, Failed: ${totalFailed}`);
+console.log(`📝 Written to ${OUTPUT} — commit and push to GitHub.`);

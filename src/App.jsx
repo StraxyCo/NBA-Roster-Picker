@@ -5,45 +5,40 @@ import TurnScreen from './screens/TurnScreen.jsx'
 import TeamDrawScreen from './screens/TeamDrawScreen.jsx'
 import PickPlayerScreen from './screens/PickPlayerScreen.jsx'
 import FinalScreen from './screens/FinalScreen.jsx'
-import { SLOT_LABELS } from './data/teams.js'
 
-// Screen identifiers
 const SCREENS = {
-  SETUP:       'SETUP',
-  ORDER_DRAW:  'ORDER_DRAW',
-  TURN:        'TURN',
-  TEAM_DRAW:   'TEAM_DRAW',
-  PICK_PLAYER: 'PICK_PLAYER',
-  FINAL:       'FINAL',
+  SETUP: 'SETUP', ORDER_DRAW: 'ORDER_DRAW', TURN: 'TURN',
+  TEAM_DRAW: 'TEAM_DRAW', PICK_PLAYER: 'PICK_PLAYER', FINAL: 'FINAL',
 }
 
-function buildEmptyRoster(size) {
-  return Array(size).fill(null)
-}
+function buildEmptyRoster(size) { return Array(size).fill(null) }
 
 export default function App() {
   const [screen, setScreen] = useState(SCREENS.SETUP)
 
-  // Config from setup
-  const [players, setPlayers]           = useState([])
-  const [rosterSize, setRosterSize]     = useState(6)
-  const [eliminateTeams, setEliminate]  = useState(true)
+  // Config
+  const [players, setPlayers]               = useState([])
+  const [rosterSize, setRosterSize]         = useState(6)
+  const [eliminateTeams, setEliminate]      = useState(true)
+  const [eliminateFranchises, setElimFranch] = useState(false)
+  const [seasons, setSeasons]               = useState(['2025-26'])
 
   // Game state
-  const [turnOrder, setTurnOrder]       = useState([])   // ["Alice", "Bob", ...] shuffled
+  const [turnOrder, setTurnOrder]           = useState([])
   const [currentTurnIdx, setCurrentTurnIdx] = useState(0)
-  const [rosters, setRosters]           = useState({})   // { "Alice": [null, null, ...], ... }
-  const [drawnTeams, setDrawnTeams]     = useState([])   // slugs/ids already drawn
-  const [currentTeam, setCurrentTeam]  = useState(null)  // team object drawn this turn
-  const [currentRoster, setCurrentRoster] = useState([]) // players from API this turn
+  const [rosters, setRosters]               = useState({})
+  // drawnEntries: array of { teamId, season } — used for eliminate logic
+  const [drawnEntries, setDrawnEntries]     = useState([])
+  const [currentTeam, setCurrentTeam]       = useState(null)
+  const [currentRoster, setCurrentRoster]   = useState([])
+  const [currentSeason, setCurrentSeason]   = useState(null)
 
-  // ── Handlers ──────────────────────────────────────────────
-
-  function handleSetupStart({ players, rosterSize, eliminateTeams }) {
+  function handleSetupStart({ players, rosterSize, eliminateTeams, eliminateFranchises, seasons }) {
     setPlayers(players)
     setRosterSize(rosterSize)
     setEliminate(eliminateTeams)
-    // Init empty rosters
+    setElimFranch(eliminateFranchises)
+    setSeasons(seasons)
     const emptyRosters = {}
     players.forEach(p => { emptyRosters[p] = buildEmptyRoster(rosterSize) })
     setRosters(emptyRosters)
@@ -56,43 +51,35 @@ export default function App() {
     setScreen(SCREENS.TURN)
   }
 
-  function handleDrawTeam() {
-    setScreen(SCREENS.TEAM_DRAW)
-  }
-
-  function handleTeamDrawn(team, rosterPlayers) {
+  function handleTeamDrawn(team, season, rosterPlayers) {
     setCurrentTeam(team)
+    setCurrentSeason(season)
     setCurrentRoster(rosterPlayers)
     if (eliminateTeams) {
-      setDrawnTeams(prev => [...prev, team.id])
+      setDrawnEntries(prev => [...prev, { teamId: team.id, season }])
     }
     setScreen(SCREENS.PICK_PLAYER)
   }
 
   function handlePickValidated(updatedUserRoster) {
     const currentPlayer = turnOrder[currentTurnIdx]
-    setRosters(prev => ({ ...prev, [currentPlayer]: updatedUserRoster }))
-
-    const nextIdx = currentTurnIdx + 1
-
-    // Check if everyone has filled their roster
     const updatedRosters = { ...rosters, [currentPlayer]: updatedUserRoster }
+    setRosters(updatedRosters)
+
     const allFull = turnOrder.every(p =>
       updatedRosters[p]?.every(slot => slot !== null)
     )
 
     if (allFull) {
-      setRosters(updatedRosters)
       setScreen(SCREENS.FINAL)
     } else {
-      setCurrentTurnIdx(nextIdx % turnOrder.length)
+      setCurrentTurnIdx((currentTurnIdx + 1) % turnOrder.length)
       setCurrentTeam(null)
+      setCurrentSeason(null)
       setCurrentRoster([])
       setScreen(SCREENS.TURN)
     }
   }
-
-  // ── Render ─────────────────────────────────────────────────
 
   const currentPlayer = turnOrder[currentTurnIdx] || ''
   const currentUserRoster = rosters[currentPlayer] || []
@@ -103,14 +90,9 @@ export default function App() {
       {screen === SCREENS.SETUP && (
         <SetupScreen onStart={handleSetupStart} />
       )}
-
       {screen === SCREENS.ORDER_DRAW && (
-        <OrderDrawScreen
-          players={players}
-          onOrderDrawn={handleOrderDrawn}
-        />
+        <OrderDrawScreen players={players} onOrderDrawn={handleOrderDrawn} />
       )}
-
       {screen === SCREENS.TURN && (
         <TurnScreen
           currentPlayer={currentPlayer}
@@ -118,29 +100,29 @@ export default function App() {
           rosterSize={rosterSize}
           rosters={rosters}
           turnOrder={turnOrder}
-          onDraw={handleDrawTeam}
+          onDraw={() => setScreen(SCREENS.TEAM_DRAW)}
         />
       )}
-
       {screen === SCREENS.TEAM_DRAW && (
         <TeamDrawScreen
-          drawnTeams={drawnTeams}
+          drawnEntries={drawnEntries}
           eliminateTeams={eliminateTeams}
+          eliminateFranchises={eliminateFranchises}
+          seasons={seasons}
           onTeamDrawn={handleTeamDrawn}
         />
       )}
-
       {screen === SCREENS.PICK_PLAYER && (
         <PickPlayerScreen
           currentPlayer={currentPlayer}
           team={currentTeam}
+          season={currentSeason}
           nbaRoster={currentRoster}
           userRoster={currentUserRoster}
           rosterSize={rosterSize}
           onValidate={handlePickValidated}
         />
       )}
-
       {screen === SCREENS.FINAL && (
         <FinalScreen
           rosters={rosters}
@@ -151,8 +133,9 @@ export default function App() {
             setTurnOrder([])
             setCurrentTurnIdx(0)
             setRosters({})
-            setDrawnTeams([])
+            setDrawnEntries([])
             setCurrentTeam(null)
+            setCurrentSeason(null)
             setCurrentRoster([])
           }}
         />
