@@ -307,3 +307,48 @@
   .screen { padding: 20px 16px; }
   .slotsGrid { grid-template-columns: 1fr 1fr; }
 }
+
+/* Mode toggle */
+.modeToggle {
+  display: flex;
+  background: var(--navy-4);
+  border: 1px solid var(--white-10);
+  border-radius: var(--radius);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.modeBtn {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 7px 14px;
+  background: transparent;
+  color: var(--white-40);
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.modeBtn:hover { color: var(--white-80); }
+.modeBtnOn {
+  background: var(--gold);
+  color: var(--navy);
+}
+
+/* Select */
+.select {
+  background: var(--navy-4);
+  border: 1px solid var(--white-10);
+  border-radius: var(--radius);
+  padding: 6px 10px;
+  color: var(--white);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.88rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color 0.18s;
+}
+.select:focus { border-color: var(--gold); outline: none; }
+.select option { background: var(--navy-2); }

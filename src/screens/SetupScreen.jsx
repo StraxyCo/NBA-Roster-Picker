@@ -26,7 +26,7 @@ function ConfirmModal({ message, onConfirm, onCancel }) {
 }
 
 // ── Name input modal (create or edit) ──────────────────────────────────────
-function NameModal({ title, initial = '', onSave, onClose }) {
+function NameModal({ title, initial = '', onSave, onClose, saving = false }) {
   const [val, setVal] = useState(initial)
   const inputRef = useRef(null)
   useEffect(() => { inputRef.current?.focus() }, [])
@@ -40,11 +40,17 @@ function NameModal({ title, initial = '', onSave, onClose }) {
         onChange={e => setVal(e.target.value)}
         placeholder="First name"
         maxLength={20}
-        onKeyDown={e => { if (e.key === 'Enter' && val.trim()) onSave(val.trim()) }}
+        onKeyDown={e => { if (e.key === 'Enter' && val.trim() && !saving) onSave(val.trim()) }}
       />
       <div className={styles.modalActions}>
-        <button className={styles.btnPrimary} onClick={() => val.trim() && onSave(val.trim())} disabled={!val.trim()}>Save</button>
-        <button className={styles.btnSecondary} onClick={onClose}>Cancel</button>
+        <button
+          className={styles.btnPrimary}
+          onClick={() => val.trim() && !saving && onSave(val.trim())}
+          disabled={!val.trim() || saving}
+        >
+          {saving ? 'Saving…' : 'Save'}
+        </button>
+        <button className={styles.btnSecondary} onClick={onClose} disabled={saving}>Cancel</button>
       </div>
     </Modal>
   )
@@ -95,13 +101,26 @@ function SeasonModal({ allSeasons, current, onConfirm, onClose }) {
 // ── Add player to slot modal ────────────────────────────────────────────────
 function AddPlayerModal({ players, slotsUsed, onCreate, onSelect, onClose }) {
   const [showCreate, setShowCreate] = useState(false)
+  const [saving, setSaving] = useState(false)
   const available = players.filter(p => !slotsUsed.includes(p.id))
+
+  async function handleCreate(name) {
+    setSaving(true)
+    try {
+      await onCreate(name)
+      onClose()
+    } catch (e) {
+      console.error('Create player failed:', e)
+      setSaving(false)
+    }
+  }
 
   if (showCreate) {
     return (
       <NameModal
         title="New player"
-        onSave={async name => { await onCreate(name); onClose() }}
+        saving={saving}
+        onSave={handleCreate}
         onClose={() => setShowCreate(false)}
       />
     )
@@ -268,14 +287,19 @@ export default function SetupScreen({ onStart, savedGames, onDeleteGame }) {
   const [selectedSeasons, setSelected] = useState(new Set(['2025-26']))
   const [showSeasonModal, setShowSeasonModal] = useState(false)
 
+  // Game mode
+  const [gameMode, setGameMode]   = useState('players') // 'players' | 'teams'
+  const [statMode, setStatMode]   = useState('standard')
+  const [keepHidden, setKeepHidden] = useState(false)
+
   // Game options
   const [rosterSize, setRosterSize]   = useState(6)
   const [eliminate, setEliminate]     = useState(true)
   const [elimFranch, setElimFranch]   = useState(false)
 
   // Popin state
-  const [addingSlot, setAddingSlot]     = useState(null)  // slot index
-  const [view, setView]                 = useState(null)   // 'stats' | 'manage' | 'games'
+  const [addingSlot, setAddingSlot]     = useState(null)
+  const [view, setView]                 = useState(null)
 
   // Pre-fill top 2 slots with most-played players once loaded
   useEffect(() => {
@@ -301,6 +325,24 @@ export default function SetupScreen({ onStart, savedGames, onDeleteGame }) {
   const canStart = filledSlots.length >= 1
   const multiSeason = selectedSeasons.size >= 2
   const slotsUsedIds = slots.filter(Boolean).map(p => p.id)
+
+  const PLAYER_STAT_OPTIONS = [
+    { value: 'standard', label: 'Standard' },
+    { value: 'pts',  label: 'Points' },
+    { value: 'reb',  label: 'Rebounds' },
+    { value: 'ast',  label: 'Assists' },
+    { value: 'stl',  label: 'Steals' },
+    { value: 'blk',  label: 'Blocks' },
+    { value: 'fg3m', label: '3PM (season total)' },
+  ]
+
+  const TEAM_STAT_OPTIONS = [
+    { value: 'standard', label: 'Standard' },
+    { value: 'wins',   label: 'Wins' },
+    { value: 'losses', label: 'Losses' },
+  ]
+
+  const statOptions = gameMode === 'teams' ? TEAM_STAT_OPTIONS : PLAYER_STAT_OPTIONS
 
   function fillSlot(idx, player) {
     setSlots(prev => { const next = [...prev]; next[idx] = player; return next })
@@ -332,8 +374,11 @@ export default function SetupScreen({ onStart, savedGames, onDeleteGame }) {
       players: filledSlots.map(p => ({ id: p.id, name: p.name })),
       rosterSize,
       eliminateTeams: eliminate,
-      eliminateFranchises: multiSeason ? elimFranch : false,
+      eliminateFranchises: elimFranch,
       seasons: [...selectedSeasons],
+      gameMode,
+      statMode,
+      keepHidden,
     })
   }
 
@@ -396,29 +441,86 @@ export default function SetupScreen({ onStart, savedGames, onDeleteGame }) {
           <section className={styles.section}>
             <h2 className={styles.sectionLabel}>Options</h2>
 
+            {/* Game mode */}
             <div className={styles.optionRow}>
               <div className={styles.optionLabel}>
-                <span className={styles.optionTitle}>Roster size</span>
-                <span className={styles.optionDesc}>Players per team</span>
+                <span className={styles.optionTitle}>Mode</span>
+                <span className={styles.optionDesc}>Players or Teams</span>
               </div>
-              <div className={styles.stepper}>
-                <button className={styles.stepBtn} onClick={() => setRosterSize(s => Math.max(5, s - 1))} disabled={rosterSize <= 5}>−</button>
-                <span className={styles.stepValue}>{rosterSize}</span>
-                <button className={styles.stepBtn} onClick={() => setRosterSize(s => Math.min(12, s + 1))} disabled={rosterSize >= 12}>+</button>
+              <div className={styles.modeToggle}>
+                <button
+                  className={`${styles.modeBtn} ${gameMode === 'players' ? styles.modeBtnOn : ''}`}
+                  onClick={() => { setGameMode('players'); setStatMode('standard') }}
+                >Players</button>
+                <button
+                  className={`${styles.modeBtn} ${gameMode === 'teams' ? styles.modeBtnOn : ''}`}
+                  onClick={() => { setGameMode('teams'); setStatMode('standard') }}
+                >Teams</button>
               </div>
             </div>
 
+            {/* Stat mode */}
             <div className={styles.optionRow}>
               <div className={styles.optionLabel}>
-                <span className={styles.optionTitle}>Eliminate drawn teams</span>
-                <span className={styles.optionDesc}>A team+season combo can't be drawn twice</span>
+                <span className={styles.optionTitle}>Stat</span>
+                <span className={styles.optionDesc}>Scoring criteria</span>
               </div>
-              <button className={`${styles.toggle} ${eliminate ? styles.toggleOn : ''}`} onClick={() => setEliminate(e => !e)} aria-pressed={eliminate}>
-                <span className={styles.toggleKnob} />
-              </button>
+              <select
+                className={styles.select}
+                value={statMode}
+                onChange={e => setStatMode(e.target.value)}
+              >
+                {statOptions.map(o => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
             </div>
 
-            {multiSeason && (
+            {/* Keep hidden — only when stat mode is not standard */}
+            {statMode !== 'standard' && (
+              <div className={styles.optionRow}>
+                <div className={styles.optionLabel}>
+                  <span className={styles.optionTitle}>Keep stats hidden</span>
+                  <span className={styles.optionDesc}>Reveal only at the end</span>
+                </div>
+                <button
+                  className={`${styles.toggle} ${keepHidden ? styles.toggleOn : ''}`}
+                  onClick={() => setKeepHidden(h => !h)}
+                  aria-pressed={keepHidden}
+                ><span className={styles.toggleKnob} /></button>
+              </div>
+            )}
+
+            {/* Roster size — players mode only */}
+            {gameMode === 'players' && (
+              <div className={styles.optionRow}>
+                <div className={styles.optionLabel}>
+                  <span className={styles.optionTitle}>Roster size</span>
+                  <span className={styles.optionDesc}>Players per team</span>
+                </div>
+                <div className={styles.stepper}>
+                  <button className={styles.stepBtn} onClick={() => setRosterSize(s => Math.max(5, s - 1))} disabled={rosterSize <= 5}>−</button>
+                  <span className={styles.stepValue}>{rosterSize}</span>
+                  <button className={styles.stepBtn} onClick={() => setRosterSize(s => Math.min(12, s + 1))} disabled={rosterSize >= 12}>+</button>
+                </div>
+              </div>
+            )}
+
+            {/* Eliminate drawn teams — players mode only */}
+            {gameMode === 'players' && (
+              <div className={styles.optionRow}>
+                <div className={styles.optionLabel}>
+                  <span className={styles.optionTitle}>Eliminate drawn teams</span>
+                  <span className={styles.optionDesc}>A team+season combo can't be drawn twice</span>
+                </div>
+                <button className={`${styles.toggle} ${eliminate ? styles.toggleOn : ''}`} onClick={() => setEliminate(e => !e)} aria-pressed={eliminate}>
+                  <span className={styles.toggleKnob} />
+                </button>
+              </div>
+            )}
+
+            {/* Eliminate drawn franchises */}
+            {(gameMode === 'teams' || multiSeason) && (
               <div className={styles.optionRow}>
                 <div className={styles.optionLabel}>
                   <span className={styles.optionTitle}>Eliminate drawn franchises</span>

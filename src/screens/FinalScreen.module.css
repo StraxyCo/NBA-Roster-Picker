@@ -308,3 +308,19 @@
   white-space: nowrap;
   flex-shrink: 0;
 }
+
+.rosterTotal {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px;
+  border-top: 1px solid var(--white-10);
+  margin-top: 4px;
+  background: rgba(245,197,24,0.05);
+}
+.rosterTotalLabel {
+  font-family: var(--font-display); font-size: 0.7rem; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--white-50);
+}
+.rosterTotalValue {
+  font-family: var(--font-display); font-weight: 800;
+  font-size: 1.4rem; color: var(--gold);
+}

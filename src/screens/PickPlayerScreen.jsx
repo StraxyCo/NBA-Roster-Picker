@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import { SLOT_LABELS, getLogoUrl } from '../data/teams.js'
 import styles from './PickPlayerScreen.module.css'
 
-export default function PickPlayerScreen({ currentPlayer, team, season, nbaRoster, userRoster, rosterSize, multiSeason, onValidate }) {
+export default function PickPlayerScreen({ currentPlayer, team, season, nbaRoster, userRoster, rosterSize, multiSeason, statMode, keepHidden, onValidate }) {
   // Working copy of the user's roster for this session
   const [myRoster, setMyRoster] = useState([...userRoster])
   // Track which players from nbaRoster have been picked (by player id)
@@ -129,7 +129,31 @@ export default function PickPlayerScreen({ currentPlayer, team, season, nbaRoste
     setSelectedSource(null)
   }
 
+  const [showStatReveal, setShowStatReveal] = useState(false)
+  const [pendingRoster, setPendingRoster]   = useState(null)
+
   const canValidate = myRoster.some(p => p !== null)
+
+  function handleValidate() {
+    if (statMode !== 'standard' && !keepHidden) {
+      setPendingRoster(myRoster)
+      setShowStatReveal(true)
+    } else {
+      onValidate(myRoster)
+    }
+  }
+
+  function getStatValue(player) {
+    if (!player || !statMode || statMode === 'standard') return null
+    const v = player[statMode]
+    if (v === undefined || v === null) return '—'
+    return statMode === 'fg3m' ? v : v.toFixed(1)
+  }
+
+  function statLabel() {
+    const labels = { pts: 'PPG', reb: 'RPG', ast: 'APG', stl: 'SPG', blk: 'BPG', fg3m: '3PM (season)' }
+    return labels[statMode] || statMode
+  }
 
   return (
     <div className={styles.screen}>
@@ -240,12 +264,33 @@ export default function PickPlayerScreen({ currentPlayer, team, season, nbaRoste
         {/* Validate button */}
         <button
           className={styles.validateBtn}
-          onClick={() => onValidate(myRoster)}
+          onClick={handleValidate}
           disabled={!canValidate}
         >
           Validate Picks
         </button>
       </div>
+
+      {/* Stat reveal overlay */}
+      {showStatReveal && pendingRoster && (
+        <div className={styles.revealOverlay}>
+          <div className={styles.revealModal}>
+            <div className={styles.revealEyebrow}>{statLabel()}</div>
+            <h2 className={styles.revealTitle}>{currentPlayer}'s picks</h2>
+            <div className={styles.revealList}>
+              {pendingRoster.filter(Boolean).map((p, i) => (
+                <div key={i} className={styles.revealRow}>
+                  <span className={styles.revealName}>{p.name}</span>
+                  <span className={styles.revealStat}>{getStatValue(p) ?? '—'}</span>
+                </div>
+              ))}
+            </div>
+            <button className={styles.validateBtn} style={{ marginTop: '16px' }} onClick={() => { setShowStatReveal(false); onValidate(pendingRoster) }}>
+              Next →
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
