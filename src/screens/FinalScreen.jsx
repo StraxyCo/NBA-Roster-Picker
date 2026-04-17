@@ -2,10 +2,48 @@ import { useState } from 'react'
 import { SLOT_LABELS } from '../data/teams.js'
 import styles from './FinalScreen.module.css'
 
-export default function FinalScreen({ rosters, turnOrder, rosterSize, multiSeason, gameMode, statMode, onDeclareWinner, onRestart }) {
+const STAT_LABELS = {
+  pts: 'PPG', reb: 'RPG', ast: 'APG', stl: 'SPG', blk: 'BPG', fg3m: '3PM',
+  wins: 'W', losses: 'L',
+}
+
+const STAT_TOTAL_LABELS = {
+  pts: 'Total PPG', reb: 'Total RPG', ast: 'Total APG',
+  stl: 'Total SPG', blk: 'Total BPG', fg3m: 'Total 3PM',
+  wins: 'Total Wins', losses: 'Total Losses',
+}
+
+function getStatKey(statMode) {
+  if (statMode === 'wins')   return 'w'
+  if (statMode === 'losses') return 'l'
+  return statMode
+}
+
+function formatStat(val, statMode) {
+  if (val === undefined || val === null) return '—'
+  const n = parseFloat(val)
+  if (isNaN(n)) return '—'
+  // fg3m, wins, losses are integers
+  if (['fg3m', 'wins', 'losses'].includes(statMode)) return Math.round(n)
+  return n.toFixed(1)
+}
+
+function rosterTotal(roster, statMode) {
+  if (!statMode || statMode === 'standard') return null
+  const key = getStatKey(statMode)
+  return roster.filter(Boolean).reduce((sum, p) => sum + (parseFloat(p[key]) || 0), 0)
+}
+
+export default function FinalScreen({ rosters, turnOrder, rosterSize, multiSeason, gameMode, statMode, keepHidden, onDeclareWinner, onRestart }) {
   const [winner, setWinner]     = useState(null)
   const [declared, setDeclared] = useState(false)
   const [saving, setSaving]     = useState(false)
+
+  const showStats   = statMode && statMode !== 'standard'
+  // Stats visible in roster view: only if not hidden
+  const statsInView = showStats && !keepHidden
+  // Stats revealed once winner is declared (always, even if was hidden)
+  const statsRevealed = showStats && declared
 
   async function declareWinner(player) {
     setWinner(player)
@@ -15,22 +53,7 @@ export default function FinalScreen({ rosters, turnOrder, rosterSize, multiSeaso
     setSaving(false)
   }
 
-  function getStatKey() {
-    if (statMode === 'wins')   return 'w'
-    if (statMode === 'losses') return 'l'
-    return statMode // pts, reb, ast, stl, blk, fg3m
-  }
-
-  function statLabel() {
-    const m = { pts: 'PPG Total', reb: 'RPG Total', ast: 'APG Total', stl: 'SPG Total', blk: 'BPG Total', fg3m: '3PM Total', wins: 'Total Wins', losses: 'Total Losses' }
-    return m[statMode] || ''
-  }
-
-  function rosterTotal(roster) {
-    if (!statMode || statMode === 'standard') return null
-    const key = getStatKey()
-    return roster.filter(Boolean).reduce((sum, p) => sum + (parseFloat(p[key]) || 0), 0)
-  }
+  const statKey = getStatKey(statMode)
 
   return (
     <div className={styles.screen}>
@@ -64,19 +87,25 @@ export default function FinalScreen({ rosters, turnOrder, rosterSize, multiSeaso
           {turnOrder.map((player) => {
             const roster = rosters[player] || []
             const isWinner = declared && winner === player
+            const total = (statsInView || statsRevealed) ? rosterTotal(roster, statMode) : null
+
             return (
               <div key={player} className={`${styles.rosterCard} ${isWinner ? styles.rosterCardWinner : ''}`}>
                 <div className={styles.rosterHeader}>
                   <span className={styles.rosterName}>{player}</span>
                   <span className={styles.rosterPicks}>{roster.filter(Boolean).length} / {rosterSize}</span>
                 </div>
+
                 <div className={styles.rosterSlots}>
                   {Array.from({ length: rosterSize }).map((_, i) => {
                     const entry = roster[i]
+                    const statVal = (statsInView || statsRevealed) && entry
+                      ? entry[statKey]
+                      : undefined
+
                     return (
                       <div key={i} className={`${styles.slot} ${entry ? styles.slotFilled : styles.slotEmpty}`}>
                         {gameMode === 'teams' ? (
-                          // Teams mode: show team name + season
                           <>
                             <span className={styles.slotLabel}>{i + 1}</span>
                             <span className={styles.slotPlayer}>
@@ -85,14 +114,13 @@ export default function FinalScreen({ rosters, turnOrder, rosterSize, multiSeaso
                                 : <em>—</em>
                               }
                             </span>
-                            {entry && statMode !== 'standard' && (
-                              <span className={styles.slotPos}>
-                                {statMode === 'wins' ? entry.w : statMode === 'losses' ? entry.l : ''}
+                            {(statsInView || statsRevealed) && entry && (
+                              <span className={styles.slotStatVal}>
+                                {formatStat(statVal, statMode)} {STAT_LABELS[statMode]}
                               </span>
                             )}
                           </>
                         ) : (
-                          // Players mode
                           <>
                             <span className={styles.slotLabel}>{SLOT_LABELS[i] || i + 1}</span>
                             <span className={styles.slotPlayer}>
@@ -101,7 +129,13 @@ export default function FinalScreen({ rosters, turnOrder, rosterSize, multiSeaso
                                 : <em>—</em>
                               }
                             </span>
-                            {entry && <span className={styles.slotPos}>{entry.position}</span>}
+                            {(statsInView || statsRevealed) && entry ? (
+                              <span className={styles.slotStatVal}>
+                                {formatStat(statVal, statMode)} {STAT_LABELS[statMode]}
+                              </span>
+                            ) : entry ? (
+                              <span className={styles.slotPos}>{entry.position}</span>
+                            ) : null}
                           </>
                         )}
                       </div>
@@ -109,18 +143,16 @@ export default function FinalScreen({ rosters, turnOrder, rosterSize, multiSeaso
                   })}
                 </div>
 
-                {/* Stat total */}
-                {statMode !== 'standard' && (() => {
-                  const total = rosterTotal(roster)
-                  return total !== null ? (
-                    <div className={styles.rosterTotal}>
-                      <span className={styles.rosterTotalLabel}>{statLabel()}</span>
-                      <span className={styles.rosterTotalValue}>
-                        {Number.isInteger(total) ? total : total.toFixed(1)}
-                      </span>
-                    </div>
-                  ) : null
-                })()}
+                {/* Total — shown when stats visible */}
+                {total !== null && (
+                  <div className={styles.rosterTotal}>
+                    <span className={styles.rosterTotalLabel}>{STAT_TOTAL_LABELS[statMode]}</span>
+                    <span className={styles.rosterTotalValue}>
+                      {formatStat(total, statMode)}
+                    </span>
+                  </div>
+                )}
+
                 {!declared && (
                   <button className={styles.declareBtn} onClick={() => declareWinner(player)}>
                     🏆 {player} wins!

@@ -20,28 +20,14 @@ export default function TeamModeDrawScreen({
   onFranchiseDrawn,
   onSeasonChosen,
 }) {
-  // Internal phases: ready → spinning → season → done
   const [phase, setPhase]           = useState('ready')
   const [displayTeam, setDisplay]   = useState(null)
   const [chosenTeam, setChosen]     = useState(null)
   const [selectedSeason, setSeason] = useState(seasons[0] || '')
-  const [wl, setWl]                 = useState(null)
-  const [loadingWl, setLoadingWl]   = useState(false)
   const [error, setError]           = useState(null)
   const rafRef = useRef(null)
 
   useEffect(() => { preloadLogos() }, [])
-
-  // Load W/L whenever season or team changes in season-pick phase
-  useEffect(() => {
-    if (phase !== 'season' || !chosenTeam || statMode === 'standard') return
-    setLoadingWl(true)
-    setWl(null)
-    fetchStandings(chosenTeam.id, selectedSeason).then(result => {
-      setWl(result)
-      setLoadingWl(false)
-    })
-  }, [selectedSeason, phase, chosenTeam, statMode])
 
   const drawnFranchiseIds = new Set(drawnEntries.map(e => e.teamId))
   const availableTeams = eliminateFranchises
@@ -78,11 +64,10 @@ export default function TeamModeDrawScreen({
   }
 
   async function confirmSeason() {
-    let finalWl = wl
-    if (!finalWl && statMode !== 'standard') {
-      finalWl = await fetchStandings(chosenTeam.id, selectedSeason)
-    }
-    onSeasonChosen(chosenTeam, selectedSeason, finalWl || { w: 0, l: 0 })
+    const wl = statMode !== 'standard'
+      ? await fetchStandings(chosenTeam.id, selectedSeason)
+      : { w: 0, l: 0 }
+    onSeasonChosen(chosenTeam, selectedSeason, wl)
   }
 
   useEffect(() => () => clearTimeout(rafRef.current), [])
@@ -153,23 +138,6 @@ export default function TeamModeDrawScreen({
             >
               {seasons.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
-
-            {showStat && (
-              <div className={styles.statPreview}>
-                <span className={styles.statValue}>
-                  {statMode === 'wins' ? wl.w : wl.l}
-                </span>
-                <span className={styles.statLabel}>
-                  {statMode === 'wins' ? 'Wins' : 'Losses'} · {selectedSeason}
-                </span>
-              </div>
-            )}
-            {statMode !== 'standard' && loadingWl && (
-              <div className={styles.loadingWl}>Loading stats…</div>
-            )}
-            {statMode !== 'standard' && keepHidden && (
-              <div className={styles.hiddenNote}>Stats hidden until the end</div>
-            )}
 
             <button className={styles.spinBtn} onClick={confirmSeason}>
               Confirm →

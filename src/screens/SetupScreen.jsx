@@ -450,11 +450,11 @@ export default function SetupScreen({ onStart, savedGames, onDeleteGame }) {
               <div className={styles.modeToggle}>
                 <button
                   className={`${styles.modeBtn} ${gameMode === 'players' ? styles.modeBtnOn : ''}`}
-                  onClick={() => { setGameMode('players'); setStatMode('standard') }}
+                  onClick={() => { setGameMode('players'); setStatMode('standard'); setRosterSize(6) }}
                 >Players</button>
                 <button
                   className={`${styles.modeBtn} ${gameMode === 'teams' ? styles.modeBtnOn : ''}`}
-                  onClick={() => { setGameMode('teams'); setStatMode('standard') }}
+                  onClick={() => { setGameMode('teams'); setStatMode('standard'); setRosterSize(3) }}
                 >Teams</button>
               </div>
             </div>
@@ -491,20 +491,22 @@ export default function SetupScreen({ onStart, savedGames, onDeleteGame }) {
               </div>
             )}
 
-            {/* Roster size — players mode only */}
-            {gameMode === 'players' && (
-              <div className={styles.optionRow}>
-                <div className={styles.optionLabel}>
-                  <span className={styles.optionTitle}>Roster size</span>
-                  <span className={styles.optionDesc}>Players per team</span>
-                </div>
-                <div className={styles.stepper}>
-                  <button className={styles.stepBtn} onClick={() => setRosterSize(s => Math.max(5, s - 1))} disabled={rosterSize <= 5}>−</button>
-                  <span className={styles.stepValue}>{rosterSize}</span>
-                  <button className={styles.stepBtn} onClick={() => setRosterSize(s => Math.min(12, s + 1))} disabled={rosterSize >= 12}>+</button>
-                </div>
+            {/* Roster size — always shown, different range per mode */}
+            <div className={styles.optionRow}>
+              <div className={styles.optionLabel}>
+                <span className={styles.optionTitle}>
+                  {gameMode === 'teams' ? 'Number of teams' : 'Roster size'}
+                </span>
+                <span className={styles.optionDesc}>
+                  {gameMode === 'teams' ? 'Teams per roster (1-10)' : 'Players per team'}
+                </span>
               </div>
-            )}
+              <div className={styles.stepper}>
+                <button className={styles.stepBtn} onClick={() => setRosterSize(s => Math.max(gameMode === 'teams' ? 1 : 5, s - 1))} disabled={rosterSize <= (gameMode === 'teams' ? 1 : 5)}>−</button>
+                <span className={styles.stepValue}>{rosterSize}</span>
+                <button className={styles.stepBtn} onClick={() => setRosterSize(s => Math.min(gameMode === 'teams' ? 10 : 12, s + 1))} disabled={rosterSize >= (gameMode === 'teams' ? 10 : 12)}>+</button>
+              </div>
+            </div>
 
             {/* Eliminate drawn teams — players mode only */}
             {gameMode === 'players' && (

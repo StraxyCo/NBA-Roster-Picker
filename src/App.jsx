@@ -196,7 +196,7 @@ export default function App() {
         <FinalScreen
           rosters={rosters} turnOrder={turnOrder} rosterSize={rosterSize}
           multiSeason={multiSeason} gameMode={gameMode}
-          statMode={statMode}
+          statMode={statMode} keepHidden={keepHidden}
           onDeclareWinner={handleDeclareWinner}
           onRestart={handleRestart}
         />
