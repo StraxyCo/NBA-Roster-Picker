@@ -28,38 +28,39 @@
   animation: fadeUp 0.5s ease both;
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 10px;
 }
 
 /* Two-column layout on desktop */
 @media (min-width: 900px) {
-  .screen {
-    align-items: center;
-    padding: 40px 48px;
-  }
-  .content {
-    max-width: 960px;
+  .screen { padding: 32px 48px; align-items: flex-start; justify-content: center; }
+  .content { max-width: 880px; }
+}
+
+.top {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cols {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+@media (min-width: 900px) {
+  .cols {
     flex-direction: row;
     align-items: flex-start;
-    gap: 32px;
+    gap: 24px;
   }
+  .colLeft  { flex: 1; min-width: 0; }
+  .colRight { flex: 1; min-width: 0; }
 }
 
-.colLeft {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  flex: 1;
-  min-width: 0;
-}
-
-.colRight {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  flex: 1;
-  min-width: 0;
-}
+.colLeft  { display: flex; flex-direction: column; gap: 10px; }
+.colRight { display: flex; flex-direction: column; gap: 10px; }
 
 /* Header */
 .header { text-align: center; margin-bottom: 4px; }

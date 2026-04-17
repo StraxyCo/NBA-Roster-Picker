@@ -391,159 +391,137 @@ export default function SetupScreen({ onStart, savedGames, onDeleteGame }) {
 
       <div className={styles.content}>
 
-        {/* LEFT COLUMN — brand + players + season */}
-        <div className={styles.colLeft}>
+        {/* FULL WIDTH TOP — header + menu */}
+        <div className={styles.top}>
           <header className={styles.header}>
             <div className={styles.badge}>NBA</div>
             <h1 className={styles.title}>Roster<br />Picker</h1>
             <p className={styles.tagline}>Draft your dream squad</p>
           </header>
 
-          {/* Menu */}
           <div className={styles.menu}>
             <button className={styles.menuBtn} onClick={() => setView('stats')}>Stats</button>
             <button className={styles.menuBtn} onClick={() => setView('manage')}>Manage players</button>
             <button className={styles.menuBtn} onClick={() => setView('games')}>View games played</button>
           </div>
+        </div>
 
-          {/* Player slots */}
-          <section className={styles.section}>
-            <h2 className={styles.sectionLabel}>Players</h2>
-            <div className={styles.slotsGrid}>
-              {slots.map((player, i) => (
-                <div key={i} className={`${styles.slot} ${player ? styles.slotFilled : styles.slotEmpty}`}>
-                  {player ? (
-                    <>
-                      <span className={styles.slotName}>{player.name}</span>
-                      <button className={styles.slotTrash} onClick={() => clearSlot(i)} title="Remove">
-                        🗑️
+        {/* TWO COLUMNS */}
+        <div className={styles.cols}>
+
+          {/* LEFT — players + season */}
+          <div className={styles.colLeft}>
+            <section className={styles.section}>
+              <h2 className={styles.sectionLabel}>Players</h2>
+              <div className={styles.slotsGrid}>
+                {slots.map((player, i) => (
+                  <div key={i} className={`${styles.slot} ${player ? styles.slotFilled : styles.slotEmpty}`}>
+                    {player ? (
+                      <>
+                        <span className={styles.slotName}>{player.name}</span>
+                        <button className={styles.slotTrash} onClick={() => clearSlot(i)} title="Remove">🗑️</button>
+                      </>
+                    ) : (
+                      <button className={styles.slotAdd} onClick={() => setAddingSlot(i)}>
+                        <span className={styles.slotPlus}>+</span>
+                        <span className={styles.slotAddLabel}>Add player</span>
                       </button>
-                    </>
-                  ) : (
-                    <button className={styles.slotAdd} onClick={() => setAddingSlot(i)}>
-                      <span className={styles.slotPlus}>+</span>
-                      <span className={styles.slotAddLabel}>Add player</span>
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Season selector */}
-          <section className={styles.section}>
-            <h2 className={styles.sectionLabel}>Season</h2>
-            <button className={styles.seasonTrigger} onClick={() => setShowSeasonModal(true)}>
-              <span className={styles.seasonTriggerLabel}>{seasonLabel()}</span>
-              <span className={styles.seasonTriggerCaret}>▾</span>
-            </button>
-          </section>
-        </div>
-
-        {/* RIGHT COLUMN — options + start */}
-        <div className={styles.colRight}>
-          {/* Options */}
-          <section className={styles.section}>
-            <h2 className={styles.sectionLabel}>Options</h2>
-
-            {/* Game mode */}
-            <div className={styles.optionRow}>
-              <div className={styles.optionLabel}>
-                <span className={styles.optionTitle}>Mode</span>
-                <span className={styles.optionDesc}>Players or Teams</span>
-              </div>
-              <div className={styles.modeToggle}>
-                <button
-                  className={`${styles.modeBtn} ${gameMode === 'players' ? styles.modeBtnOn : ''}`}
-                  onClick={() => { setGameMode('players'); setStatMode('standard'); setRosterSize(6) }}
-                >Players</button>
-                <button
-                  className={`${styles.modeBtn} ${gameMode === 'teams' ? styles.modeBtnOn : ''}`}
-                  onClick={() => { setGameMode('teams'); setStatMode('standard'); setRosterSize(3) }}
-                >Teams</button>
-              </div>
-            </div>
-
-            {/* Stat mode */}
-            <div className={styles.optionRow}>
-              <div className={styles.optionLabel}>
-                <span className={styles.optionTitle}>Stat</span>
-                <span className={styles.optionDesc}>Scoring criteria</span>
-              </div>
-              <select
-                className={styles.select}
-                value={statMode}
-                onChange={e => setStatMode(e.target.value)}
-              >
-                {statOptions.map(o => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
+                    )}
+                  </div>
                 ))}
-              </select>
-            </div>
+              </div>
+            </section>
 
-            {/* Keep hidden */}
-            {statMode !== 'standard' && (
+            <section className={styles.section}>
+              <h2 className={styles.sectionLabel}>Season</h2>
+              <button className={styles.seasonTrigger} onClick={() => setShowSeasonModal(true)}>
+                <span className={styles.seasonTriggerLabel}>{seasonLabel()}</span>
+                <span className={styles.seasonTriggerCaret}>▾</span>
+              </button>
+            </section>
+          </div>
+
+          {/* RIGHT — options */}
+          <div className={styles.colRight}>
+            <section className={styles.section}>
+              <h2 className={styles.sectionLabel}>Options</h2>
+
               <div className={styles.optionRow}>
                 <div className={styles.optionLabel}>
-                  <span className={styles.optionTitle}>Keep stats hidden</span>
-                  <span className={styles.optionDesc}>Reveal only at the end</span>
+                  <span className={styles.optionTitle}>Mode</span>
+                  <span className={styles.optionDesc}>Players or Teams</span>
                 </div>
-                <button
-                  className={`${styles.toggle} ${keepHidden ? styles.toggleOn : ''}`}
-                  onClick={() => setKeepHidden(h => !h)}
-                  aria-pressed={keepHidden}
-                ><span className={styles.toggleKnob} /></button>
+                <div className={styles.modeToggle}>
+                  <button className={`${styles.modeBtn} ${gameMode === 'players' ? styles.modeBtnOn : ''}`} onClick={() => { setGameMode('players'); setStatMode('standard'); setRosterSize(6) }}>Players</button>
+                  <button className={`${styles.modeBtn} ${gameMode === 'teams' ? styles.modeBtnOn : ''}`} onClick={() => { setGameMode('teams'); setStatMode('standard'); setRosterSize(3) }}>Teams</button>
+                </div>
               </div>
-            )}
 
-            {/* Roster size */}
-            <div className={styles.optionRow}>
-              <div className={styles.optionLabel}>
-                <span className={styles.optionTitle}>
-                  {gameMode === 'teams' ? 'Number of teams' : 'Roster size'}
-                </span>
-                <span className={styles.optionDesc}>
-                  {gameMode === 'teams' ? 'Teams per roster (1–10)' : 'Players per team'}
-                </span>
-              </div>
-              <div className={styles.stepper}>
-                <button className={styles.stepBtn} onClick={() => setRosterSize(s => Math.max(gameMode === 'teams' ? 1 : 5, s - 1))} disabled={rosterSize <= (gameMode === 'teams' ? 1 : 5)}>−</button>
-                <span className={styles.stepValue}>{rosterSize}</span>
-                <button className={styles.stepBtn} onClick={() => setRosterSize(s => Math.min(gameMode === 'teams' ? 10 : 12, s + 1))} disabled={rosterSize >= (gameMode === 'teams' ? 10 : 12)}>+</button>
-              </div>
-            </div>
-
-            {/* Eliminate drawn teams */}
-            {gameMode === 'players' && (
               <div className={styles.optionRow}>
                 <div className={styles.optionLabel}>
-                  <span className={styles.optionTitle}>Eliminate drawn teams</span>
-                  <span className={styles.optionDesc}>A team+season combo can't be drawn twice</span>
+                  <span className={styles.optionTitle}>Stat</span>
+                  <span className={styles.optionDesc}>Scoring criteria</span>
                 </div>
-                <button className={`${styles.toggle} ${eliminate ? styles.toggleOn : ''}`} onClick={() => setEliminate(e => !e)} aria-pressed={eliminate}>
-                  <span className={styles.toggleKnob} />
-                </button>
+                <select className={styles.select} value={statMode} onChange={e => setStatMode(e.target.value)}>
+                  {statOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
               </div>
-            )}
 
-            {/* Eliminate drawn franchises */}
-            {(gameMode === 'teams' || multiSeason) && (
+              {statMode !== 'standard' && (
+                <div className={styles.optionRow}>
+                  <div className={styles.optionLabel}>
+                    <span className={styles.optionTitle}>Keep stats hidden</span>
+                    <span className={styles.optionDesc}>Reveal only at the end</span>
+                  </div>
+                  <button className={`${styles.toggle} ${keepHidden ? styles.toggleOn : ''}`} onClick={() => setKeepHidden(h => !h)} aria-pressed={keepHidden}>
+                    <span className={styles.toggleKnob} />
+                  </button>
+                </div>
+              )}
+
               <div className={styles.optionRow}>
                 <div className={styles.optionLabel}>
-                  <span className={styles.optionTitle}>Eliminate drawn franchises</span>
-                  <span className={styles.optionDesc}>All seasons of a drawn team are removed</span>
+                  <span className={styles.optionTitle}>{gameMode === 'teams' ? 'Number of teams' : 'Roster size'}</span>
+                  <span className={styles.optionDesc}>{gameMode === 'teams' ? 'Teams per roster (1–10)' : 'Players per team'}</span>
                 </div>
-                <button className={`${styles.toggle} ${elimFranch ? styles.toggleOn : ''}`} onClick={() => setElimFranch(e => !e)} aria-pressed={elimFranch}>
-                  <span className={styles.toggleKnob} />
-                </button>
+                <div className={styles.stepper}>
+                  <button className={styles.stepBtn} onClick={() => setRosterSize(s => Math.max(gameMode === 'teams' ? 1 : 5, s - 1))} disabled={rosterSize <= (gameMode === 'teams' ? 1 : 5)}>−</button>
+                  <span className={styles.stepValue}>{rosterSize}</span>
+                  <button className={styles.stepBtn} onClick={() => setRosterSize(s => Math.min(gameMode === 'teams' ? 10 : 12, s + 1))} disabled={rosterSize >= (gameMode === 'teams' ? 10 : 12)}>+</button>
+                </div>
               </div>
-            )}
-          </section>
 
-          <button className={styles.startBtn} onClick={handleStart} disabled={!canStart}>
-            Start Game
-          </button>
+              {gameMode === 'players' && (
+                <div className={styles.optionRow}>
+                  <div className={styles.optionLabel}>
+                    <span className={styles.optionTitle}>Eliminate drawn teams</span>
+                    <span className={styles.optionDesc}>A team+season combo can't be drawn twice</span>
+                  </div>
+                  <button className={`${styles.toggle} ${eliminate ? styles.toggleOn : ''}`} onClick={() => setEliminate(e => !e)} aria-pressed={eliminate}>
+                    <span className={styles.toggleKnob} />
+                  </button>
+                </div>
+              )}
+
+              {(gameMode === 'teams' || multiSeason) && (
+                <div className={styles.optionRow}>
+                  <div className={styles.optionLabel}>
+                    <span className={styles.optionTitle}>Eliminate drawn franchises</span>
+                    <span className={styles.optionDesc}>All seasons of a drawn team are removed</span>
+                  </div>
+                  <button className={`${styles.toggle} ${elimFranch ? styles.toggleOn : ''}`} onClick={() => setElimFranch(e => !e)} aria-pressed={elimFranch}>
+                    <span className={styles.toggleKnob} />
+                  </button>
+                </div>
+              )}
+            </section>
+          </div>
         </div>
+
+        {/* FULL WIDTH BOTTOM — start button */}
+        <button className={styles.startBtn} onClick={handleStart} disabled={!canStart}>
+          Start Game
+        </button>
 
       </div>
 
