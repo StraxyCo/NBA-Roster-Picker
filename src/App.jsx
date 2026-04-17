@@ -255,6 +255,7 @@ export default function App() {
           }}
         />
       )}
+      {screen === SCREENS.FINAL && (
         <FinalScreen
           rosters={rosters} turnOrder={turnOrder} rosterSize={rosterSize}
           multiSeason={multiSeason} gameMode={gameMode}
