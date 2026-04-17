@@ -213,6 +213,7 @@ export default function App() {
           currentPlayer={currentPlayer} picksCount={picksCount}
           rosterSize={rosterSize} rosters={rosters} turnOrder={turnOrder}
           multiSeason={multiSeason} gameMode={gameMode} statMode={statMode}
+          keepHidden={keepHidden}
           onDraw={() => setScreen(gameMode === 'teams' ? SCREENS.TEAM_MODE_DRAW : SCREENS.TEAM_DRAW)}
         />
       )}

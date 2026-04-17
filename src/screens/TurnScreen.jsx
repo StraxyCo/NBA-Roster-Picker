@@ -1,7 +1,29 @@
 import styles from './TurnScreen.module.css'
 import { SLOT_LABELS } from '../data/teams.js'
 
-export default function TurnScreen({ currentPlayer, picksCount, rosterSize, rosters, turnOrder, multiSeason, gameMode, onDraw }) {
+const STAT_LABELS = {
+  pts: 'PPG', reb: 'RPG', ast: 'APG', stl: 'SPG', blk: 'BPG', fg3m: '3PM',
+  wins: 'W', losses: 'L',
+}
+
+function getStatKey(statMode) {
+  if (statMode === 'wins')   return 'w'
+  if (statMode === 'losses') return 'l'
+  return statMode
+}
+
+function formatStat(val, statMode) {
+  if (val === undefined || val === null) return null
+  const n = parseFloat(val)
+  if (isNaN(n)) return null
+  if (['fg3m', 'wins', 'losses'].includes(statMode)) return Math.round(n)
+  return n.toFixed(1)
+}
+
+export default function TurnScreen({ currentPlayer, picksCount, rosterSize, rosters, turnOrder, multiSeason, gameMode, statMode, keepHidden, onDraw }) {
+  const showStats = statMode && statMode !== 'standard' && !keepHidden
+  const statKey   = getStatKey(statMode)
+
   return (
     <div className={styles.screen}>
       <div className={styles.content}>
@@ -31,6 +53,7 @@ export default function TurnScreen({ currentPlayer, picksCount, rosterSize, rost
                   <div className={styles.rosterSlots}>
                     {Array.from({ length: rosterSize }).map((_, i) => {
                       const entry = roster[i]
+                      const statVal = showStats && entry ? formatStat(entry[statKey], statMode) : null
                       return (
                         <div key={i} className={`${styles.rosterSlot} ${entry ? styles.rosterSlotFilled : ''}`}>
                           <span className={styles.rosterSlotLabel}>
@@ -43,6 +66,11 @@ export default function TurnScreen({ currentPlayer, picksCount, rosterSize, rost
                                 : <>{entry.name}{multiSeason && entry.season && <span className={styles.seasonTag}>{entry.season}</span>}</>
                             ) : <em>empty</em>}
                           </span>
+                          {statVal !== null && (
+                            <span className={styles.rosterSlotStat}>
+                              {statVal} {STAT_LABELS[statMode]}
+                            </span>
+                          )}
                         </div>
                       )
                     })}

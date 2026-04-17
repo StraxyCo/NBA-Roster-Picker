@@ -38,8 +38,9 @@ export async function fetchRoster(teamId, season) {
   try {
     const rosters = await loadRosters();
     const players = (rosters[season] || {})[teamId] || [];
-    rosterCache[key] = players;
-    return players;
+    const sorted = [...players].sort((a, b) => a.name.localeCompare(b.name));
+    rosterCache[key] = sorted;
+    return sorted;
   } catch (err) {
     console.error('Failed to load rosters:', err);
     return { error: 'FETCH_FAILED' };
