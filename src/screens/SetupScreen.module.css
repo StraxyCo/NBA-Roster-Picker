@@ -21,12 +21,48 @@
 }
 
 .content {
-  width: 100%; max-width: 520px; position: relative; z-index: 1;
+  width: 100%;
+  max-width: 520px;
+  position: relative;
+  z-index: 1;
   animation: fadeUp 0.5s ease both;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Two-column layout on desktop */
+@media (min-width: 900px) {
+  .screen {
+    align-items: center;
+    padding: 40px 48px;
+  }
+  .content {
+    max-width: 960px;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 32px;
+  }
+}
+
+.colLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.colRight {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
 }
 
 /* Header */
-.header { text-align: center; margin-bottom: 12px; }
+.header { text-align: center; margin-bottom: 4px; }
 .badge {
   display: inline-block; font-family: var(--font-display); font-weight: 800;
   font-size: 0.7rem; letter-spacing: 0.2em; color: var(--navy); background: var(--gold);
@@ -56,8 +92,7 @@
 }
 .menuBtn:hover { color: var(--gold); border-color: var(--gold); }
 
-/* Form */
-.form { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+/* .form removed — replaced by colLeft / colRight */
 .section {
   background: var(--navy-3); border: 1px solid var(--white-10);
   border-radius: var(--radius-lg); padding: 12px 16px;

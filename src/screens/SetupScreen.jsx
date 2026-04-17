@@ -390,20 +390,22 @@ export default function SetupScreen({ onStart, savedGames, onDeleteGame }) {
       </div>
 
       <div className={styles.content}>
-        <header className={styles.header}>
-          <div className={styles.badge}>NBA</div>
-          <h1 className={styles.title}>Roster<br />Picker</h1>
-          <p className={styles.tagline}>Draft your dream squad</p>
-        </header>
 
-        {/* Menu */}
-        <div className={styles.menu}>
-          <button className={styles.menuBtn} onClick={() => setView('stats')}>Stats</button>
-          <button className={styles.menuBtn} onClick={() => setView('manage')}>Manage players</button>
-          <button className={styles.menuBtn} onClick={() => setView('games')}>View games played</button>
-        </div>
+        {/* LEFT COLUMN — brand + players + season */}
+        <div className={styles.colLeft}>
+          <header className={styles.header}>
+            <div className={styles.badge}>NBA</div>
+            <h1 className={styles.title}>Roster<br />Picker</h1>
+            <p className={styles.tagline}>Draft your dream squad</p>
+          </header>
 
-        <div className={styles.form}>
+          {/* Menu */}
+          <div className={styles.menu}>
+            <button className={styles.menuBtn} onClick={() => setView('stats')}>Stats</button>
+            <button className={styles.menuBtn} onClick={() => setView('manage')}>Manage players</button>
+            <button className={styles.menuBtn} onClick={() => setView('games')}>View games played</button>
+          </div>
+
           {/* Player slots */}
           <section className={styles.section}>
             <h2 className={styles.sectionLabel}>Players</h2>
@@ -436,7 +438,10 @@ export default function SetupScreen({ onStart, savedGames, onDeleteGame }) {
               <span className={styles.seasonTriggerCaret}>▾</span>
             </button>
           </section>
+        </div>
 
+        {/* RIGHT COLUMN — options + start */}
+        <div className={styles.colRight}>
           {/* Options */}
           <section className={styles.section}>
             <h2 className={styles.sectionLabel}>Options</h2>
@@ -476,7 +481,7 @@ export default function SetupScreen({ onStart, savedGames, onDeleteGame }) {
               </select>
             </div>
 
-            {/* Keep hidden — only when stat mode is not standard */}
+            {/* Keep hidden */}
             {statMode !== 'standard' && (
               <div className={styles.optionRow}>
                 <div className={styles.optionLabel}>
@@ -491,14 +496,14 @@ export default function SetupScreen({ onStart, savedGames, onDeleteGame }) {
               </div>
             )}
 
-            {/* Roster size — always shown, different range per mode */}
+            {/* Roster size */}
             <div className={styles.optionRow}>
               <div className={styles.optionLabel}>
                 <span className={styles.optionTitle}>
                   {gameMode === 'teams' ? 'Number of teams' : 'Roster size'}
                 </span>
                 <span className={styles.optionDesc}>
-                  {gameMode === 'teams' ? 'Teams per roster (1-10)' : 'Players per team'}
+                  {gameMode === 'teams' ? 'Teams per roster (1–10)' : 'Players per team'}
                 </span>
               </div>
               <div className={styles.stepper}>
@@ -508,7 +513,7 @@ export default function SetupScreen({ onStart, savedGames, onDeleteGame }) {
               </div>
             </div>
 
-            {/* Eliminate drawn teams — players mode only */}
+            {/* Eliminate drawn teams */}
             {gameMode === 'players' && (
               <div className={styles.optionRow}>
                 <div className={styles.optionLabel}>
@@ -534,11 +539,12 @@ export default function SetupScreen({ onStart, savedGames, onDeleteGame }) {
               </div>
             )}
           </section>
+
+          <button className={styles.startBtn} onClick={handleStart} disabled={!canStart}>
+            Start Game
+          </button>
         </div>
 
-        <button className={styles.startBtn} onClick={handleStart} disabled={!canStart}>
-          Start Game
-        </button>
       </div>
 
       {/* Modals */}
