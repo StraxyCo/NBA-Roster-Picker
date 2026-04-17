@@ -7,11 +7,48 @@ import PickPlayerScreen from './screens/PickPlayerScreen.jsx'
 import TeamModeDrawScreen from './screens/TeamModeDrawScreen.jsx'
 import FinalScreen from './screens/FinalScreen.jsx'
 import { useGames } from './hooks/useProfiles.js'
+import { NBA_TEAMS, getLogoUrl } from './data/teams.js'
+
+// ── Small inline reveal screen for Teams mode stat ──────────────────────────
+function TeamStatReveal({ entry, statMode, currentPlayer, onNext }) {
+  const statVal  = statMode === 'wins' ? entry.w : entry.l
+  const statName = statMode === 'wins' ? 'Wins' : 'Losses'
+  const team     = NBA_TEAMS.find(t => String(t.id) === String(entry.teamId))
+  return (
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px' }}>
+      <div style={{ textAlign: 'center', maxWidth: '380px', width: '100%' }}>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--gold)', marginBottom: '20px' }}>
+          {currentPlayer}'s pick
+        </div>
+        {team && (
+          <img src={getLogoUrl(team.slug)} alt={entry.name}
+            style={{ width: 80, height: 80, objectFit: 'contain', marginBottom: 12 }}
+            onError={e => { e.target.style.display = 'none' }}
+          />
+        )}
+        <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 'clamp(1.6rem, 5vw, 2.2rem)', textTransform: 'uppercase', color: 'var(--white)', marginBottom: 4 }}>
+          {entry.name}
+        </div>
+        <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1rem', color: 'var(--gold)', marginBottom: 24, letterSpacing: '0.08em' }}>
+          {entry.season}
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, padding: '20px 32px', background: 'rgba(245,197,24,0.08)', border: '1px solid rgba(245,197,24,0.25)', borderRadius: 'var(--radius-lg)', marginBottom: 28 }}>
+          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '4rem', color: 'var(--gold)', lineHeight: 1 }}>{statVal}</span>
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--white-50)' }}>{statName}</span>
+        </div>
+        <button onClick={onNext} style={{ width: '100%', background: 'var(--gold)', color: 'var(--navy)', fontFamily: 'var(--font-display)', fontSize: '1.1rem', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '14px', borderRadius: 'var(--radius)', border: 'none', cursor: 'pointer' }}>
+          Next →
+        </button>
+      </div>
+    </div>
+  )
+}
 
 const SCREENS = {
   SETUP: 'SETUP', ORDER_DRAW: 'ORDER_DRAW', TURN: 'TURN',
   TEAM_DRAW: 'TEAM_DRAW', PICK_PLAYER: 'PICK_PLAYER',
   TEAM_MODE_DRAW: 'TEAM_MODE_DRAW',
+  TEAM_STAT_REVEAL: 'TEAM_STAT_REVEAL',
   FINAL: 'FINAL',
 }
 
@@ -40,6 +77,8 @@ export default function App() {
   const [currentTeam, setCurrentTeam]        = useState(null)
   const [currentRoster, setCurrentRoster]    = useState([])
   const [currentSeason, setCurrentSeason]    = useState(null)
+  const [lastPickedEntry, setLastPickedEntry] = useState(null) // for team stat reveal
+  const [pendingRosters, setPendingRosters]  = useState(null) // rosters after team pick, before reveal
 
   function handleSetupStart({ players, rosterSize, eliminateTeams, eliminateFranchises, seasons, gameMode, statMode, keepHidden }) {
     setPlayers(players)
@@ -97,6 +136,18 @@ export default function App() {
     const updatedRosters = { ...rosters, [currentPlayer]: newRoster }
     setRosters(updatedRosters)
 
+    // Show stat reveal if stat mode is active and not hidden
+    if (statMode !== 'standard' && !keepHidden) {
+      setLastPickedEntry(entry)
+      setPendingRosters(updatedRosters)
+      setScreen(SCREENS.TEAM_STAT_REVEAL)
+      return
+    }
+
+    advanceAfterTeamPick(updatedRosters)
+  }
+
+  function advanceAfterTeamPick(updatedRosters) {
     const allFull = turnOrder.every(p => updatedRosters[p]?.every(slot => slot !== null))
     if (allFull) {
       setScreen(SCREENS.FINAL)
@@ -138,6 +189,7 @@ export default function App() {
     setCurrentTurnIdx(0); setRosters({})
     setDrawnEntries([])
     setCurrentTeam(null); setCurrentSeason(null); setCurrentRoster([])
+    setLastPickedEntry(null); setPendingRosters(null)
   }
 
   const currentPlayer     = turnOrder[currentTurnIdx] || ''
@@ -192,7 +244,17 @@ export default function App() {
           onValidate={handlePickValidated}
         />
       )}
-      {screen === SCREENS.FINAL && (
+      {screen === SCREENS.TEAM_STAT_REVEAL && lastPickedEntry && (
+        <TeamStatReveal
+          entry={lastPickedEntry}
+          statMode={statMode}
+          currentPlayer={turnOrder[currentTurnIdx]}
+          onNext={() => {
+            setLastPickedEntry(null)
+            advanceAfterTeamPick(pendingRosters || rosters)
+          }}
+        />
+      )}
         <FinalScreen
           rosters={rosters} turnOrder={turnOrder} rosterSize={rosterSize}
           multiSeason={multiSeason} gameMode={gameMode}
