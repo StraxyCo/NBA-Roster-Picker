@@ -73,7 +73,6 @@ export default function TeamModeDrawScreen({
   useEffect(() => () => clearTimeout(rafRef.current), [])
 
   const displayedTeam = displayTeam || NBA_TEAMS[0]
-  const showStat = statMode !== 'standard' && !keepHidden && wl && !loadingWl
 
   return (
     <div className={styles.screen}>
