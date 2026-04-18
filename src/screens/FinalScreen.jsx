@@ -39,11 +39,9 @@ export default function FinalScreen({ rosters, turnOrder, rosterSize, multiSeaso
   const [declared, setDeclared] = useState(false)
   const [saving, setSaving]     = useState(false)
 
-  const showStats   = statMode && statMode !== 'standard'
-  // Stats visible in roster view: only if not hidden
-  const statsInView = showStats && !keepHidden
-  // Stats revealed once winner is declared (always, even if was hidden)
-  const statsRevealed = showStats && declared
+  const showStats = statMode && statMode !== 'standard'
+  // On the final screen, stats are always visible — keepHidden only hides them during the game
+  const statsInView = showStats
 
   async function declareWinner(player) {
     setWinner(player)
@@ -87,7 +85,7 @@ export default function FinalScreen({ rosters, turnOrder, rosterSize, multiSeaso
           {turnOrder.map((player) => {
             const roster = rosters[player] || []
             const isWinner = declared && winner === player
-            const total = (statsInView || statsRevealed) ? rosterTotal(roster, statMode) : null
+            const total = statsInView ? rosterTotal(roster, statMode) : null
 
             return (
               <div key={player} className={`${styles.rosterCard} ${isWinner ? styles.rosterCardWinner : ''}`}>
@@ -99,7 +97,7 @@ export default function FinalScreen({ rosters, turnOrder, rosterSize, multiSeaso
                 <div className={styles.rosterSlots}>
                   {Array.from({ length: rosterSize }).map((_, i) => {
                     const entry = roster[i]
-                    const statVal = (statsInView || statsRevealed) && entry
+                    const statVal = statsInView && entry
                       ? entry[statKey]
                       : undefined
 
@@ -114,7 +112,7 @@ export default function FinalScreen({ rosters, turnOrder, rosterSize, multiSeaso
                                 : <em>—</em>
                               }
                             </span>
-                            {(statsInView || statsRevealed) && entry && (
+                            {statsInView && entry && (
                               <span className={styles.slotStatVal}>
                                 {formatStat(statVal, statMode)} {STAT_LABELS[statMode]}
                               </span>
@@ -129,7 +127,7 @@ export default function FinalScreen({ rosters, turnOrder, rosterSize, multiSeaso
                                 : <em>—</em>
                               }
                             </span>
-                            {(statsInView || statsRevealed) && entry ? (
+                            {statsInView && entry ? (
                               <span className={styles.slotStatVal}>
                                 {formatStat(statVal, statMode)} {STAT_LABELS[statMode]}
                               </span>
