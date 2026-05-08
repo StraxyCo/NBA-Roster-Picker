@@ -132,7 +132,13 @@ export default function PickPlayerScreen({ currentPlayer, team, season, nbaRoste
   const [showStatReveal, setShowStatReveal] = useState(false)
   const [pendingRoster, setPendingRoster]   = useState(null)
 
-  const canValidate = myRoster.some(p => p !== null)
+  function countFilledSlots(roster) {
+    return roster.filter(p => p !== null).length
+  }
+
+  const originalCount = countFilledSlots(userRoster)
+  const currentCount = countFilledSlots(myRoster)
+  const canValidate = currentCount === originalCount + 1
 
   function handleValidate() {
     if (statMode !== 'standard' && !keepHidden) {
