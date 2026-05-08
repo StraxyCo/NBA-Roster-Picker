@@ -16,10 +16,48 @@ function shuffle(arr) {
   return a
 }
 
-function buildWrongChoices(correct) {
-  const pool = ['00']
-  for (let i = 0; i <= 99; i++) pool.push(String(i))
-  return shuffle(pool.filter(n => n !== correct)).slice(0, 3)
+function playerWeight(p) {
+  const total = (p.min ?? 0) * (p.gp ?? 0)
+  return total > 0 ? total : 1
+}
+
+function weightedShuffle(arr, weights) {
+  const items = [...arr], ws = [...weights], result = []
+  while (items.length > 0) {
+    const total = ws.reduce((a, b) => a + b, 0)
+    let r = Math.random() * total, i = 0
+    while (i < ws.length - 1) { r -= ws[i]; if (r <= 0) break; i++ }
+    result.push(items[i])
+    items.splice(i, 1); ws.splice(i, 1)
+  }
+  return result
+}
+
+function weightedPick(players, weights) {
+  const total = weights.reduce((a, b) => a + b, 0)
+  let r = Math.random() * total
+  for (let i = 0; i < players.length; i++) {
+    r -= weights[i]
+    if (r <= 0) return players[i]
+  }
+  return players[players.length - 1]
+}
+
+function buildWrongChoices(correct, players, weights) {
+  const chosen = new Set()
+  let attempts = 0
+  while (chosen.size < 3 && attempts < 200) {
+    attempts++
+    const p = weightedPick(players, weights)
+    if (p.number && p.number !== correct && !chosen.has(p.number)) {
+      chosen.add(p.number)
+    }
+  }
+  for (let i = 0; chosen.size < 3; i++) {
+    const n = String(i)
+    if (n !== correct && !chosen.has(n)) chosen.add(n)
+  }
+  return [...chosen]
 }
 
 export default function JerseyGuesserGameScreen({ players, rounds, onBack }) {
@@ -33,6 +71,8 @@ export default function JerseyGuesserGameScreen({ players, rounds, onBack }) {
   const [imgError, setImgError] = useState(false)
   const inputRef = useRef(null)
   const playerQueue = useRef([])
+  const allPlayers = useRef([])
+  const allWeights = useRef([])
 
   const activePlayers = players.filter(Boolean)
   const totalTurns = rounds * activePlayers.length
@@ -54,7 +94,10 @@ export default function JerseyGuesserGameScreen({ players, rounds, onBack }) {
             }
           }
         }
-        playerQueue.current = shuffle(all)
+        const weights = all.map(playerWeight)
+        allPlayers.current = all
+        allWeights.current = weights
+        playerQueue.current = weightedShuffle(all, weights)
         advanceTurn()
       })
   }, [])
@@ -83,7 +126,7 @@ export default function JerseyGuesserGameScreen({ players, rounds, onBack }) {
       setScores(prev => ({ ...prev, [currentParticipant.name]: prev[currentParticipant.name] + 2 }))
       setPhase('success')
     } else {
-      setChoices(shuffle([currentNbaPlayer.number, ...buildWrongChoices(currentNbaPlayer.number)]))
+      setChoices(shuffle([currentNbaPlayer.number, ...buildWrongChoices(currentNbaPlayer.number, allPlayers.current, allWeights.current)]))
       setPhase('hint')
     }
   }
