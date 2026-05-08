@@ -276,7 +276,7 @@ function GamesView({ games, onDelete, onClose }) {
 }
 
 // ── Main SetupScreen ────────────────────────────────────────────────────────
-export default function SetupScreen({ onStart, savedGames, onDeleteGame }) {
+export default function SetupScreen({ onStart, savedGames, onDeleteGame, onBack }) {
   const { players, loading, createPlayer, updatePlayer, deletePlayer } = usePlayers()
 
   // 4 slots — each is null or a player object
@@ -384,6 +384,10 @@ export default function SetupScreen({ onStart, savedGames, onDeleteGame }) {
 
   return (
     <div className={styles.screen}>
+      <button className={styles.backArrow} onClick={onBack} aria-label="Back to home">
+        ←
+      </button>
+
       <div className={styles.courtLines} aria-hidden="true">
         <div className={styles.courtArc} />
         <div className={styles.courtCenter} />

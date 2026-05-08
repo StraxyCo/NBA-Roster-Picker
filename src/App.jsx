@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import SetupScreen from './screens/SetupScreen.jsx'
+import HomeScreen from './screens/HomeScreen.jsx'
 import OrderDrawScreen from './screens/OrderDrawScreen.jsx'
 import TurnScreen from './screens/TurnScreen.jsx'
 import TeamDrawScreen from './screens/TeamDrawScreen.jsx'
@@ -45,7 +46,7 @@ function TeamStatReveal({ entry, statMode, currentPlayer, onNext }) {
 }
 
 const SCREENS = {
-  SETUP: 'SETUP', ORDER_DRAW: 'ORDER_DRAW', TURN: 'TURN',
+  HOME: 'HOME', SETUP: 'SETUP', ORDER_DRAW: 'ORDER_DRAW', TURN: 'TURN',
   TEAM_DRAW: 'TEAM_DRAW', PICK_PLAYER: 'PICK_PLAYER',
   TEAM_MODE_DRAW: 'TEAM_MODE_DRAW',
   TEAM_STAT_REVEAL: 'TEAM_STAT_REVEAL',
@@ -55,7 +56,7 @@ const SCREENS = {
 function buildEmptyRoster(size) { return Array(size).fill(null) }
 
 export default function App() {
-  const [screen, setScreen] = useState(SCREENS.SETUP)
+  const [screen, setScreen] = useState(SCREENS.HOME)
   const { games, saveGame, deleteGame } = useGames()
 
   // Config
@@ -184,7 +185,7 @@ export default function App() {
   }
 
   function handleRestart() {
-    setScreen(SCREENS.SETUP)
+    setScreen(SCREENS.HOME)
     setTurnOrder([]); setTurnOrderFull([])
     setCurrentTurnIdx(0); setRosters({})
     setDrawnEntries([])
@@ -199,8 +200,17 @@ export default function App() {
 
   return (
     <>
+      {screen === SCREENS.HOME && (
+        <HomeScreen onSelectGame={(game) => {
+          if (game === 'ROSTER_PICKER') setScreen(SCREENS.SETUP)
+          if (game === 'JERSEY_GUESSER') setScreen(SCREENS.JERSEY_GUESSER)
+        }} />
+      )}
+      {screen === SCREENS.JERSEY_GUESSER && (
+        <JerseyGuesserScreen onBack={() => setScreen(SCREENS.HOME)} />
+      )}
       {screen === SCREENS.SETUP && (
-        <SetupScreen onStart={handleSetupStart} savedGames={games} onDeleteGame={deleteGame} />
+        <SetupScreen onStart={handleSetupStart} savedGames={games} onDeleteGame={deleteGame} onBack={() => setScreen(SCREENS.HOME)} />
       )}
       {screen === SCREENS.ORDER_DRAW && (
         <OrderDrawScreen

@@ -388,3 +388,21 @@
 }
 .select:focus { border-color: var(--gold); outline: none; }
 .select option { background: var(--navy-2); }
+
+.backArrow {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  background: none;
+  border: none;
+  color: var(--white-50);
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  z-index: 10;
+  padding: 8px;
+  line-height: 1;
+}
+.backArrow:hover {
+  color: var(--white);
+}
