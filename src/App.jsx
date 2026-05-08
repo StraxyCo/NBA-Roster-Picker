@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import SetupScreen from './screens/SetupScreen.jsx'
 import HomeScreen from './screens/HomeScreen.jsx'
+import JerseyGuesserScreen from './screens/JerseyGuesserScreen.jsx'
 import OrderDrawScreen from './screens/OrderDrawScreen.jsx'
 import TurnScreen from './screens/TurnScreen.jsx'
 import TeamDrawScreen from './screens/TeamDrawScreen.jsx'
