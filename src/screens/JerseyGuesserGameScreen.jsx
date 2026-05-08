@@ -60,7 +60,7 @@ function buildWrongChoices(correct, players, weights) {
   return [...chosen]
 }
 
-export default function JerseyGuesserGameScreen({ players, rounds, onBack }) {
+export default function JerseyGuesserGameScreen({ players, rounds, onBack, onSaveGame }) {
   const [phase, setPhase] = useState('loading') // loading | guess | success | hint | hint_result | recap
   const [currentNbaPlayer, setCurrentNbaPlayer] = useState(null)
   const [turnIdx, setTurnIdx] = useState(0)
@@ -106,9 +106,23 @@ export default function JerseyGuesserGameScreen({ players, rounds, onBack }) {
     if (phase === 'guess') inputRef.current?.focus()
   }, [phase, currentNbaPlayer])
 
+  function saveAndRecap(currentScores) {
+    const sorted = [...activePlayers].sort((a, b) => (currentScores[b.name] ?? 0) - (currentScores[a.name] ?? 0))
+    const topScore = currentScores[sorted[0]?.name] ?? 0
+    const isTie = sorted.length > 1 && (currentScores[sorted[1].name] ?? 0) === topScore
+    const winner = isTie ? null : sorted[0]
+    onSaveGame?.({
+      playerIds: activePlayers.map(p => p.id),
+      playerNames: activePlayers.map(p => p.name),
+      winnerId: winner?.id ?? null,
+      winnerName: winner?.name ?? 'Tie',
+    })
+    setPhase('recap')
+  }
+
   function advanceTurn() {
     const next = playerQueue.current.pop()
-    if (!next) { setPhase('recap'); return }
+    if (!next) { saveAndRecap(scores); return }
     setCurrentNbaPlayer(next)
     setInputVal('')
     setImgError(false)
@@ -143,7 +157,7 @@ export default function JerseyGuesserGameScreen({ players, rounds, onBack }) {
   function handleNext() {
     const next = turnIdx + 1
     if (next >= totalTurns) {
-      setPhase('recap')
+      saveAndRecap(scores)
     } else {
       setTurnIdx(next)
       advanceTurn()

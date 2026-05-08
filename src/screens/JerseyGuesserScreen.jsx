@@ -2,6 +2,94 @@ import React, { useState } from 'react'
 import styles from './JerseyGuesserScreen.module.css'
 import { usePlayers } from '../hooks/useProfiles.js'
 
+// ── Confirm delete dialog ───────────────────────────────────────────────────
+function ConfirmModal({ message, onConfirm, onCancel }) {
+  return (
+    <Modal onClose={onCancel}>
+      <p className={styles.confirmMsg}>{message}</p>
+      <div className={styles.modalActions}>
+        <button className={styles.btnDanger} onClick={onConfirm}>Delete</button>
+        <button className={styles.btnSecondary} onClick={onCancel}>Cancel</button>
+      </div>
+    </Modal>
+  )
+}
+
+// ── Stats view ──────────────────────────────────────────────────────────────
+function StatsView({ players, onClose }) {
+  const sorted = [...players]
+    .filter(p => (p.jerseyGamesPlayed || 0) > 0 || (p.jerseyWins || 0) > 0)
+    .sort((a, b) => (b.jerseyWins || 0) - (a.jerseyWins || 0))
+  return (
+    <Modal onClose={onClose}>
+      <h3 className={styles.modalTitle}>Stats</h3>
+      <div className={styles.statsTable}>
+        <div className={styles.statsHeader}>
+          <span className={styles.statsColPlayer}>Player</span>
+          <span className={styles.statsCol}>GP</span>
+          <span className={styles.statsCol}>Wins</span>
+          <span className={styles.statsCol}>Win%</span>
+        </div>
+        {sorted.length === 0 && <p className={styles.emptyNote}>No games recorded yet.</p>}
+        {sorted.map(p => {
+          const gp = p.jerseyGamesPlayed || 0
+          const w = p.jerseyWins || 0
+          const pct = gp > 0 ? Math.round((w / gp) * 100) : 0
+          return (
+            <div key={p.id} className={styles.statsRow}>
+              <span className={styles.statsColPlayer}>{p.name}</span>
+              <span className={styles.statsCol}>{gp}</span>
+              <span className={styles.statsCol}>{w}</span>
+              <span className={styles.statsCol}>{pct}%</span>
+            </div>
+          )
+        })}
+      </div>
+      <div className={styles.modalActions}>
+        <button className={styles.btnSecondary} onClick={onClose}>Close</button>
+      </div>
+    </Modal>
+  )
+}
+
+// ── View games played ───────────────────────────────────────────────────────
+function GamesView({ games, onDelete, onClose }) {
+  const [deletingId, setDeletingId] = useState(null)
+  const game = games.find(g => g.id === deletingId)
+  return (
+    <>
+      <Modal onClose={onClose}>
+        <h3 className={styles.modalTitle}>Games played</h3>
+        <div className={styles.gamesTable}>
+          <div className={styles.gamesHeader}>
+            <span className={styles.gamesColPlayers}>Players</span>
+            <span className={styles.gamesColWinner}>Winner</span>
+            <span className={styles.gamesColAction}></span>
+          </div>
+          {games.length === 0 && <p className={styles.emptyNote}>No games recorded yet.</p>}
+          {games.map(g => (
+            <div key={g.id} className={styles.gamesRow}>
+              <span className={styles.gamesColPlayers}>{(g.playerNames || []).join(', ')}</span>
+              <span className={styles.gamesColWinner}>{g.winnerName}</span>
+              <button className={styles.iconBtn} onClick={() => setDeletingId(g.id)}>🗑️</button>
+            </div>
+          ))}
+        </div>
+        <div className={styles.modalActions}>
+          <button className={styles.btnSecondary} onClick={onClose}>Close</button>
+        </div>
+      </Modal>
+      {game && (
+        <ConfirmModal
+          message="Delete this game? Player stats will be updated."
+          onConfirm={async () => { await onDelete(game.id); setDeletingId(null) }}
+          onCancel={() => setDeletingId(null)}
+        />
+      )}
+    </>
+  )
+}
+
 // ── Small shared modal shell ────────────────────────────────────────────────
 function Modal({ onClose, children }) {
   return (
@@ -92,14 +180,15 @@ function AddPlayerModal({ players, slotsUsed, onSelect, onClose, onCreate }) {
   )
 }
 
-export default function JerseyGuesserScreen({ onBack, onStart }) {
+export default function JerseyGuesserScreen({ onBack, onStart, savedGames, onDeleteGame }) {
   const { players, createPlayer } = usePlayers()
-  
+
   // 4 player slots — each is null or a player object
   const [selectedPlayers, setSelectedPlayers] = useState([null, null, null, null])
   const [showAddPlayerModal, setShowAddPlayerModal] = useState(false)
   const [addingSlot, setAddingSlot] = useState(null)
-  
+  const [view, setView] = useState(null) // null | 'stats' | 'games'
+
   const [rounds, setRounds] = useState(5)
 
   function clearSlot(idx) {
@@ -133,6 +222,11 @@ export default function JerseyGuesserScreen({ onBack, onStart }) {
         <h1 className={styles.title}>Jersey Number Guesser</h1>
         <p className={styles.subtitle}>Test your NBA knowledge</p>
       </header>
+
+      <div className={styles.menu}>
+        <button className={styles.menuBtn} onClick={() => setView('stats')}>Stats</button>
+        <button className={styles.menuBtn} onClick={() => setView('games')}>View games played</button>
+      </div>
 
       {/* Container for players + rounds */}
       <div className={styles.mainContainer}>
@@ -198,6 +292,18 @@ export default function JerseyGuesserScreen({ onBack, onStart }) {
           onSelect={handleAddPlayer}
           onClose={() => setAddingSlot(null)}
           onCreate={createPlayer}
+        />
+      )}
+
+      {view === 'stats' && (
+        <StatsView players={players} onClose={() => setView(null)} />
+      )}
+
+      {view === 'games' && (
+        <GamesView
+          games={savedGames || []}
+          onDelete={onDeleteGame}
+          onClose={() => setView(null)}
         />
       )}
     </div>

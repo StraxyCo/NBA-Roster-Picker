@@ -462,3 +462,66 @@
   border-color: var(--gold);
   color: var(--gold);
 }
+
+/* Menu */
+.menu {
+  display: flex; gap: 8px; justify-content: center;
+  margin-bottom: 14px; flex-wrap: wrap;
+}
+.menuBtn {
+  font-family: var(--font-display); font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--white-50); background: transparent;
+  border: 1px solid var(--white-10); border-radius: 4px;
+  padding: 5px 12px; cursor: pointer; transition: all 0.15s;
+}
+.menuBtn:hover { color: var(--gold); border-color: var(--gold); }
+
+/* Stats table */
+.statsTable { display: flex; flex-direction: column; gap: 2px; }
+.statsHeader {
+  display: flex; align-items: center; padding: 4px 8px; gap: 4px;
+}
+.statsRow {
+  display: flex; align-items: center; padding: 8px; gap: 4px;
+  background: var(--navy-3); border-radius: var(--radius);
+}
+.statsColPlayer { flex: 1; font-family: var(--font-display); font-weight: 700; font-size: 0.88rem; color: var(--white-80); }
+.statsHeader .statsColPlayer { color: var(--white-40); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; }
+.statsCol { width: 52px; text-align: right; font-family: var(--font-display); font-weight: 700; font-size: 0.88rem; color: var(--white-80); }
+.statsHeader .statsCol { color: var(--white-40); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; }
+
+/* Games table */
+.gamesTable { display: flex; flex-direction: column; gap: 2px; }
+.gamesHeader {
+  display: flex; align-items: center; padding: 4px 8px; gap: 4px;
+}
+.gamesRow {
+  display: flex; align-items: center; padding: 8px; gap: 4px;
+  background: var(--navy-3); border-radius: var(--radius);
+}
+.gamesColPlayers { flex: 1; font-size: 0.85rem; color: var(--white-70); }
+.gamesHeader .gamesColPlayers { color: var(--white-40); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; font-family: var(--font-display); font-weight: 700; }
+.gamesColWinner { width: 110px; font-family: var(--font-display); font-weight: 700; font-size: 0.88rem; color: var(--gold); }
+.gamesHeader .gamesColWinner { color: var(--white-40); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; }
+.gamesColAction { width: 32px; }
+
+/* Icon button */
+.iconBtn {
+  background: none; border: none; cursor: pointer;
+  font-size: 1rem; padding: 2px; opacity: 0.5; transition: opacity 0.15s;
+}
+.iconBtn:hover { opacity: 1; }
+
+/* Confirm modal */
+.confirmMsg {
+  color: var(--white-80); font-size: 0.95rem; margin: 0 0 16px 0;
+}
+.btnDanger {
+  flex: 1; padding: 10px 12px; border-radius: var(--radius);
+  font-family: var(--font-display); font-size: 0.75rem; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  cursor: pointer; transition: all 0.15s;
+  background: #c0392b; color: var(--white); border: 1px solid #c0392b;
+}
+.btnDanger:hover { background: #e74c3c; border-color: #e74c3c; }

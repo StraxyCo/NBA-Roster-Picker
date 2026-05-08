@@ -9,7 +9,7 @@ import TeamDrawScreen from './screens/TeamDrawScreen.jsx'
 import PickPlayerScreen from './screens/PickPlayerScreen.jsx'
 import TeamModeDrawScreen from './screens/TeamModeDrawScreen.jsx'
 import FinalScreen from './screens/FinalScreen.jsx'
-import { useGames } from './hooks/useProfiles.js'
+import { useGames, useJerseyGames } from './hooks/useProfiles.js'
 import { NBA_TEAMS, getLogoUrl } from './data/teams.js'
 
 // ── Small inline reveal screen for Teams mode stat ──────────────────────────
@@ -62,6 +62,7 @@ function buildEmptyRoster(size) { return Array(size).fill(null) }
 export default function App() {
   const [screen, setScreen] = useState(SCREENS.HOME)
   const { games, saveGame, deleteGame } = useGames()
+  const { games: jerseyGames, saveGame: saveJerseyGame, deleteGame: deleteJerseyGame } = useJerseyGames()
 
   // Config
   const [gameMode, setGameMode]              = useState('players') // 'players' | 'teams'
@@ -224,6 +225,8 @@ export default function App() {
             setJerseyRounds(rounds)
             setScreen(SCREENS.JERSEY_GUESSER_GAME)
           }}
+          savedGames={jerseyGames}
+          onDeleteGame={deleteJerseyGame}
         />
       )}
       {screen === SCREENS.JERSEY_GUESSER_GAME && (
@@ -231,6 +234,7 @@ export default function App() {
           players={jerseyPlayers}
           rounds={jerseyRounds}
           onBack={() => setScreen(SCREENS.JERSEY_GUESSER)}
+          onSaveGame={saveJerseyGame}
         />
       )}
       {screen === SCREENS.SETUP && (
