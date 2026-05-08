@@ -1,0 +1,84 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 24px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 48px;
+  margin-top: 40px;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--white);
+  margin: 0;
+  line-height: 1.1;
+  text-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+.subtitle {
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  color: var(--white-50);
+  margin-top: 12px;
+}
+
+.gameList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 500px;
+}
+
+.gameCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  color: var(--white);
+}
+
+.gameCard:hover {
+  background: var(--surface-hover);
+  border-color: var(--gold);
+  transform: translateY(-2px);
+}
+
+.gameInfo h2 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin: 0 0 8px 0;
+}
+
+.gameInfo p {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--white-50);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.arrow {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: var(--gold);
+  font-weight: 800;
+  padding-left: 16px;
+}

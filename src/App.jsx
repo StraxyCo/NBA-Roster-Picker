@@ -81,6 +81,7 @@ export default function App() {
   const [currentSeason, setCurrentSeason]    = useState(null)
   const [lastPickedEntry, setLastPickedEntry] = useState(null) // for team stat reveal
   const [pendingRosters, setPendingRosters]  = useState(null) // rosters after team pick, before reveal
+  const [lastSetup, setLastSetup]            = useState(null) // preserve prev game params
 
   function handleSetupStart({ players, rosterSize, eliminateTeams, eliminateFranchises, seasons, gameMode, statMode, keepHidden }) {
     setPlayers(players)
@@ -91,6 +92,8 @@ export default function App() {
     setGameMode(gameMode)
     setStatMode(statMode)
     setKeepHidden(keepHidden)
+    // Store setup params for next game restart
+    setLastSetup({ rosterSize, eliminateTeams, eliminateFranchises, seasons, gameMode, statMode, keepHidden })
     const emptyRosters = {}
     players.forEach(p => { emptyRosters[p.name] = buildEmptyRoster(rosterSize) })
     setRosters(emptyRosters)
@@ -186,12 +189,12 @@ export default function App() {
   }
 
   function handleRestart() {
-    setScreen(SCREENS.HOME)
     setTurnOrder([]); setTurnOrderFull([])
     setCurrentTurnIdx(0); setRosters({})
     setDrawnEntries([])
     setCurrentTeam(null); setCurrentSeason(null); setCurrentRoster([])
     setLastPickedEntry(null); setPendingRosters(null)
+    setScreen(SCREENS.SETUP)
   }
 
   const currentPlayer     = turnOrder[currentTurnIdx] || ''
@@ -211,7 +214,7 @@ export default function App() {
         <JerseyGuesserScreen onBack={() => setScreen(SCREENS.HOME)} />
       )}
       {screen === SCREENS.SETUP && (
-        <SetupScreen onStart={handleSetupStart} savedGames={games} onDeleteGame={deleteGame} onBack={() => setScreen(SCREENS.HOME)} />
+        <SetupScreen onStart={handleSetupStart} savedGames={games} onDeleteGame={deleteGame} onBack={() => setScreen(SCREENS.HOME)} lastSetup={lastSetup} />
       )}
       {screen === SCREENS.ORDER_DRAW && (
         <OrderDrawScreen
