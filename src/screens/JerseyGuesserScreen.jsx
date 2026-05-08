@@ -92,8 +92,7 @@ function AddPlayerModal({ players, slotsUsed, onSelect, onClose, onCreate }) {
   )
 }
 
-export default function JerseyGuesserScreen({ onBack }) {
-  console.log("Rendering JerseyGuesserScreen");
+export default function JerseyGuesserScreen({ onBack, onStart }) {
   const { players, createPlayer } = usePlayers()
   
   // 4 player slots — each is null or a player object
@@ -123,6 +122,7 @@ export default function JerseyGuesserScreen({ onBack }) {
   }
 
   const slotsUsedIds = selectedPlayers.filter(Boolean).map(p => p.id)
+  const activePlayers = selectedPlayers.filter(Boolean)
 
   return (
     <div className={styles.container}>
@@ -183,7 +183,11 @@ export default function JerseyGuesserScreen({ onBack }) {
         </div>
       </div>
 
-      <button className={styles.startBtn} onClick={() => alert(`Starting game with ${rounds} rounds!`)}>
+      <button
+        className={styles.startBtn}
+        disabled={activePlayers.length === 0}
+        onClick={() => onStart({ players: activePlayers, rounds })}
+      >
         Start Game
       </button>
 

@@ -107,6 +107,8 @@ async function fetchPlayerStats(season) {
       ast: +(row[h.indexOf('AST')] ?? 0).toFixed(1),
       stl: +(row[h.indexOf('STL')] ?? 0).toFixed(1),
       blk: +(row[h.indexOf('BLK')] ?? 0).toFixed(1),
+      min: +(row[h.indexOf('MIN')] ?? 0).toFixed(1),
+      gp: row[h.indexOf('GP')] ?? 0,
     });
   }
   return map;
