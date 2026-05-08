@@ -276,7 +276,7 @@ function GamesView({ games, onDelete, onClose }) {
 }
 
 // ── Main SetupScreen ────────────────────────────────────────────────────────
-export default function SetupScreen({ onStart, savedGames, onDeleteGame, onBack }) {
+export default function SetupScreen({ onStart, savedGames, onDeleteGame, onBack, initialConfig = null }) {
   const { players, loading, createPlayer, updatePlayer, deletePlayer } = usePlayers()
 
   // 4 slots — each is null or a player object
@@ -284,40 +284,57 @@ export default function SetupScreen({ onStart, savedGames, onDeleteGame, onBack 
 
   // Season state
   const [allSeasons, setAllSeasons]    = useState(['2025-26'])
-  const [selectedSeasons, setSelected] = useState(new Set(['2025-26']))
+  const [selectedSeasons, setSelected] = useState(
+    initialConfig ? new Set(initialConfig.seasons) : new Set(['2025-26'])
+  )
   const [showSeasonModal, setShowSeasonModal] = useState(false)
 
   // Game mode
-  const [gameMode, setGameMode]   = useState('players') // 'players' | 'teams'
-  const [statMode, setStatMode]   = useState('standard')
-  const [keepHidden, setKeepHidden] = useState(false)
+  const [gameMode, setGameMode]   = useState(initialConfig?.gameMode ?? 'players')
+  const [statMode, setStatMode]   = useState(initialConfig?.statMode ?? 'standard')
+  const [keepHidden, setKeepHidden] = useState(initialConfig?.keepHidden ?? false)
 
   // Game options
-  const [rosterSize, setRosterSize]   = useState(6)
-  const [eliminate, setEliminate]     = useState(true)
-  const [elimFranch, setElimFranch]   = useState(false)
+  const [rosterSize, setRosterSize]   = useState(initialConfig?.rosterSize ?? 6)
+  const [eliminate, setEliminate]     = useState(initialConfig?.eliminateTeams ?? true)
+  const [elimFranch, setElimFranch]   = useState(initialConfig?.eliminateFranchises ?? false)
 
   // Popin state
   const [addingSlot, setAddingSlot]     = useState(null)
   const [view, setView]                 = useState(null)
 
-  // Pre-fill top 2 slots with most-played players once loaded
+  // Pre-fill slots from last game's players (by id match), or fall back to top 2 most-played
   useEffect(() => {
     if (!loading && players.length > 0) {
-      const top = players.slice(0, 2)
-      setSlots(prev => {
-        const next = [...prev]
-        if (!next[0] && top[0]) next[0] = top[0]
-        if (!next[1] && top[1]) next[1] = top[1]
-        return next
-      })
+      if (initialConfig?.players?.length) {
+        const configPlayers = initialConfig.players
+        setSlots(prev => {
+          const next = [...prev]
+          configPlayers.forEach((cp, i) => {
+            if (i < 4 && !next[i]) {
+              const found = players.find(p => p.id === cp.id)
+              if (found) next[i] = found
+            }
+          })
+          return next
+        })
+      } else {
+        const top = players.slice(0, 2)
+        setSlots(prev => {
+          const next = [...prev]
+          if (!next[0] && top[0]) next[0] = top[0]
+          if (!next[1] && top[1]) next[1] = top[1]
+          return next
+        })
+      }
     }
   }, [loading, players])
 
   useEffect(() => {
     getAvailableSeasons().then(s => {
       setAllSeasons(s)
-      setSelected(new Set([s[0]]))
+      // Only reset selected seasons to latest if no initialConfig provided
+      if (!initialConfig) setSelected(new Set([s[0]]))
     }).catch(() => {})
   }, [])
 

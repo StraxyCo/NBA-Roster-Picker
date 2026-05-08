@@ -84,7 +84,7 @@ export default function App() {
   const [currentSeason, setCurrentSeason]    = useState(null)
   const [lastPickedEntry, setLastPickedEntry] = useState(null) // for team stat reveal
   const [pendingRosters, setPendingRosters]  = useState(null) // rosters after team pick, before reveal
-  const [lastSetup, setLastSetup]            = useState(null) // preserve prev game params
+  const [lastGameConfig, setLastGameConfig]  = useState(null) // preserve prev game params (incl. players)
 
   // Jersey Guesser state
   const [jerseyPlayers, setJerseyPlayers]    = useState([])
@@ -99,8 +99,7 @@ export default function App() {
     setGameMode(gameMode)
     setStatMode(statMode)
     setKeepHidden(keepHidden)
-    // Store setup params for next game restart
-    setLastSetup({ rosterSize, eliminateTeams, eliminateFranchises, seasons, gameMode, statMode, keepHidden })
+    setLastGameConfig({ players, rosterSize, eliminateTeams, eliminateFranchises, seasons, gameMode, statMode, keepHidden })
     const emptyRosters = {}
     players.forEach(p => { emptyRosters[p.name] = buildEmptyRoster(rosterSize) })
     setRosters(emptyRosters)
@@ -235,7 +234,7 @@ export default function App() {
         />
       )}
       {screen === SCREENS.SETUP && (
-        <SetupScreen onStart={handleSetupStart} savedGames={games} onDeleteGame={deleteGame} onBack={() => setScreen(SCREENS.HOME)} lastSetup={lastSetup} />
+        <SetupScreen onStart={handleSetupStart} savedGames={games} onDeleteGame={deleteGame} onBack={() => setScreen(SCREENS.HOME)} initialConfig={lastGameConfig} />
       )}
       {screen === SCREENS.ORDER_DRAW && (
         <OrderDrawScreen
