@@ -2,6 +2,7 @@ import { useState } from 'react'
 import SetupScreen from './screens/SetupScreen.jsx'
 import HomeScreen from './screens/HomeScreen.jsx'
 import JerseyGuesserScreen from './screens/JerseyGuesserScreen.jsx'
+import JerseyGuesserGameScreen from './screens/JerseyGuesserGameScreen.jsx'
 import OrderDrawScreen from './screens/OrderDrawScreen.jsx'
 import TurnScreen from './screens/TurnScreen.jsx'
 import TeamDrawScreen from './screens/TeamDrawScreen.jsx'
@@ -52,6 +53,8 @@ const SCREENS = {
   TEAM_MODE_DRAW: 'TEAM_MODE_DRAW',
   TEAM_STAT_REVEAL: 'TEAM_STAT_REVEAL',
   FINAL: 'FINAL',
+  JERSEY_GUESSER: 'JERSEY_GUESSER',
+  JERSEY_GUESSER_GAME: 'JERSEY_GUESSER_GAME',
 }
 
 function buildEmptyRoster(size) { return Array(size).fill(null) }
@@ -82,6 +85,10 @@ export default function App() {
   const [lastPickedEntry, setLastPickedEntry] = useState(null) // for team stat reveal
   const [pendingRosters, setPendingRosters]  = useState(null) // rosters after team pick, before reveal
   const [lastSetup, setLastSetup]            = useState(null) // preserve prev game params
+
+  // Jersey Guesser state
+  const [jerseyPlayers, setJerseyPlayers]    = useState([])
+  const [jerseyRounds, setJerseyRounds]      = useState(5)
 
   function handleSetupStart({ players, rosterSize, eliminateTeams, eliminateFranchises, seasons, gameMode, statMode, keepHidden }) {
     setPlayers(players)
@@ -211,7 +218,21 @@ export default function App() {
         }} />
       )}
       {screen === SCREENS.JERSEY_GUESSER && (
-        <JerseyGuesserScreen onBack={() => setScreen(SCREENS.HOME)} />
+        <JerseyGuesserScreen
+          onBack={() => setScreen(SCREENS.HOME)}
+          onStart={({ players, rounds }) => {
+            setJerseyPlayers(players)
+            setJerseyRounds(rounds)
+            setScreen(SCREENS.JERSEY_GUESSER_GAME)
+          }}
+        />
+      )}
+      {screen === SCREENS.JERSEY_GUESSER_GAME && (
+        <JerseyGuesserGameScreen
+          players={jerseyPlayers}
+          rounds={jerseyRounds}
+          onBack={() => setScreen(SCREENS.JERSEY_GUESSER)}
+        />
       )}
       {screen === SCREENS.SETUP && (
         <SetupScreen onStart={handleSetupStart} savedGames={games} onDeleteGame={deleteGame} onBack={() => setScreen(SCREENS.HOME)} lastSetup={lastSetup} />
