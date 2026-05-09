@@ -36,10 +36,8 @@ function normalizePlayer(raw) {
       rosterPicker:  { played: p.gamesPlayed || 0,       wins: p.wins || 0 },
       jerseyGuesser: { played: p.jerseyGamesPlayed || 0, wins: p.jerseyWins || 0 },
     }
-    delete p.gamesPlayed
-    delete p.wins
-    delete p.jerseyGamesPlayed
-    delete p.jerseyWins
+    delete p.gamesPlayed; delete p.wins
+    delete p.jerseyGamesPlayed; delete p.jerseyWins
   }
   return p
 }
@@ -52,7 +50,7 @@ export default async function handler(req, res) {
 
   try {
     if (req.method === 'GET') {
-      const raw = await redisGet('jersey-games')
+      const raw = await redisGet('team-leaders-games')
       const games = raw ? (typeof raw === 'string' ? JSON.parse(raw) : raw) : []
       games.sort((a, b) => b.date - a.date)
       return res.status(200).json(games)
@@ -60,36 +58,30 @@ export default async function handler(req, res) {
 
     if (req.method === 'POST') {
       const { playerIds, playerNames, winnerId, winnerName } = req.body
-      if (!playerIds?.length) {
-        return res.status(400).json({ error: 'playerIds required' })
-      }
-      const raw = await redisGet('jersey-games')
+      if (!playerIds?.length) return res.status(400).json({ error: 'playerIds required' })
+
+      const raw = await redisGet('team-leaders-games')
       const games = raw ? (typeof raw === 'string' ? JSON.parse(raw) : raw) : []
-      const newGame = {
-        id: Date.now().toString(),
-        date: Date.now(),
-        playerIds, playerNames, winnerId, winnerName,
-      }
+      const newGame = { id: Date.now().toString(), date: Date.now(), playerIds, playerNames, winnerId, winnerName }
       games.push(newGame)
-      await redisSet('jersey-games', JSON.stringify(games))
+      await redisSet('team-leaders-games', JSON.stringify(games))
 
       for (const pid of playerIds) {
         const pRaw = await hget('players', pid)
         if (!pRaw) continue
         const player = normalizePlayer(pRaw)
-        if (!player.stats.jerseyGuesser) player.stats.jerseyGuesser = { played: 0, wins: 0 }
-        player.stats.jerseyGuesser.played++
-        if (pid === winnerId) player.stats.jerseyGuesser.wins++
+        if (!player.stats.teamLeaders) player.stats.teamLeaders = { played: 0, wins: 0 }
+        player.stats.teamLeaders.played++
+        if (pid === winnerId) player.stats.teamLeaders.wins++
         await hset('players', pid, JSON.stringify(player))
       }
-
       return res.status(201).json(newGame)
     }
 
     if (req.method === 'DELETE') {
       const { id } = req.query
       if (!id) return res.status(400).json({ error: 'id required' })
-      const raw = await redisGet('jersey-games')
+      const raw = await redisGet('team-leaders-games')
       let games = raw ? (typeof raw === 'string' ? JSON.parse(raw) : raw) : []
       const game = games.find(g => g.id === id)
       if (!game) return res.status(404).json({ error: 'Game not found' })
@@ -98,20 +90,20 @@ export default async function handler(req, res) {
         const pRaw = await hget('players', pid)
         if (!pRaw) continue
         const player = normalizePlayer(pRaw)
-        if (!player.stats.jerseyGuesser) player.stats.jerseyGuesser = { played: 0, wins: 0 }
-        player.stats.jerseyGuesser.played = Math.max(0, player.stats.jerseyGuesser.played - 1)
-        if (pid === game.winnerId) player.stats.jerseyGuesser.wins = Math.max(0, player.stats.jerseyGuesser.wins - 1)
+        if (!player.stats.teamLeaders) player.stats.teamLeaders = { played: 0, wins: 0 }
+        player.stats.teamLeaders.played = Math.max(0, player.stats.teamLeaders.played - 1)
+        if (pid === game.winnerId) player.stats.teamLeaders.wins = Math.max(0, player.stats.teamLeaders.wins - 1)
         await hset('players', pid, JSON.stringify(player))
       }
 
       games = games.filter(g => g.id !== id)
-      await redisSet('jersey-games', JSON.stringify(games))
+      await redisSet('team-leaders-games', JSON.stringify(games))
       return res.status(200).json({ ok: true })
     }
 
     res.status(405).json({ error: 'Method not allowed' })
   } catch (err) {
-    console.error('[jersey-games] error:', err.message)
+    console.error('[team-leaders-games] error:', err.message)
     res.status(500).json({ error: err.message })
   }
 }

@@ -18,8 +18,8 @@ function ConfirmModal({ message, onConfirm, onCancel }) {
 // ── Stats view ──────────────────────────────────────────────────────────────
 function StatsView({ players, onClose }) {
   const sorted = [...players]
-    .filter(p => (p.jerseyGamesPlayed || 0) > 0 || (p.jerseyWins || 0) > 0)
-    .sort((a, b) => (b.jerseyWins || 0) - (a.jerseyWins || 0))
+    .filter(p => (p.stats?.jerseyGuesser?.played || 0) > 0)
+    .sort((a, b) => (b.stats?.jerseyGuesser?.wins || 0) - (a.stats?.jerseyGuesser?.wins || 0))
   return (
     <Modal onClose={onClose}>
       <h3 className={styles.modalTitle}>Stats</h3>
@@ -32,8 +32,8 @@ function StatsView({ players, onClose }) {
         </div>
         {sorted.length === 0 && <p className={styles.emptyNote}>No games recorded yet.</p>}
         {sorted.map(p => {
-          const gp = p.jerseyGamesPlayed || 0
-          const w = p.jerseyWins || 0
+          const gp = p.stats?.jerseyGuesser?.played || 0
+          const w  = p.stats?.jerseyGuesser?.wins   || 0
           const pct = gp > 0 ? Math.round((w / gp) * 100) : 0
           return (
             <div key={p.id} className={styles.statsRow}>

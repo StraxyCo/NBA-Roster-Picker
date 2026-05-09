@@ -27,7 +27,7 @@ export function usePlayers() {
     })
     if (!res.ok) throw new Error('Failed to create player')
     const player = await res.json()
-    setPlayers(prev => [...prev, player].sort((a, b) => (b.gamesPlayed || 0) - (a.gamesPlayed || 0)))
+    setPlayers(prev => [...prev, player].sort((a, b) => totalPlayed(b) - totalPlayed(a)))
     return player
   }
 
@@ -50,6 +50,10 @@ export function usePlayers() {
   }
 
   return { players, loading, reload: load, createPlayer, updatePlayer, deletePlayer }
+}
+
+function totalPlayed(player) {
+  return Object.values(player.stats || {}).reduce((sum, g) => sum + (g.played || 0), 0)
 }
 
 export function useGames() {
@@ -124,6 +128,162 @@ export function useWhoHasMoreGames() {
   async function deleteGame(id) {
     const res = await fetch(`/api/who-has-more-games?id=${id}`, { method: 'DELETE' })
     if (!res.ok) throw new Error('Failed to delete who-has-more game')
+    setGames(prev => prev.filter(g => g.id !== id))
+  }
+
+  return { games, loading, reload: load, saveGame, deleteGame }
+}
+
+export function useStatsOverUnderGames() {
+  const [games, setGames] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  const load = useCallback(async () => {
+    try {
+      const res = await fetch('/api/stats-over-under-games')
+      const data = await res.json()
+      setGames(Array.isArray(data) ? data : [])
+    } catch (e) {
+      console.error('useStatsOverUnderGames load error', e)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => { load() }, [load])
+
+  async function saveGame({ playerIds, playerNames, winnerId, winnerName }) {
+    const res = await fetch('/api/stats-over-under-games', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ playerIds, playerNames, winnerId, winnerName }),
+    })
+    if (!res.ok) throw new Error('Failed to save stats-over-under game')
+    const game = await res.json()
+    setGames(prev => [game, ...prev])
+    return game
+  }
+
+  async function deleteGame(id) {
+    const res = await fetch(`/api/stats-over-under-games?id=${id}`, { method: 'DELETE' })
+    if (!res.ok) throw new Error('Failed to delete stats-over-under game')
+    setGames(prev => prev.filter(g => g.id !== id))
+  }
+
+  return { games, loading, reload: load, saveGame, deleteGame }
+}
+
+export function useTeamLeadersGames() {
+  const [games, setGames] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  const load = useCallback(async () => {
+    try {
+      const res = await fetch('/api/team-leaders-games')
+      const data = await res.json()
+      setGames(Array.isArray(data) ? data : [])
+    } catch (e) {
+      console.error('useTeamLeadersGames load error', e)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => { load() }, [load])
+
+  async function saveGame({ playerIds, playerNames, winnerId, winnerName }) {
+    const res = await fetch('/api/team-leaders-games', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ playerIds, playerNames, winnerId, winnerName }),
+    })
+    if (!res.ok) throw new Error('Failed to save team-leaders game')
+    const game = await res.json()
+    setGames(prev => [game, ...prev])
+    return game
+  }
+
+  async function deleteGame(id) {
+    const res = await fetch(`/api/team-leaders-games?id=${id}`, { method: 'DELETE' })
+    if (!res.ok) throw new Error('Failed to delete team-leaders game')
+    setGames(prev => prev.filter(g => g.id !== id))
+  }
+
+  return { games, loading, reload: load, saveGame, deleteGame }
+}
+
+export function useWhosThatGuyGames() {
+  const [games, setGames] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  const load = useCallback(async () => {
+    try {
+      const res = await fetch('/api/whos-that-guy-games')
+      const data = await res.json()
+      setGames(Array.isArray(data) ? data : [])
+    } catch (e) {
+      console.error('useWhosThatGuyGames load error', e)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => { load() }, [load])
+
+  async function saveGame({ playerIds, playerNames, winnerId, winnerName }) {
+    const res = await fetch('/api/whos-that-guy-games', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ playerIds, playerNames, winnerId, winnerName }),
+    })
+    if (!res.ok) throw new Error('Failed to save whos-that-guy game')
+    const game = await res.json()
+    setGames(prev => [game, ...prev])
+    return game
+  }
+
+  async function deleteGame(id) {
+    const res = await fetch(`/api/whos-that-guy-games?id=${id}`, { method: 'DELETE' })
+    if (!res.ok) throw new Error('Failed to delete whos-that-guy game')
+    setGames(prev => prev.filter(g => g.id !== id))
+  }
+
+  return { games, loading, reload: load, saveGame, deleteGame }
+}
+
+export function useAllStarsGames() {
+  const [games, setGames] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  const load = useCallback(async () => {
+    try {
+      const res = await fetch('/api/all-stars-games')
+      const data = await res.json()
+      setGames(Array.isArray(data) ? data : [])
+    } catch (e) {
+      console.error('useAllStarsGames load error', e)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => { load() }, [load])
+
+  async function saveGame({ playerIds, playerNames, winnerId, winnerName }) {
+    const res = await fetch('/api/all-stars-games', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ playerIds, playerNames, winnerId, winnerName }),
+    })
+    if (!res.ok) throw new Error('Failed to save all-stars game')
+    const game = await res.json()
+    setGames(prev => [game, ...prev])
+    return game
+  }
+
+  async function deleteGame(id) {
+    const res = await fetch(`/api/all-stars-games?id=${id}`, { method: 'DELETE' })
+    if (!res.ok) throw new Error('Failed to delete all-stars game')
     setGames(prev => prev.filter(g => g.id !== id))
   }
 

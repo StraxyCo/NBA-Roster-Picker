@@ -10,7 +10,7 @@ function shuffle(arr) {
   return a
 }
 
-export default function OrderDrawScreen({ players, onOrderDrawn }) {
+export default function OrderDrawScreen({ players, onOrderDrawn, confirmLabel = 'Start Game →' }) {
   const [phase, setPhase]             = useState('idle')   // idle | rolling | revealed
   const [rollingNames, setRollingNames] = useState([])     // random names shown during roll
   const [order, setOrder]             = useState([])
@@ -97,7 +97,7 @@ export default function OrderDrawScreen({ players, onOrderDrawn }) {
               onClick={() => onOrderDrawn(order)}
               style={{ marginTop: '32px' }}
             >
-              Start Drafting →
+              {confirmLabel}
             </button>
           </div>
         )}

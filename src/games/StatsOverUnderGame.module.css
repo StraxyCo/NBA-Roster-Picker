@@ -1,0 +1,37 @@
+.screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px 24px; }
+
+.content { width: 100%; max-width: 420px; display: flex; flex-direction: column; align-items: center; gap: 20px; text-align: center; }
+
+.eyebrow { font-family: var(--font-display); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); }
+
+.turnName { font-family: var(--font-display); font-size: clamp(2.5rem, 8vw, 4rem); font-weight: 800; text-transform: uppercase; color: var(--white); margin: 0; line-height: 1; text-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+
+.turnSubtitle { font-family: var(--font-body); font-size: 1rem; color: var(--white-50); margin: 0; }
+
+/* Scoreboard */
+.scoreBoard { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+.scoreBoardLabel { font-family: var(--font-display); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--white-40); padding: 10px 16px 6px; }
+.scoreRow { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-top: 1px solid var(--border); }
+.scoreRowActive { background: rgba(245,197,24,0.07); }
+.scorePlayerName { font-family: var(--font-display); font-weight: 700; font-size: 0.95rem; color: var(--white); }
+.scorePoints { font-family: var(--font-display); font-weight: 800; font-size: 0.95rem; color: var(--gold); }
+
+.drawBtn { width: 100%; background: var(--gold); color: var(--navy); font-family: var(--font-display); font-size: 1.1rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; padding: 16px; border-radius: var(--radius); border: none; cursor: pointer; transition: all 0.18s; }
+.drawBtn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(245,197,24,0.4); }
+.drawBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Final screen */
+.winnerName { font-family: var(--font-display); font-size: clamp(2rem, 7vw, 3.5rem); font-weight: 800; text-transform: uppercase; color: var(--gold); margin: 0; line-height: 1.1; }
+.winnerSub { font-family: var(--font-body); font-size: 1rem; color: var(--white-50); margin: 0; }
+
+.finalScores { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+.finalScoreRow { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+.finalScoreRow:last-child { border-bottom: none; }
+.finalScoreWinner { background: rgba(245,197,24,0.08); }
+
+.finalRank { font-family: var(--font-display); font-size: 0.75rem; font-weight: 700; color: var(--white-30); width: 24px; text-align: center; }
+.finalPlayerName { flex: 1; font-family: var(--font-display); font-weight: 700; font-size: 1rem; color: var(--white); text-align: left; }
+.finalPoints { font-family: var(--font-display); font-weight: 800; font-size: 1.1rem; color: var(--gold); }
+
+.finishBtn { width: 100%; background: var(--gold); color: var(--navy); font-family: var(--font-display); font-size: 1.1rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; padding: 16px; border-radius: var(--radius); border: none; cursor: pointer; transition: all 0.18s; }
+.finishBtn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(245,197,24,0.4); }

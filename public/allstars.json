@@ -1,0 +1,2431 @@
+{
+  "2005-06": {
+    "east": [
+      {
+        "id": 1713,
+        "name": "Vince Carter",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2544,
+        "name": "LeBron James",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 406,
+        "name": "Shaquille O'Neal",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2548,
+        "name": "Dwyane Wade",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 947,
+        "name": "Allen Iverson",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2547,
+        "name": "Chris Bosh",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 1888,
+        "name": "Richard Hamilton",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 1112,
+        "name": "Ben Wallace",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 1497,
+        "name": "Chauncey Billups",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 739,
+        "name": "Rasheed Wallace",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 1718,
+        "name": "Paul Pierce",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2240,
+        "name": "Gilbert Arenas",
+        "teamAbbr": "EST"
+      }
+    ],
+    "west": [
+      {
+        "id": 1503,
+        "name": "Tracy McGrady",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 1495,
+        "name": "Tim Duncan",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 2397,
+        "name": "Yao Ming",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 959,
+        "name": "Steve Nash",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 977,
+        "name": "Kobe Bryant",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 708,
+        "name": "Kevin Garnett",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 1890,
+        "name": "Shawn Marion",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 2225,
+        "name": "Tony Parker",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 2200,
+        "name": "Pau Gasol",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 1717,
+        "name": "Dirk Nowitzki",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 1882,
+        "name": "Elton Brand",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 951,
+        "name": "Ray Allen",
+        "teamAbbr": "WST"
+      }
+    ]
+  },
+  "2006-07": {
+    "east": [
+      {
+        "id": 2544,
+        "name": "LeBron James",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2547,
+        "name": "Chris Bosh",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 406,
+        "name": "Shaquille O'Neal",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2548,
+        "name": "Dwyane Wade",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2240,
+        "name": "Gilbert Arenas",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2730,
+        "name": "Dwight Howard",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 979,
+        "name": "Jermaine O'Neal",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 1713,
+        "name": "Vince Carter",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 1497,
+        "name": "Chauncey Billups",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 1888,
+        "name": "Richard Hamilton",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2406,
+        "name": "Caron Butler",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2207,
+        "name": "Joe Johnson",
+        "teamAbbr": "EST"
+      }
+    ],
+    "west": [
+      {
+        "id": 1717,
+        "name": "Dirk Nowitzki",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 708,
+        "name": "Kevin Garnett",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 1495,
+        "name": "Tim Duncan",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 1503,
+        "name": "Tracy McGrady",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 977,
+        "name": "Kobe Bryant",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 1890,
+        "name": "Shawn Marion",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 2405,
+        "name": "Amar'e Stoudemire",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 2572,
+        "name": "Josh Howard",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 2546,
+        "name": "Carmelo Anthony",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 2225,
+        "name": "Tony Parker",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 951,
+        "name": "Ray Allen",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 2246,
+        "name": "Mehmet Okur",
+        "teamAbbr": "WST"
+      }
+    ]
+  },
+  "2007-08": {
+    "east": [
+      {
+        "id": 2544,
+        "name": "LeBron James",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2547,
+        "name": "Chris Bosh",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2730,
+        "name": "Dwight Howard",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2548,
+        "name": "Dwyane Wade",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 467,
+        "name": "Jason Kidd",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 1888,
+        "name": "Richard Hamilton",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 739,
+        "name": "Rasheed Wallace",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 1497,
+        "name": "Chauncey Billups",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 1712,
+        "name": "Antawn Jamison",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 1718,
+        "name": "Paul Pierce",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2207,
+        "name": "Joe Johnson",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 951,
+        "name": "Ray Allen",
+        "teamAbbr": "EST"
+      }
+    ],
+    "west": [
+      {
+        "id": 2546,
+        "name": "Carmelo Anthony",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 1495,
+        "name": "Tim Duncan",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 2397,
+        "name": "Yao Ming",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 977,
+        "name": "Kobe Bryant",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 947,
+        "name": "Allen Iverson",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 959,
+        "name": "Steve Nash",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 2405,
+        "name": "Amar'e Stoudemire",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 1717,
+        "name": "Dirk Nowitzki",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 101108,
+        "name": "Chris Paul",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 2561,
+        "name": "David West",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 200750,
+        "name": "Brandon Roy",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 2430,
+        "name": "Carlos Boozer",
+        "teamAbbr": "WST"
+      }
+    ]
+  },
+  "2008-09": {
+    "east": [
+      {
+        "id": 2544,
+        "name": "LeBron James",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 708,
+        "name": "Kevin Garnett",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2730,
+        "name": "Dwight Howard",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 947,
+        "name": "Allen Iverson",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2548,
+        "name": "Dwyane Wade",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2207,
+        "name": "Joe Johnson",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2734,
+        "name": "Devin Harris",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 1718,
+        "name": "Paul Pierce",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 1740,
+        "name": "Rashard Lewis",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 951,
+        "name": "Ray Allen",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2590,
+        "name": "Mo Williams",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 101122,
+        "name": "Danny Granger",
+        "teamAbbr": "EST"
+      }
+    ],
+    "west": [
+      {
+        "id": 2405,
+        "name": "Amar'e Stoudemire",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 1495,
+        "name": "Tim Duncan",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 2397,
+        "name": "Yao Ming",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 977,
+        "name": "Kobe Bryant",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 101108,
+        "name": "Chris Paul",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 406,
+        "name": "Shaquille O'Neal",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 1717,
+        "name": "Dirk Nowitzki",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 1497,
+        "name": "Chauncey Billups",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 200750,
+        "name": "Brandon Roy",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 2225,
+        "name": "Tony Parker",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 2200,
+        "name": "Pau Gasol",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 2561,
+        "name": "David West",
+        "teamAbbr": "WST"
+      }
+    ]
+  },
+  "2009-10": {
+    "east": [
+      {
+        "id": 2544,
+        "name": "LeBron James",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 708,
+        "name": "Kevin Garnett",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2730,
+        "name": "Dwight Howard",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2207,
+        "name": "Joe Johnson",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2548,
+        "name": "Dwyane Wade",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 1718,
+        "name": "Paul Pierce",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2547,
+        "name": "Chris Bosh",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 200765,
+        "name": "Rajon Rondo",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2222,
+        "name": "Gerald Wallace",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 101135,
+        "name": "David Lee",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 201565,
+        "name": "Derrick Rose",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 201143,
+        "name": "Al Horford",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 947,
+        "name": "Allen Iverson",
+        "teamAbbr": "EST"
+      }
+    ],
+    "west": [
+      {
+        "id": 1495,
+        "name": "Tim Duncan",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 1717,
+        "name": "Dirk Nowitzki",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 2405,
+        "name": "Amar'e Stoudemire",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 2546,
+        "name": "Carmelo Anthony",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 959,
+        "name": "Steve Nash",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 2200,
+        "name": "Pau Gasol",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 1497,
+        "name": "Chauncey Billups",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 101114,
+        "name": "Deron Williams",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 201142,
+        "name": "Kevin Durant",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 2216,
+        "name": "Zach Randolph",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 2549,
+        "name": "Chris Kaman",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 467,
+        "name": "Jason Kidd",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 977,
+        "name": "Kobe Bryant",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 101108,
+        "name": "Chris Paul",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 200750,
+        "name": "Brandon Roy",
+        "teamAbbr": "WST"
+      }
+    ]
+  },
+  "2010-11": {
+    "east": [
+      {
+        "id": 2544,
+        "name": "LeBron James",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2405,
+        "name": "Amar'e Stoudemire",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2730,
+        "name": "Dwight Howard",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 201565,
+        "name": "Derrick Rose",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2548,
+        "name": "Dwyane Wade",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 1718,
+        "name": "Paul Pierce",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 200765,
+        "name": "Rajon Rondo",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 708,
+        "name": "Kevin Garnett",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 951,
+        "name": "Ray Allen",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2547,
+        "name": "Chris Bosh",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 201143,
+        "name": "Al Horford",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2207,
+        "name": "Joe Johnson",
+        "teamAbbr": "EST"
+      }
+    ],
+    "west": [
+      {
+        "id": 2546,
+        "name": "Carmelo Anthony",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 201142,
+        "name": "Kevin Durant",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 1495,
+        "name": "Tim Duncan",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 977,
+        "name": "Kobe Bryant",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 101108,
+        "name": "Chris Paul",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 2200,
+        "name": "Pau Gasol",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 101114,
+        "name": "Deron Williams",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 1717,
+        "name": "Dirk Nowitzki",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 1938,
+        "name": "Manu Ginobili",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 201933,
+        "name": "Blake Griffin",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 201567,
+        "name": "Kevin Love",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 201566,
+        "name": "Russell Westbrook",
+        "teamAbbr": "WST"
+      }
+    ]
+  },
+  "2011-12": {
+    "east": [
+      {
+        "id": 201142,
+        "name": "Kevin Durant",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 201933,
+        "name": "Blake Griffin",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 101115,
+        "name": "Andrew Bynum",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 977,
+        "name": "Kobe Bryant",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 101108,
+        "name": "Chris Paul",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 1717,
+        "name": "Dirk Nowitzki",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 201566,
+        "name": "Russell Westbrook",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 201567,
+        "name": "Kevin Love",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 2225,
+        "name": "Tony Parker",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 201188,
+        "name": "Marc Gasol",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 200746,
+        "name": "LaMarcus Aldridge",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 959,
+        "name": "Steve Nash",
+        "teamAbbr": "WST"
+      }
+    ],
+    "west": [
+      {
+        "id": 2546,
+        "name": "Carmelo Anthony",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2544,
+        "name": "LeBron James",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2730,
+        "name": "Dwight Howard",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2548,
+        "name": "Dwyane Wade",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 201565,
+        "name": "Derrick Rose",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2736,
+        "name": "Luol Deng",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 201579,
+        "name": "Roy Hibbert",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 200765,
+        "name": "Rajon Rondo",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 1718,
+        "name": "Paul Pierce",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2547,
+        "name": "Chris Bosh",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2738,
+        "name": "Andre Iguodala",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 101114,
+        "name": "Deron Williams",
+        "teamAbbr": "EST"
+      }
+    ]
+  },
+  "2012-13": {
+    "east": [
+      {
+        "id": 2544,
+        "name": "LeBron James",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2547,
+        "name": "Chris Bosh",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 708,
+        "name": "Kevin Garnett",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2546,
+        "name": "Carmelo Anthony",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2548,
+        "name": "Dwyane Wade",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2199,
+        "name": "Tyson Chandler",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 202681,
+        "name": "Kyrie Irving",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2736,
+        "name": "Luol Deng",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 202331,
+        "name": "Paul George",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 201149,
+        "name": "Joakim Noah",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 201950,
+        "name": "Jrue Holiday",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 201572,
+        "name": "Brook Lopez",
+        "teamAbbr": "EST"
+      }
+    ],
+    "west": [
+      {
+        "id": 201142,
+        "name": "Kevin Durant",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 201933,
+        "name": "Blake Griffin",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 2730,
+        "name": "Dwight Howard",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 977,
+        "name": "Kobe Bryant",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 101108,
+        "name": "Chris Paul",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 1495,
+        "name": "Tim Duncan",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 2225,
+        "name": "Tony Parker",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 201935,
+        "name": "James Harden",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 2216,
+        "name": "Zach Randolph",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 201566,
+        "name": "Russell Westbrook",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 200746,
+        "name": "LaMarcus Aldridge",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 101135,
+        "name": "David Lee",
+        "teamAbbr": "WST"
+      }
+    ]
+  },
+  "2013-14": {
+    "east": [
+      {
+        "id": 202331,
+        "name": "Paul George",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2546,
+        "name": "Carmelo Anthony",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2544,
+        "name": "LeBron James",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2548,
+        "name": "Dwyane Wade",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 202681,
+        "name": "Kyrie Irving",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 201579,
+        "name": "Roy Hibbert",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2547,
+        "name": "Chris Bosh",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2207,
+        "name": "Joe Johnson",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 201942,
+        "name": "DeMar DeRozan",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 202322,
+        "name": "John Wall",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 200794,
+        "name": "Paul Millsap",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 201149,
+        "name": "Joakim Noah",
+        "teamAbbr": "EST"
+      }
+    ],
+    "west": [
+      {
+        "id": 201142,
+        "name": "Kevin Durant",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 201933,
+        "name": "Blake Griffin",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 201567,
+        "name": "Kevin Love",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 201935,
+        "name": "James Harden",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 201939,
+        "name": "Stephen Curry",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 101108,
+        "name": "Chris Paul",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 2225,
+        "name": "Tony Parker",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 1717,
+        "name": "Dirk Nowitzki",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 2730,
+        "name": "Dwight Howard",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 200746,
+        "name": "LaMarcus Aldridge",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 203076,
+        "name": "Anthony Davis",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 203081,
+        "name": "Damian Lillard",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 977,
+        "name": "Kobe Bryant",
+        "teamAbbr": "WST"
+      }
+    ]
+  },
+  "2014-15": {
+    "east": [
+      {
+        "id": 200746,
+        "name": "LaMarcus Aldridge",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 202691,
+        "name": "Klay Thompson",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 201188,
+        "name": "Marc Gasol",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 201939,
+        "name": "Stephen Curry",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 201935,
+        "name": "James Harden",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 201566,
+        "name": "Russell Westbrook",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 201142,
+        "name": "Kevin Durant",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 1495,
+        "name": "Tim Duncan",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 101108,
+        "name": "Chris Paul",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 203081,
+        "name": "Damian Lillard",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 202326,
+        "name": "DeMarcus Cousins",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 1717,
+        "name": "Dirk Nowitzki",
+        "teamAbbr": "WST"
+      }
+    ],
+    "west": [
+      {
+        "id": 2546,
+        "name": "Carmelo Anthony",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2544,
+        "name": "LeBron James",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2200,
+        "name": "Pau Gasol",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 200768,
+        "name": "Kyle Lowry",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 202322,
+        "name": "John Wall",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 202681,
+        "name": "Kyrie Irving",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 201143,
+        "name": "Al Horford",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 201952,
+        "name": "Jeff Teague",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 200794,
+        "name": "Paul Millsap",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2594,
+        "name": "Kyle Korver",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2547,
+        "name": "Chris Bosh",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 202710,
+        "name": "Jimmy Butler III",
+        "teamAbbr": "EST"
+      }
+    ]
+  },
+  "2015-16": {
+    "east": [
+      {
+        "id": 977,
+        "name": "Kobe Bryant",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 202695,
+        "name": "Kawhi Leonard",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 201142,
+        "name": "Kevin Durant",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 201939,
+        "name": "Stephen Curry",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 201566,
+        "name": "Russell Westbrook",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 202691,
+        "name": "Klay Thompson",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 201935,
+        "name": "James Harden",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 203076,
+        "name": "Anthony Davis",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 101108,
+        "name": "Chris Paul",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 200746,
+        "name": "LaMarcus Aldridge",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 203110,
+        "name": "Draymond Green",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 202326,
+        "name": "DeMarcus Cousins",
+        "teamAbbr": "WST"
+      }
+    ],
+    "west": [
+      {
+        "id": 2544,
+        "name": "LeBron James",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 202331,
+        "name": "Paul George",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2546,
+        "name": "Carmelo Anthony",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2548,
+        "name": "Dwyane Wade",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 200768,
+        "name": "Kyle Lowry",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 201942,
+        "name": "DeMar DeRozan",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 202322,
+        "name": "John Wall",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 200794,
+        "name": "Paul Millsap",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 202738,
+        "name": "Isaiah Thomas",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2200,
+        "name": "Pau Gasol",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 203083,
+        "name": "Andre Drummond",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 201143,
+        "name": "Al Horford",
+        "teamAbbr": "EST"
+      }
+    ]
+  },
+  "2016-17": {
+    "east": [
+      {
+        "id": 202710,
+        "name": "Jimmy Butler III",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2544,
+        "name": "LeBron James",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 203507,
+        "name": "Giannis Antetokounmpo",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 201942,
+        "name": "DeMar DeRozan",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 202681,
+        "name": "Kyrie Irving",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 200794,
+        "name": "Paul Millsap",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 202331,
+        "name": "Paul George",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 200768,
+        "name": "Kyle Lowry",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 202738,
+        "name": "Isaiah Thomas",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 202322,
+        "name": "John Wall",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 2546,
+        "name": "Carmelo Anthony",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 202689,
+        "name": "Kemba Walker",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 201567,
+        "name": "Kevin Love",
+        "teamAbbr": "EST"
+      }
+    ],
+    "west": [
+      {
+        "id": 201142,
+        "name": "Kevin Durant",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 202695,
+        "name": "Kawhi Leonard",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 203076,
+        "name": "Anthony Davis",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 201939,
+        "name": "Stephen Curry",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 201935,
+        "name": "James Harden",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 201566,
+        "name": "Russell Westbrook",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 203110,
+        "name": "Draymond Green",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 201188,
+        "name": "Marc Gasol",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 202330,
+        "name": "Gordon Hayward",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 202691,
+        "name": "Klay Thompson",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 201599,
+        "name": "DeAndre Jordan",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 202326,
+        "name": "DeMarcus Cousins",
+        "teamAbbr": "WST"
+      }
+    ]
+  },
+  "2017-18": {
+    "east": [
+      {
+        "id": 2544,
+        "name": "LeBron James",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 201142,
+        "name": "Kevin Durant",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 203076,
+        "name": "Anthony Davis",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 201566,
+        "name": "Russell Westbrook",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 202681,
+        "name": "Kyrie Irving",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 200746,
+        "name": "LaMarcus Aldridge",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 203078,
+        "name": "Bradley Beal",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 203506,
+        "name": "Victor Oladipo",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 202331,
+        "name": "Paul George",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 203083,
+        "name": "Andre Drummond",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 201609,
+        "name": "Goran Dragic",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 202689,
+        "name": "Kemba Walker",
+        "teamAbbr": "LBN"
+      }
+    ],
+    "west": [
+      {
+        "id": 201942,
+        "name": "DeMar DeRozan",
+        "teamAbbr": "STP"
+      },
+      {
+        "id": 203507,
+        "name": "Giannis Antetokounmpo",
+        "teamAbbr": "STP"
+      },
+      {
+        "id": 203954,
+        "name": "Joel Embiid",
+        "teamAbbr": "STP"
+      },
+      {
+        "id": 201935,
+        "name": "James Harden",
+        "teamAbbr": "STP"
+      },
+      {
+        "id": 201939,
+        "name": "Stephen Curry",
+        "teamAbbr": "STP"
+      },
+      {
+        "id": 1626157,
+        "name": "Karl-Anthony Towns",
+        "teamAbbr": "STP"
+      },
+      {
+        "id": 203110,
+        "name": "Draymond Green",
+        "teamAbbr": "STP"
+      },
+      {
+        "id": 202691,
+        "name": "Klay Thompson",
+        "teamAbbr": "STP"
+      },
+      {
+        "id": 203081,
+        "name": "Damian Lillard",
+        "teamAbbr": "STP"
+      },
+      {
+        "id": 200768,
+        "name": "Kyle Lowry",
+        "teamAbbr": "STP"
+      },
+      {
+        "id": 201143,
+        "name": "Al Horford",
+        "teamAbbr": "STP"
+      },
+      {
+        "id": 202710,
+        "name": "Jimmy Butler III",
+        "teamAbbr": "STP"
+      }
+    ]
+  },
+  "2018-19": {
+    "east": [
+      {
+        "id": 202695,
+        "name": "Kawhi Leonard",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 2544,
+        "name": "LeBron James",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 201142,
+        "name": "Kevin Durant",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 201935,
+        "name": "James Harden",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 202681,
+        "name": "Kyrie Irving",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 203081,
+        "name": "Damian Lillard",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 202691,
+        "name": "Klay Thompson",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 200746,
+        "name": "LaMarcus Aldridge",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 203076,
+        "name": "Anthony Davis",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 203078,
+        "name": "Bradley Beal",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 2548,
+        "name": "Dwyane Wade",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 1627732,
+        "name": "Ben Simmons",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 1626157,
+        "name": "Karl-Anthony Towns",
+        "teamAbbr": "LBN"
+      }
+    ],
+    "west": [
+      {
+        "id": 202331,
+        "name": "Paul George",
+        "teamAbbr": "GNS"
+      },
+      {
+        "id": 203507,
+        "name": "Giannis Antetokounmpo",
+        "teamAbbr": "GNS"
+      },
+      {
+        "id": 203954,
+        "name": "Joel Embiid",
+        "teamAbbr": "GNS"
+      },
+      {
+        "id": 201939,
+        "name": "Stephen Curry",
+        "teamAbbr": "GNS"
+      },
+      {
+        "id": 202689,
+        "name": "Kemba Walker",
+        "teamAbbr": "GNS"
+      },
+      {
+        "id": 203999,
+        "name": "Nikola Jokić",
+        "teamAbbr": "GNS"
+      },
+      {
+        "id": 203114,
+        "name": "Khris Middleton",
+        "teamAbbr": "GNS"
+      },
+      {
+        "id": 200768,
+        "name": "Kyle Lowry",
+        "teamAbbr": "GNS"
+      },
+      {
+        "id": 201566,
+        "name": "Russell Westbrook",
+        "teamAbbr": "GNS"
+      },
+      {
+        "id": 201933,
+        "name": "Blake Griffin",
+        "teamAbbr": "GNS"
+      },
+      {
+        "id": 1717,
+        "name": "Dirk Nowitzki",
+        "teamAbbr": "GNS"
+      },
+      {
+        "id": 1626156,
+        "name": "D'Angelo Russell",
+        "teamAbbr": "GNS"
+      },
+      {
+        "id": 202696,
+        "name": "Nikola Vučević",
+        "teamAbbr": "GNS"
+      },
+      {
+        "id": 203506,
+        "name": "Victor Oladipo",
+        "teamAbbr": "GNS"
+      }
+    ]
+  },
+  "2019-20": {
+    "east": [
+      {
+        "id": 202695,
+        "name": "Kawhi Leonard",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 2544,
+        "name": "LeBron James",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 203076,
+        "name": "Anthony Davis",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 201935,
+        "name": "James Harden",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 1629029,
+        "name": "Luka Dončić",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 203999,
+        "name": "Nikola Jokić",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 1627732,
+        "name": "Ben Simmons",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 1628369,
+        "name": "Jayson Tatum",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 201566,
+        "name": "Russell Westbrook",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 101108,
+        "name": "Chris Paul",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 1627734,
+        "name": "Domantas Sabonis",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 1626164,
+        "name": "Devin Booker",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 203081,
+        "name": "Damian Lillard",
+        "teamAbbr": "LBN"
+      }
+    ],
+    "west": [
+      {
+        "id": 1627783,
+        "name": "Pascal Siakam",
+        "teamAbbr": "GNS"
+      },
+      {
+        "id": 203507,
+        "name": "Giannis Antetokounmpo",
+        "teamAbbr": "GNS"
+      },
+      {
+        "id": 203954,
+        "name": "Joel Embiid",
+        "teamAbbr": "GNS"
+      },
+      {
+        "id": 1629027,
+        "name": "Trae Young",
+        "teamAbbr": "GNS"
+      },
+      {
+        "id": 202689,
+        "name": "Kemba Walker",
+        "teamAbbr": "GNS"
+      },
+      {
+        "id": 200768,
+        "name": "Kyle Lowry",
+        "teamAbbr": "GNS"
+      },
+      {
+        "id": 202710,
+        "name": "Jimmy Butler III",
+        "teamAbbr": "GNS"
+      },
+      {
+        "id": 203497,
+        "name": "Rudy Gobert",
+        "teamAbbr": "GNS"
+      },
+      {
+        "id": 1628389,
+        "name": "Bam Adebayo",
+        "teamAbbr": "GNS"
+      },
+      {
+        "id": 1628378,
+        "name": "Donovan Mitchell",
+        "teamAbbr": "GNS"
+      },
+      {
+        "id": 1627742,
+        "name": "Brandon Ingram",
+        "teamAbbr": "GNS"
+      },
+      {
+        "id": 203114,
+        "name": "Khris Middleton",
+        "teamAbbr": "GNS"
+      }
+    ]
+  },
+  "2020-21": {
+    "east": [
+      {
+        "id": 2544,
+        "name": "LeBron James",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 203507,
+        "name": "Giannis Antetokounmpo",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 203999,
+        "name": "Nikola Jokić",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 1629029,
+        "name": "Luka Dončić",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 201939,
+        "name": "Stephen Curry",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 203081,
+        "name": "Damian Lillard",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 101108,
+        "name": "Chris Paul",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 203497,
+        "name": "Rudy Gobert",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 1627759,
+        "name": "Jaylen Brown",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 202331,
+        "name": "Paul George",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 1627734,
+        "name": "Domantas Sabonis",
+        "teamAbbr": "LBN"
+      }
+    ],
+    "west": [
+      {
+        "id": 202695,
+        "name": "Kawhi Leonard",
+        "teamAbbr": "DRT"
+      },
+      {
+        "id": 1628369,
+        "name": "Jayson Tatum",
+        "teamAbbr": "DRT"
+      },
+      {
+        "id": 1629627,
+        "name": "Zion Williamson",
+        "teamAbbr": "DRT"
+      },
+      {
+        "id": 203078,
+        "name": "Bradley Beal",
+        "teamAbbr": "DRT"
+      },
+      {
+        "id": 202681,
+        "name": "Kyrie Irving",
+        "teamAbbr": "DRT"
+      },
+      {
+        "id": 203897,
+        "name": "Zach LaVine",
+        "teamAbbr": "DRT"
+      },
+      {
+        "id": 202696,
+        "name": "Nikola Vučević",
+        "teamAbbr": "DRT"
+      },
+      {
+        "id": 203944,
+        "name": "Julius Randle",
+        "teamAbbr": "DRT"
+      },
+      {
+        "id": 1628378,
+        "name": "Donovan Mitchell",
+        "teamAbbr": "DRT"
+      },
+      {
+        "id": 201935,
+        "name": "James Harden",
+        "teamAbbr": "DRT"
+      },
+      {
+        "id": 201144,
+        "name": "Mike Conley",
+        "teamAbbr": "DRT"
+      }
+    ]
+  },
+  "2021-22": {
+    "east": [
+      {
+        "id": 1628369,
+        "name": "Jayson Tatum",
+        "teamAbbr": "DRT"
+      },
+      {
+        "id": 203952,
+        "name": "Andrew Wiggins",
+        "teamAbbr": "DRT"
+      },
+      {
+        "id": 203954,
+        "name": "Joel Embiid",
+        "teamAbbr": "DRT"
+      },
+      {
+        "id": 1629630,
+        "name": "Ja Morant",
+        "teamAbbr": "DRT"
+      },
+      {
+        "id": 1629027,
+        "name": "Trae Young",
+        "teamAbbr": "DRT"
+      },
+      {
+        "id": 203897,
+        "name": "Zach LaVine",
+        "teamAbbr": "DRT"
+      },
+      {
+        "id": 1626164,
+        "name": "Devin Booker",
+        "teamAbbr": "DRT"
+      },
+      {
+        "id": 1626157,
+        "name": "Karl-Anthony Towns",
+        "teamAbbr": "DRT"
+      },
+      {
+        "id": 203114,
+        "name": "Khris Middleton",
+        "teamAbbr": "DRT"
+      },
+      {
+        "id": 203497,
+        "name": "Rudy Gobert",
+        "teamAbbr": "DRT"
+      },
+      {
+        "id": 1630163,
+        "name": "LaMelo Ball",
+        "teamAbbr": "DRT"
+      },
+      {
+        "id": 1627749,
+        "name": "Dejounte Murray",
+        "teamAbbr": "DRT"
+      }
+    ],
+    "west": [
+      {
+        "id": 2544,
+        "name": "LeBron James",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 203507,
+        "name": "Giannis Antetokounmpo",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 203999,
+        "name": "Nikola Jokić",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 201942,
+        "name": "DeMar DeRozan",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 201939,
+        "name": "Stephen Curry",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 101108,
+        "name": "Chris Paul",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 202710,
+        "name": "Jimmy Butler III",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 1627832,
+        "name": "Fred VanVleet",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 1628386,
+        "name": "Jarrett Allen",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 1629636,
+        "name": "Darius Garland",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 1629029,
+        "name": "Luka Dončić",
+        "teamAbbr": "LBN"
+      }
+    ]
+  },
+  "2022-23": {
+    "east": [
+      {
+        "id": 1628369,
+        "name": "Jayson Tatum",
+        "teamAbbr": "GNS"
+      },
+      {
+        "id": 203507,
+        "name": "Giannis Antetokounmpo",
+        "teamAbbr": "GNS"
+      },
+      {
+        "id": 1628374,
+        "name": "Lauri Markkanen",
+        "teamAbbr": "GNS"
+      },
+      {
+        "id": 1628378,
+        "name": "Donovan Mitchell",
+        "teamAbbr": "GNS"
+      },
+      {
+        "id": 1629630,
+        "name": "Ja Morant",
+        "teamAbbr": "GNS"
+      },
+      {
+        "id": 1628389,
+        "name": "Bam Adebayo",
+        "teamAbbr": "GNS"
+      },
+      {
+        "id": 201942,
+        "name": "DeMar DeRozan",
+        "teamAbbr": "GNS"
+      },
+      {
+        "id": 203081,
+        "name": "Damian Lillard",
+        "teamAbbr": "GNS"
+      },
+      {
+        "id": 201950,
+        "name": "Jrue Holiday",
+        "teamAbbr": "GNS"
+      },
+      {
+        "id": 1627783,
+        "name": "Pascal Siakam",
+        "teamAbbr": "GNS"
+      },
+      {
+        "id": 1627734,
+        "name": "Domantas Sabonis",
+        "teamAbbr": "GNS"
+      },
+      {
+        "id": 1628983,
+        "name": "Shai Gilgeous-Alexander",
+        "teamAbbr": "GNS"
+      }
+    ],
+    "west": [
+      {
+        "id": 2544,
+        "name": "LeBron James",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 203954,
+        "name": "Joel Embiid",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 203999,
+        "name": "Nikola Jokić",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 1629029,
+        "name": "Luka Dončić",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 202681,
+        "name": "Kyrie Irving",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 202331,
+        "name": "Paul George",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 1628368,
+        "name": "De'Aaron Fox",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 203944,
+        "name": "Julius Randle",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 1627759,
+        "name": "Jaylen Brown",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 1630162,
+        "name": "Anthony Edwards",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 1630169,
+        "name": "Tyrese Haliburton",
+        "teamAbbr": "LBN"
+      },
+      {
+        "id": 1628991,
+        "name": "Jaren Jackson Jr.",
+        "teamAbbr": "LBN"
+      }
+    ]
+  },
+  "2023-24": {
+    "east": [
+      {
+        "id": 2544,
+        "name": "LeBron James",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 201142,
+        "name": "Kevin Durant",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 203999,
+        "name": "Nikola Jokić",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 1629029,
+        "name": "Luka Dončić",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 1628983,
+        "name": "Shai Gilgeous-Alexander",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 203076,
+        "name": "Anthony Davis",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 201939,
+        "name": "Stephen Curry",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 1626164,
+        "name": "Devin Booker",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 1630162,
+        "name": "Anthony Edwards",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 202695,
+        "name": "Kawhi Leonard",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 202331,
+        "name": "Paul George",
+        "teamAbbr": "WST"
+      },
+      {
+        "id": 1626157,
+        "name": "Karl-Anthony Towns",
+        "teamAbbr": "WST"
+      }
+    ],
+    "west": [
+      {
+        "id": 1628369,
+        "name": "Jayson Tatum",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 203507,
+        "name": "Giannis Antetokounmpo",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 1628389,
+        "name": "Bam Adebayo",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 203081,
+        "name": "Damian Lillard",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 1630169,
+        "name": "Tyrese Haliburton",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 1627759,
+        "name": "Jaylen Brown",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 1628378,
+        "name": "Donovan Mitchell",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 1631094,
+        "name": "Paolo Banchero",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 1630178,
+        "name": "Tyrese Maxey",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 1628973,
+        "name": "Jalen Brunson",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 1630567,
+        "name": "Scottie Barnes",
+        "teamAbbr": "EST"
+      },
+      {
+        "id": 1629027,
+        "name": "Trae Young",
+        "teamAbbr": "EST"
+      }
+    ]
+  }
+}

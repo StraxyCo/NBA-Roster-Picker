@@ -136,7 +136,7 @@ function AddPlayerModal({ players, slotsUsed, onCreate, onSelect, onClose }) {
         {available.map(p => (
           <button key={p.id} className={styles.playerPickRow} onClick={() => { onSelect(p); onClose() }}>
             <span className={styles.playerPickName}>{p.name}</span>
-            <span className={styles.playerPickStat}>{p.gamesPlayed || 0} games</span>
+            <span className={styles.playerPickStat}>{(p.stats?.rosterPicker?.played || 0)} games</span>
           </button>
         ))}
       </div>
@@ -150,10 +150,10 @@ function AddPlayerModal({ players, slotsUsed, onCreate, onSelect, onClose }) {
 
 // ── Stats view ──────────────────────────────────────────────────────────────
 function StatsView({ players, onClose }) {
-  const sorted = [...players].sort((a, b) => (b.wins || 0) - (a.wins || 0))
+  const sorted = [...players].sort((a, b) => (b.stats?.rosterPicker?.wins || 0) - (a.stats?.rosterPicker?.wins || 0))
   return (
     <Modal onClose={onClose}>
-      <h3 className={styles.modalTitle}>Stats</h3>
+      <h3 className={styles.modalTitle}>Roster Picker Stats</h3>
       <div className={styles.statsTable}>
         <div className={styles.statsHeader}>
           <span className={styles.statsColPlayer}>Player</span>
@@ -163,8 +163,8 @@ function StatsView({ players, onClose }) {
         </div>
         {sorted.length === 0 && <p className={styles.emptyNote}>No players yet.</p>}
         {sorted.map(p => {
-          const gp = p.gamesPlayed || 0
-          const w = p.wins || 0
+          const gp = p.stats?.rosterPicker?.played || 0
+          const w  = p.stats?.rosterPicker?.wins   || 0
           const pct = gp > 0 ? Math.round((w / gp) * 100) : 0
           return (
             <div key={p.id} className={styles.statsRow}>

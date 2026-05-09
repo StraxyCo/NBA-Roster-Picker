@@ -29,6 +29,21 @@ async function hset(key, field, value) {
   })
 }
 
+function normalizePlayer(raw) {
+  const p = typeof raw === 'string' ? JSON.parse(raw) : { ...raw }
+  if (!p.stats) {
+    p.stats = {
+      rosterPicker:  { played: p.gamesPlayed || 0,       wins: p.wins || 0 },
+      jerseyGuesser: { played: p.jerseyGamesPlayed || 0, wins: p.jerseyWins || 0 },
+    }
+    delete p.gamesPlayed
+    delete p.wins
+    delete p.jerseyGamesPlayed
+    delete p.jerseyWins
+  }
+  return p
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS')
@@ -61,9 +76,10 @@ export default async function handler(req, res) {
       for (const pid of playerIds) {
         const pRaw = await hget('players', pid)
         if (!pRaw) continue
-        const player = typeof pRaw === 'string' ? JSON.parse(pRaw) : pRaw
-        player.gamesPlayed = (player.gamesPlayed || 0) + 1
-        if (pid === winnerId) player.wins = (player.wins || 0) + 1
+        const player = normalizePlayer(pRaw)
+        if (!player.stats.rosterPicker) player.stats.rosterPicker = { played: 0, wins: 0 }
+        player.stats.rosterPicker.played++
+        if (pid === winnerId) player.stats.rosterPicker.wins++
         await hset('players', pid, JSON.stringify(player))
       }
 
@@ -81,9 +97,10 @@ export default async function handler(req, res) {
       for (const pid of (game.playerIds || [])) {
         const pRaw = await hget('players', pid)
         if (!pRaw) continue
-        const player = typeof pRaw === 'string' ? JSON.parse(pRaw) : pRaw
-        player.gamesPlayed = Math.max(0, (player.gamesPlayed || 0) - 1)
-        if (pid === game.winnerId) player.wins = Math.max(0, (player.wins || 0) - 1)
+        const player = normalizePlayer(pRaw)
+        if (!player.stats.rosterPicker) player.stats.rosterPicker = { played: 0, wins: 0 }
+        player.stats.rosterPicker.played = Math.max(0, player.stats.rosterPicker.played - 1)
+        if (pid === game.winnerId) player.stats.rosterPicker.wins = Math.max(0, player.stats.rosterPicker.wins - 1)
         await hset('players', pid, JSON.stringify(player))
       }
 

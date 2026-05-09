@@ -2,31 +2,18 @@ const BASE = process.env.KV_REST_API_URL
 const TOKEN = process.env.KV_REST_API_TOKEN
 
 async function redisGet(key) {
-  const res = await fetch(`${BASE}/get/${encodeURIComponent(key)}`, {
-    headers: { Authorization: `Bearer ${TOKEN}` },
-  })
-  const data = await res.json()
-  return data.result
+  const res = await fetch(`${BASE}/get/${encodeURIComponent(key)}`, { headers: { Authorization: `Bearer ${TOKEN}` } })
+  return (await res.json()).result
 }
-
 async function redisSet(key, value) {
-  await fetch(`${BASE}/set/${encodeURIComponent(key)}/${encodeURIComponent(value)}`, {
-    headers: { Authorization: `Bearer ${TOKEN}` },
-  })
+  await fetch(`${BASE}/set/${encodeURIComponent(key)}/${encodeURIComponent(value)}`, { headers: { Authorization: `Bearer ${TOKEN}` } })
 }
-
 async function hget(key, field) {
-  const res = await fetch(`${BASE}/hget/${encodeURIComponent(key)}/${encodeURIComponent(field)}`, {
-    headers: { Authorization: `Bearer ${TOKEN}` },
-  })
-  const data = await res.json()
-  return data.result
+  const res = await fetch(`${BASE}/hget/${encodeURIComponent(key)}/${encodeURIComponent(field)}`, { headers: { Authorization: `Bearer ${TOKEN}` } })
+  return (await res.json()).result
 }
-
 async function hset(key, field, value) {
-  await fetch(`${BASE}/hset/${encodeURIComponent(key)}/${encodeURIComponent(field)}/${encodeURIComponent(value)}`, {
-    headers: { Authorization: `Bearer ${TOKEN}` },
-  })
+  await fetch(`${BASE}/hset/${encodeURIComponent(key)}/${encodeURIComponent(field)}/${encodeURIComponent(value)}`, { headers: { Authorization: `Bearer ${TOKEN}` } })
 }
 
 function normalizePlayer(raw) {
@@ -36,10 +23,7 @@ function normalizePlayer(raw) {
       rosterPicker:  { played: p.gamesPlayed || 0,       wins: p.wins || 0 },
       jerseyGuesser: { played: p.jerseyGamesPlayed || 0, wins: p.jerseyWins || 0 },
     }
-    delete p.gamesPlayed
-    delete p.wins
-    delete p.jerseyGamesPlayed
-    delete p.jerseyWins
+    delete p.gamesPlayed; delete p.wins; delete p.jerseyGamesPlayed; delete p.jerseyWins
   }
   return p
 }
@@ -52,7 +36,7 @@ export default async function handler(req, res) {
 
   try {
     if (req.method === 'GET') {
-      const raw = await redisGet('jersey-games')
+      const raw = await redisGet('stats-over-under-games')
       const games = raw ? (typeof raw === 'string' ? JSON.parse(raw) : raw) : []
       games.sort((a, b) => b.date - a.date)
       return res.status(200).json(games)
@@ -60,58 +44,48 @@ export default async function handler(req, res) {
 
     if (req.method === 'POST') {
       const { playerIds, playerNames, winnerId, winnerName } = req.body
-      if (!playerIds?.length) {
-        return res.status(400).json({ error: 'playerIds required' })
-      }
-      const raw = await redisGet('jersey-games')
+      if (!playerIds?.length) return res.status(400).json({ error: 'playerIds required' })
+      const raw = await redisGet('stats-over-under-games')
       const games = raw ? (typeof raw === 'string' ? JSON.parse(raw) : raw) : []
-      const newGame = {
-        id: Date.now().toString(),
-        date: Date.now(),
-        playerIds, playerNames, winnerId, winnerName,
-      }
+      const newGame = { id: Date.now().toString(), date: Date.now(), playerIds, playerNames, winnerId, winnerName }
       games.push(newGame)
-      await redisSet('jersey-games', JSON.stringify(games))
-
+      await redisSet('stats-over-under-games', JSON.stringify(games))
       for (const pid of playerIds) {
         const pRaw = await hget('players', pid)
         if (!pRaw) continue
         const player = normalizePlayer(pRaw)
-        if (!player.stats.jerseyGuesser) player.stats.jerseyGuesser = { played: 0, wins: 0 }
-        player.stats.jerseyGuesser.played++
-        if (pid === winnerId) player.stats.jerseyGuesser.wins++
+        if (!player.stats.statsOverUnder) player.stats.statsOverUnder = { played: 0, wins: 0 }
+        player.stats.statsOverUnder.played++
+        if (pid === winnerId) player.stats.statsOverUnder.wins++
         await hset('players', pid, JSON.stringify(player))
       }
-
       return res.status(201).json(newGame)
     }
 
     if (req.method === 'DELETE') {
       const { id } = req.query
       if (!id) return res.status(400).json({ error: 'id required' })
-      const raw = await redisGet('jersey-games')
+      const raw = await redisGet('stats-over-under-games')
       let games = raw ? (typeof raw === 'string' ? JSON.parse(raw) : raw) : []
       const game = games.find(g => g.id === id)
       if (!game) return res.status(404).json({ error: 'Game not found' })
-
       for (const pid of (game.playerIds || [])) {
         const pRaw = await hget('players', pid)
         if (!pRaw) continue
         const player = normalizePlayer(pRaw)
-        if (!player.stats.jerseyGuesser) player.stats.jerseyGuesser = { played: 0, wins: 0 }
-        player.stats.jerseyGuesser.played = Math.max(0, player.stats.jerseyGuesser.played - 1)
-        if (pid === game.winnerId) player.stats.jerseyGuesser.wins = Math.max(0, player.stats.jerseyGuesser.wins - 1)
+        if (!player.stats.statsOverUnder) player.stats.statsOverUnder = { played: 0, wins: 0 }
+        player.stats.statsOverUnder.played = Math.max(0, player.stats.statsOverUnder.played - 1)
+        if (pid === game.winnerId) player.stats.statsOverUnder.wins = Math.max(0, player.stats.statsOverUnder.wins - 1)
         await hset('players', pid, JSON.stringify(player))
       }
-
       games = games.filter(g => g.id !== id)
-      await redisSet('jersey-games', JSON.stringify(games))
+      await redisSet('stats-over-under-games', JSON.stringify(games))
       return res.status(200).json({ ok: true })
     }
 
     res.status(405).json({ error: 'Method not allowed' })
   } catch (err) {
-    console.error('[jersey-games] error:', err.message)
+    console.error('[stats-over-under-games] error:', err.message)
     res.status(500).json({ error: err.message })
   }
 }
