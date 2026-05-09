@@ -91,6 +91,45 @@ export function useGames() {
   return { games, loading, reload: load, saveGame, deleteGame }
 }
 
+export function useWhoHasMoreGames() {
+  const [games, setGames] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  const load = useCallback(async () => {
+    try {
+      const res = await fetch('/api/who-has-more-games')
+      const data = await res.json()
+      setGames(Array.isArray(data) ? data : [])
+    } catch (e) {
+      console.error('useWhoHasMoreGames load error', e)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => { load() }, [load])
+
+  async function saveGame({ playerIds, playerNames, winnerId, winnerName }) {
+    const res = await fetch('/api/who-has-more-games', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ playerIds, playerNames, winnerId, winnerName }),
+    })
+    if (!res.ok) throw new Error('Failed to save who-has-more game')
+    const game = await res.json()
+    setGames(prev => [game, ...prev])
+    return game
+  }
+
+  async function deleteGame(id) {
+    const res = await fetch(`/api/who-has-more-games?id=${id}`, { method: 'DELETE' })
+    if (!res.ok) throw new Error('Failed to delete who-has-more game')
+    setGames(prev => prev.filter(g => g.id !== id))
+  }
+
+  return { games, loading, reload: load, saveGame, deleteGame }
+}
+
 export function useJerseyGames() {
   const [games, setGames] = useState([])
   const [loading, setLoading] = useState(true)

@@ -11,7 +11,7 @@ import TeamDrawScreen from './screens/TeamDrawScreen.jsx'
 import PickPlayerScreen from './screens/PickPlayerScreen.jsx'
 import TeamModeDrawScreen from './screens/TeamModeDrawScreen.jsx'
 import FinalScreen from './screens/FinalScreen.jsx'
-import { useGames, useJerseyGames } from './hooks/useProfiles.js'
+import { useGames, useJerseyGames, useWhoHasMoreGames } from './hooks/useProfiles.js'
 import { NBA_TEAMS, getLogoUrl } from './data/teams.js'
 
 // ── Small inline reveal screen for Teams mode stat ──────────────────────────
@@ -67,6 +67,7 @@ export default function App() {
   const [screen, setScreen] = useState(SCREENS.HOME)
   const { games, saveGame, deleteGame } = useGames()
   const { games: jerseyGames, saveGame: saveJerseyGame, deleteGame: deleteJerseyGame } = useJerseyGames()
+  const { games: whoHasMoreGames, saveGame: saveWhoHasMoreGame, deleteGame: deleteWhoHasMoreGame } = useWhoHasMoreGames()
 
   // Config
   const [gameMode, setGameMode]              = useState('players') // 'players' | 'teams'
@@ -240,6 +241,8 @@ export default function App() {
       {screen === SCREENS.WHO_HAS_MORE && (
         <WhoHasMoreScreen
           onBack={() => setScreen(SCREENS.HOME)}
+          savedGames={whoHasMoreGames}
+          onDeleteGame={deleteWhoHasMoreGame}
           onStart={config => {
             setWhoHasMoreConfig(config)
             setScreen(SCREENS.WHO_HAS_MORE_GAME)
@@ -250,6 +253,7 @@ export default function App() {
         <WhoHasMoreGameScreen
           {...whoHasMoreConfig}
           onBack={() => setScreen(SCREENS.WHO_HAS_MORE)}
+          onSaveGame={saveWhoHasMoreGame}
         />
       )}
       {screen === SCREENS.JERSEY_GUESSER_GAME && (

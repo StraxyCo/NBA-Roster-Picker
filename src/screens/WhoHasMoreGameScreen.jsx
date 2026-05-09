@@ -74,7 +74,7 @@ function PlayerCard({ player, statConf, onClick, highlight, dimmed, chosen, disa
 }
 
 // ── Main game screen ─────────────────────────────────────────────────────────
-export default function WhoHasMoreGameScreen({ players, seasons, stats, rounds, optionsPerQuestion, onBack }) {
+export default function WhoHasMoreGameScreen({ players, seasons, stats, rounds, optionsPerQuestion, onBack, onSaveGame }) {
   const [rostersData, setRostersData] = useState(null)
   const [phase, setPhase]             = useState('loading')
   // season_draw sub-states
@@ -160,6 +160,18 @@ export default function WhoHasMoreGameScreen({ players, seasons, stats, rounds, 
     } else {
       const nextRound = roundIdx + 1
       if (nextRound >= rounds) {
+        // Save game before showing recap
+        const finalScores = scores // captured in closure
+        const sorted   = [...players].sort((a, b) => (finalScores[b.name] ?? 0) - (finalScores[a.name] ?? 0))
+        const topScore = finalScores[sorted[0]?.name] ?? 0
+        const isTie    = sorted.length > 1 && (finalScores[sorted[1].name] ?? 0) === topScore
+        const winner   = isTie ? null : sorted[0]
+        onSaveGame?.({
+          playerIds:   players.map(p => p.id),
+          playerNames: players.map(p => p.name),
+          winnerId:    winner?.id ?? null,
+          winnerName:  winner?.name ?? 'Tie',
+        })
         setPhase('recap')
       } else {
         setRoundIdx(nextRound)
