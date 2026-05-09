@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import WhosThatGuySetupScreen from '../screens/WhosThatGuySetupScreen.jsx'
 import OrderDrawScreen from '../screens/OrderDrawScreen.jsx'
@@ -122,7 +122,6 @@ export default function WhosThatGuyGame() {
   const [phase, setPhase]     = useState(PHASES.SETUP)
   const [config, setConfig]   = useState(null)
   const [careers, setCareers] = useState(null)
-  const [rosters, setRosters] = useState(null)
 
   const [turnOrder, setTurnOrder]         = useState([])
   const [playerObjects, setPlayerObjects] = useState([])
@@ -132,12 +131,17 @@ export default function WhosThatGuyGame() {
   const [history, setHistory]             = useState([])
 
   useEffect(() => {
-    Promise.all([
-      fetch('/careers.json').then(r => r.json()),
-      fetch('/rosters.json').then(r => r.json()),
-    ]).then(([c, r]) => { setCareers(c); setRosters(r) })
+    fetch('/careers.json').then(r => r.json())
+      .then(c => setCareers(c))
       .catch(e => console.error('data load error', e))
   }, [])
+
+  const allPlayers = useMemo(() => {
+    if (!careers) return []
+    return Object.entries(careers)
+      .map(([id, data]) => ({ id, name: data.name }))
+      .sort((a, b) => a.name.localeCompare(b.name))
+  }, [careers])
 
   function handleStart(cfg) {
     setConfig(cfg)
@@ -202,7 +206,7 @@ export default function WhosThatGuyGame() {
 
   const currentPlayerName = turnOrder[turnIndex % turnOrder.length] || ''
   const currentRound      = Math.floor(turnIndex / (turnOrder.length || 1)) + 1
-  const dataLoaded        = careers !== null && rosters !== null
+  const dataLoaded        = careers !== null
 
   return (
     <>
@@ -234,10 +238,10 @@ export default function WhosThatGuyGame() {
         />
       )}
 
-      {phase === PHASES.QUESTIONING && currentMystery && rosters && (
+      {phase === PHASES.QUESTIONING && currentMystery && careers && (
         <WhosThatGuyGameScreen
           mysteryPlayer={currentMystery}
-          rosters={rosters}
+          allPlayers={allPlayers}
           showTeams={config.showTeams}
           currentPlayer={currentPlayerName}
           onResult={handleResult}

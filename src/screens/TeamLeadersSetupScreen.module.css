@@ -120,6 +120,11 @@
 .startBtn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(245,197,24,0.4); }
 .startBtn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
 
+/* Stats toggle */
+.statsToggleGrid { display: flex; flex-wrap: wrap; gap: 8px; }
+.statToggle { padding: 6px 12px; border-radius: var(--radius); font-family: var(--font-display); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; border: 1px solid var(--white-20); background: transparent; color: var(--white-40); cursor: pointer; transition: all 0.15s; }
+.statToggleOn { border-color: var(--gold); color: var(--gold); background: rgba(245,197,24,0.1); }
+
 /* Seasons modal */
 .seasonsGrid { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
 .seasonTag {

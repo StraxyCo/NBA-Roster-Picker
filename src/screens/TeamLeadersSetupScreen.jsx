@@ -148,6 +148,16 @@ function GamesView({ games, onDelete, onClose }) {
   )
 }
 
+// ── Available stats ─────────────────────────────────────────────────────────
+export const ALL_TEAM_STATS = [
+  { key: 'pts',  label: 'Points',   stat: 'pts',  unit: 'PPG' },
+  { key: 'reb',  label: 'Rebounds', stat: 'reb',  unit: 'RPG' },
+  { key: 'ast',  label: 'Assists',  stat: 'ast',  unit: 'APG' },
+  { key: 'stl',  label: 'Steals',   stat: 'stl',  unit: 'SPG' },
+  { key: 'blk',  label: 'Blocks',   stat: 'blk',  unit: 'BPG' },
+  { key: 'fg3m', label: '3PM',      stat: 'fg3m', unit: '3PM' },
+]
+
 // ── Seasons picker ──────────────────────────────────────────────────────────
 function SeasonsModal({ selected, onSave, onClose }) {
   const [draft, setDraft] = useState(selected)
@@ -187,9 +197,14 @@ export default function TeamLeadersSetupScreen({ onBack, onStart, savedGames, on
 
   const [rounds, setRounds]                     = useState(5)
   const [seasons, setSeasons]                   = useState(ALL_SEASONS)
+  const [selectedStats, setSelectedStats]       = useState(['pts', 'reb', 'ast'])
   const [eliminateTeams, setEliminateTeams]     = useState(true)
   const [eliminateFranchises, setElimFranch]    = useState(true)
   const [showSeasons, setShowSeasons]           = useState(false)
+
+  function toggleStat(key) {
+    setSelectedStats(prev => prev.includes(key) ? (prev.length > 1 ? prev.filter(k => k !== key) : prev) : [...prev, key])
+  }
 
   function clearSlot(idx) {
     setSelectedPlayers(prev => { const n = [...prev]; n[idx] = null; return n })
@@ -298,9 +313,25 @@ export default function TeamLeadersSetupScreen({ onBack, onStart, savedGames, on
             </button>
           </div>
         </div>
+
+        {/* Stats selector */}
+        <div className={styles.section}>
+          <h2 className={styles.sectionLabel}>Stats ({selectedStats.length}/{ALL_TEAM_STATS.length} selected)</h2>
+          <div className={styles.statsToggleGrid}>
+            {ALL_TEAM_STATS.map(s => (
+              <button
+                key={s.key}
+                className={`${styles.statToggle} ${selectedStats.includes(s.key) ? styles.statToggleOn : ''}`}
+                onClick={() => toggleStat(s.key)}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
-      <button className={styles.startBtn} disabled={!canStart} onClick={() => onStart({ players: activePlayers, rounds, seasons, eliminateTeams, eliminateFranchises })}>
+      <button className={styles.startBtn} disabled={!canStart} onClick={() => onStart({ players: activePlayers, rounds, seasons, selectedStats, eliminateTeams, eliminateFranchises })}>
         Start Game
       </button>
 

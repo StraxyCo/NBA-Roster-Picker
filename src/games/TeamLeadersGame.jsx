@@ -8,10 +8,13 @@ import { useTeamLeadersGames } from '../hooks/useProfiles.js'
 import { getLogoUrl } from '../data/teams.js'
 import styles from './TeamLeadersGame.module.css'
 
-const RESULT_CATS = [
-  { key: 'pts', label: 'Points', stat: 'pts', unit: 'PPG' },
-  { key: 'reb', label: 'Rebounds', stat: 'reb', unit: 'RPG' },
-  { key: 'ast', label: 'Assists', stat: 'ast', unit: 'APG' },
+const ALL_TEAM_STATS = [
+  { key: 'pts',  label: 'Points',   stat: 'pts',  unit: 'PPG' },
+  { key: 'reb',  label: 'Rebounds', stat: 'reb',  unit: 'RPG' },
+  { key: 'ast',  label: 'Assists',  stat: 'ast',  unit: 'APG' },
+  { key: 'stl',  label: 'Steals',   stat: 'stl',  unit: 'SPG' },
+  { key: 'blk',  label: 'Blocks',   stat: 'blk',  unit: 'BPG' },
+  { key: 'fg3m', label: '3PM',      stat: 'fg3m', unit: '3PM' },
 ]
 
 const PHASES = {
@@ -55,7 +58,7 @@ function BetweenTurns({ currentPlayer, currentRound, totalRounds, scores, turnOr
 }
 
 // ── Final screen ─────────────────────────────────────────────────────────────
-function FinalScreen({ scores, turnOrder, history, onFinish }) {
+function FinalScreen({ scores, turnOrder, history, resultCats, onFinish }) {
   const sorted   = [...turnOrder].sort((a, b) => (scores[b] || 0) - (scores[a] || 0))
   const topScore = scores[sorted[0]] || 0
   const winners  = sorted.filter(name => (scores[name] || 0) === topScore)
@@ -91,9 +94,9 @@ function FinalScreen({ scores, turnOrder, history, onFinish }) {
                 <div key={ti} className={styles.turnBlock}>
                   <div className={styles.turnHeader}>
                     <span className={styles.turnTeam}>{t.teamName} <span className={styles.turnSeason}>{t.season}</span></span>
-                    <span className={styles.turnScore}>{t.score}/4</span>
+                    <span className={styles.turnScore}>{t.score}/{resultCats.length + 1}</span>
                   </div>
-                  {RESULT_CATS.map(({ key, label, stat, unit }) => {
+                  {resultCats.map(({ key, label, stat, unit }) => {
                     const pick    = t.picks[key]
                     const correct = t.leaders[stat]
                     const isRight = pick?.id === correct?.id
@@ -211,6 +214,7 @@ export default function TeamLeadersGame() {
 
   const currentPlayerName  = turnOrder[turnIndex % turnOrder.length] || ''
   const currentRound       = Math.floor(turnIndex / (turnOrder.length || 1)) + 1
+  const resultCats         = config ? ALL_TEAM_STATS.filter(s => (config.selectedStats || ['pts','reb','ast']).includes(s.key)) : []
 
   return (
     <>
@@ -256,6 +260,7 @@ export default function TeamLeadersGame() {
           team={currentTeam}
           season={currentSeason}
           roster={currentRoster}
+          categories={resultCats}
           currentPlayer={currentPlayerName}
           onResult={handleResult}
         />
@@ -266,6 +271,7 @@ export default function TeamLeadersGame() {
           scores={scores}
           turnOrder={turnOrder}
           history={history}
+          resultCats={resultCats}
           onFinish={handleFinish}
         />
       )}

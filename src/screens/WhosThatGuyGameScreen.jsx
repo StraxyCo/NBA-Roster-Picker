@@ -1,10 +1,7 @@
 import { useState, useMemo } from 'react'
-import { NBA_TEAMS } from '../data/teams.js'
 import styles from './WhosThatGuyGameScreen.module.css'
 
-const TEAM_BY_ID = Object.fromEntries(NBA_TEAMS.map(t => [String(t.id), t]))
-
-function fmtSeason(s) { return s.slice(2) } // "2005-06" → "05-06"
+function fmtSeason(s) { return s.slice(2) }
 function fmtStat(key, val) {
   if (val == null) return '—'
   if (key === 'gp') return String(Math.round(val))
@@ -12,32 +9,17 @@ function fmtStat(key, val) {
 }
 
 // mysteryPlayer: { id, name, seasons: [{season, teamAbbr, gp, pts, reb, ast, fg3m, ...}] }
-// rosters: { [season]: { [teamId]: [{id, name, ...}] } }
-export default function WhosThatGuyGameScreen({ mysteryPlayer, rosters, showTeams, currentPlayer, onResult }) {
+// allPlayers: [{ id, name }] sorted alphabetically
+export default function WhosThatGuyGameScreen({ mysteryPlayer, allPlayers, showTeams, currentPlayer, onResult }) {
   const [phase, setPhase]               = useState('picking')
-  const [selectedSeason, setSelectedSeason] = useState('')
-  const [selectedTeamId, setSelectedTeamId] = useState('')
+  const [query, setQuery]               = useState('')
   const [pickedPlayer, setPickedPlayer] = useState(null)
 
-  const rosterSeasons = useMemo(() => Object.keys(rosters).sort(), [rosters])
-
-  const teamsForSeason = useMemo(() => {
-    if (!selectedSeason || !rosters[selectedSeason]) return []
-    return Object.keys(rosters[selectedSeason])
-      .map(id => TEAM_BY_ID[id])
-      .filter(Boolean)
-      .sort((a, b) => a.name.localeCompare(b.name))
-  }, [rosters, selectedSeason])
-
-  const rosterPlayers = useMemo(() => {
-    if (!selectedSeason || !selectedTeamId) return []
-    return rosters[selectedSeason]?.[selectedTeamId] || []
-  }, [rosters, selectedSeason, selectedTeamId])
-
-  function handleSeasonChange(s) {
-    setSelectedSeason(s)
-    setSelectedTeamId('')
-  }
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    if (!q) return allPlayers
+    return allPlayers.filter(p => p.name.toLowerCase().includes(q))
+  }, [allPlayers, query])
 
   function handlePickPlayer(p) {
     setPickedPlayer({ id: p.id, name: p.name })
@@ -99,7 +81,6 @@ export default function WhosThatGuyGameScreen({ mysteryPlayer, rosters, showTeam
             <>
               <div className={styles.panelLabel}>Your pick</div>
 
-              {/* Slot */}
               <div className={`${styles.slot} ${pickedPlayer ? styles.slotFilled : styles.slotEmpty}`}>
                 {pickedPlayer ? (
                   <>
@@ -107,53 +88,33 @@ export default function WhosThatGuyGameScreen({ mysteryPlayer, rosters, showTeam
                     <button className={styles.slotClear} onClick={() => setPickedPlayer(null)}>✕</button>
                   </>
                 ) : (
-                  <span className={styles.slotPlaceholder}>Select a player below</span>
+                  <span className={styles.slotPlaceholder}>Search and select a player</span>
                 )}
               </div>
 
-              {/* Dropdowns */}
-              <div className={styles.dropdownRow}>
-                <select
-                  className={styles.select}
-                  value={selectedSeason}
-                  onChange={e => handleSeasonChange(e.target.value)}
-                >
-                  <option value="">Season…</option>
-                  {rosterSeasons.map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
-                <select
-                  className={styles.select}
-                  value={selectedTeamId}
-                  onChange={e => setSelectedTeamId(e.target.value)}
-                  disabled={!selectedSeason}
-                >
-                  <option value="">Team…</option>
-                  {teamsForSeason.map(t => <option key={t.id} value={String(t.id)}>{t.abbr} — {t.name}</option>)}
-                </select>
+              <input
+                className={styles.searchInput}
+                type="text"
+                placeholder="Search player…"
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                autoFocus
+              />
+
+              <div className={styles.rosterList}>
+                {filtered.map(p => (
+                  <button
+                    key={p.id}
+                    className={`${styles.rosterBtn} ${pickedPlayer?.id === p.id ? styles.rosterBtnActive : ''}`}
+                    onClick={() => handlePickPlayer(p)}
+                  >
+                    {p.name}
+                  </button>
+                ))}
+                {filtered.length === 0 && query && (
+                  <p className={styles.hint}>No players match "{query}"</p>
+                )}
               </div>
-
-              {/* Roster list */}
-              {rosterPlayers.length > 0 && (
-                <div className={styles.rosterList}>
-                  {rosterPlayers
-                    .slice()
-                    .sort((a, b) => a.name.localeCompare(b.name))
-                    .map(p => (
-                      <button
-                        key={p.id}
-                        className={`${styles.rosterBtn} ${pickedPlayer?.id === p.id ? styles.rosterBtnActive : ''}`}
-                        onClick={() => handlePickPlayer(p)}
-                      >
-                        {p.name}
-                      </button>
-                    ))
-                  }
-                </div>
-              )}
-
-              {!selectedSeason && (
-                <p className={styles.hint}>Select a season and team to browse rosters.</p>
-              )}
 
               {pickedPlayer && (
                 <button className={styles.validateBtn} onClick={handleValidate}>

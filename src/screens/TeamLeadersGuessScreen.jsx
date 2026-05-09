@@ -1,37 +1,30 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { getLogoUrl } from '../data/teams.js'
 import styles from './TeamLeadersGuessScreen.module.css'
-
-const CATEGORIES = [
-  { key: 'pts', label: 'Points Leader',   stat: 'pts', unit: 'PPG' },
-  { key: 'reb', label: 'Rebounds Leader', stat: 'reb', unit: 'RPG' },
-  { key: 'ast', label: 'Assists Leader',  stat: 'ast', unit: 'APG' },
-]
 
 function getLeader(roster, stat) {
   return roster.reduce((best, p) => (!best || (p[stat] ?? 0) > (best[stat] ?? 0)) ? p : best, null)
 }
 
-function computeScore(picks, leaders) {
+function computeScore(picks, leaders, categories) {
   let correct = 0
-  for (const { key, stat } of CATEGORIES) {
+  for (const { key, stat } of categories) {
     if (picks[key]?.id === leaders[stat]?.id) correct++
   }
-  return correct + (correct === 3 ? 1 : 0) // +1 bonus for perfect round
+  return correct + (correct === categories.length ? 1 : 0)
 }
 
-export default function TeamLeadersGuessScreen({ team, season, roster, currentPlayer, onResult }) {
-  const [phase, setPhase] = useState('guessing') // 'guessing' | 'recap'
-  const [selectedNbaPlayer, setSelectedNbaPlayer] = useState(null) // NBA player currently "selected" to place
-  const [picks, setPicks] = useState({ pts: null, reb: null, ast: null })
+export default function TeamLeadersGuessScreen({ team, season, roster, categories, currentPlayer, onResult }) {
+  const [phase, setPhase] = useState('guessing')
+  const [selectedNbaPlayer, setSelectedNbaPlayer] = useState(null)
+  const [picks, setPicks] = useState(() => Object.fromEntries(categories.map(c => [c.key, null])))
 
-  const leaders = {
-    pts: getLeader(roster, 'pts'),
-    reb: getLeader(roster, 'reb'),
-    ast: getLeader(roster, 'ast'),
-  }
+  const leaders = useMemo(
+    () => Object.fromEntries(categories.map(c => [c.stat, getLeader(roster, c.stat)])),
+    [roster, categories]
+  )
 
-  const allSlotsFilled = CATEGORIES.every(c => picks[c.key] !== null)
+  const allSlotsFilled = categories.every(c => picks[c.key] !== null)
 
   function handleRosterPlayerClick(player) {
     if (phase !== 'guessing') return
@@ -44,7 +37,6 @@ export default function TeamLeadersGuessScreen({ team, season, roster, currentPl
       setPicks(prev => ({ ...prev, [catKey]: selectedNbaPlayer }))
       setSelectedNbaPlayer(null)
     } else if (picks[catKey]) {
-      // clicking a filled slot with no player selected → clear it
       setPicks(prev => ({ ...prev, [catKey]: null }))
     }
   }
@@ -61,7 +53,7 @@ export default function TeamLeadersGuessScreen({ team, season, roster, currentPl
   }
 
   function handleNext() {
-    const score = computeScore(picks, leaders)
+    const score = computeScore(picks, leaders, categories)
     onResult({ picks, leaders, score })
   }
 
@@ -69,8 +61,9 @@ export default function TeamLeadersGuessScreen({ team, season, roster, currentPl
 
   // ── Recap phase ────────────────────────────────────────────────────────────
   if (phase === 'recap') {
-    const score = computeScore(picks, leaders)
-    const perfect = score === 4
+    const score   = computeScore(picks, leaders, categories)
+    const perfect = score === categories.length + 1
+    const maxPts  = categories.length + 1
     return (
       <div className={styles.screen}>
         <div className={styles.content}>
@@ -85,7 +78,7 @@ export default function TeamLeadersGuessScreen({ team, season, roster, currentPl
           <div className={styles.playerTurnLabel}>{currentPlayer}'s results</div>
 
           <div className={styles.recapList}>
-            {CATEGORIES.map(({ key, label, stat, unit }) => {
+            {categories.map(({ key, label, stat, unit }) => {
               const pick    = picks[key]
               const correct = leaders[stat]
               const isRight = pick?.id === correct?.id
@@ -113,7 +106,7 @@ export default function TeamLeadersGuessScreen({ team, season, roster, currentPl
 
           <div className={styles.scoreBox}>
             <span className={styles.scoreNum}>{score}</span>
-            <span className={styles.scoreDenom}>/4 points</span>
+            <span className={styles.scoreDenom}>/{maxPts} points</span>
             {perfect && <span className={styles.perfectBadge}>Perfect round! +1 bonus</span>}
           </div>
 
@@ -164,7 +157,7 @@ export default function TeamLeadersGuessScreen({ team, season, roster, currentPl
                 : 'Click a player, then a slot'}
             </div>
             <div className={styles.slotsList}>
-              {CATEGORIES.map(({ key, label }) => {
+              {categories.map(({ key, label }) => {
                 const filled = picks[key]
                 return (
                   <div
