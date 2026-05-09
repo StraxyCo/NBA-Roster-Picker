@@ -3,6 +3,7 @@ import SetupScreen from './screens/SetupScreen.jsx'
 import HomeScreen from './screens/HomeScreen.jsx'
 import JerseyGuesserScreen from './screens/JerseyGuesserScreen.jsx'
 import WhoHasMoreScreen from './screens/WhoHasMoreScreen.jsx'
+import WhoHasMoreGameScreen from './screens/WhoHasMoreGameScreen.jsx'
 import JerseyGuesserGameScreen from './screens/JerseyGuesserGameScreen.jsx'
 import OrderDrawScreen from './screens/OrderDrawScreen.jsx'
 import TurnScreen from './screens/TurnScreen.jsx'
@@ -57,6 +58,7 @@ const SCREENS = {
   JERSEY_GUESSER: 'JERSEY_GUESSER',
   JERSEY_GUESSER_GAME: 'JERSEY_GUESSER_GAME',
   WHO_HAS_MORE: 'WHO_HAS_MORE',
+  WHO_HAS_MORE_GAME: 'WHO_HAS_MORE_GAME',
 }
 
 function buildEmptyRoster(size) { return Array(size).fill(null) }
@@ -92,6 +94,9 @@ export default function App() {
   // Jersey Guesser state
   const [jerseyPlayers, setJerseyPlayers]    = useState([])
   const [jerseyRounds, setJerseyRounds]      = useState(5)
+
+  // Who Has More state
+  const [whoHasMoreConfig, setWhoHasMoreConfig] = useState(null)
 
   function handleSetupStart({ players, rosterSize, eliminateTeams, eliminateFranchises, seasons, gameMode, statMode, keepHidden }) {
     setPlayers(players)
@@ -235,9 +240,16 @@ export default function App() {
       {screen === SCREENS.WHO_HAS_MORE && (
         <WhoHasMoreScreen
           onBack={() => setScreen(SCREENS.HOME)}
-          onStart={({ players, seasons, stats, rounds, optionsPerQuestion }) => {
-            // game config saved here when gameplay is implemented
+          onStart={config => {
+            setWhoHasMoreConfig(config)
+            setScreen(SCREENS.WHO_HAS_MORE_GAME)
           }}
+        />
+      )}
+      {screen === SCREENS.WHO_HAS_MORE_GAME && whoHasMoreConfig && (
+        <WhoHasMoreGameScreen
+          {...whoHasMoreConfig}
+          onBack={() => setScreen(SCREENS.WHO_HAS_MORE)}
         />
       )}
       {screen === SCREENS.JERSEY_GUESSER_GAME && (
