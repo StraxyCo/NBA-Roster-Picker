@@ -333,8 +333,8 @@ export default function SetupScreen({ onStart, savedGames, onDeleteGame, onBack,
   useEffect(() => {
     getAvailableSeasons().then(s => {
       setAllSeasons(s)
-      // Only reset selected seasons to latest if no initialConfig provided
-      if (!initialConfig) setSelected(new Set([s[0]]))
+      // Only reset selected seasons if no initialConfig provided
+      if (!initialConfig) setSelected(new Set(s))
     }).catch(() => {})
   }, [])
 

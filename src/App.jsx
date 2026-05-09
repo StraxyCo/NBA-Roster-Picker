@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import SetupScreen from './screens/SetupScreen.jsx'
 import HomeScreen from './screens/HomeScreen.jsx'
 import JerseyGuesserScreen from './screens/JerseyGuesserScreen.jsx'
@@ -65,6 +65,25 @@ function buildEmptyRoster(size) { return Array(size).fill(null) }
 
 export default function App() {
   const [screen, setScreen] = useState(SCREENS.HOME)
+
+  useEffect(() => {
+    const TITLES = {
+      [SCREENS.HOME]: 'NBA Games',
+      [SCREENS.SETUP]: 'Roster Picker',
+      [SCREENS.ORDER_DRAW]: 'Roster Picker',
+      [SCREENS.TURN]: 'Roster Picker',
+      [SCREENS.TEAM_DRAW]: 'Roster Picker',
+      [SCREENS.PICK_PLAYER]: 'Roster Picker',
+      [SCREENS.TEAM_MODE_DRAW]: 'Roster Picker',
+      [SCREENS.TEAM_STAT_REVEAL]: 'Roster Picker',
+      [SCREENS.FINAL]: 'Roster Picker',
+      [SCREENS.JERSEY_GUESSER]: 'Jersey Number Guesser',
+      [SCREENS.JERSEY_GUESSER_GAME]: 'Jersey Number Guesser',
+      [SCREENS.WHO_HAS_MORE]: 'Who Has More',
+      [SCREENS.WHO_HAS_MORE_GAME]: 'Who Has More',
+    }
+    document.title = TITLES[screen] ?? 'NBA Games'
+  }, [screen])
   const { games, saveGame, deleteGame } = useGames()
   const { games: jerseyGames, saveGame: saveJerseyGame, deleteGame: deleteJerseyGame } = useJerseyGames()
   const { games: whoHasMoreGames, saveGame: saveWhoHasMoreGame, deleteGame: deleteWhoHasMoreGame } = useWhoHasMoreGames()
