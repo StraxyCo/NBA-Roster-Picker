@@ -127,21 +127,23 @@
 
 /* ── Players grid ── */
 .playersGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
   width: 100%;
-  max-width: 640px;
+  max-width: 720px;
   margin-bottom: 24px;
 }
 
 /* ── Player card ── */
 .playerCard {
+  width: 160px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 16px 12px 12px;
+  gap: 10px;
+  padding: 20px 16px 16px;
   background: var(--navy-3);
   border: 2px solid var(--white-10);
   border-radius: var(--radius-lg);
@@ -176,8 +178,8 @@
 /* ── Headshot ── */
 .headshotWrap {
   position: relative;
-  width: 88px;
-  height: 88px;
+  width: 110px;
+  height: 110px;
   flex-shrink: 0;
 }
 
@@ -223,7 +225,7 @@
 .playerName {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   color: var(--white);
   text-align: center;
   line-height: 1.2;
@@ -463,5 +465,5 @@
 @media (max-width: 400px) {
   .seasonBox { width: 200px; height: 120px; }
   .seasonText { font-size: 1.8rem; }
-  .playersGrid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+  .playerCard { width: 140px; }
 }
