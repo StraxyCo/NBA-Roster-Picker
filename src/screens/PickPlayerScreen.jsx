@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import { SLOT_LABELS, getLogoUrl } from '../data/teams.js'
 import styles from './PickPlayerScreen.module.css'
 
-export default function PickPlayerScreen({ currentPlayer, team, season, nbaRoster, userRoster, rosterSize, multiSeason, statMode, keepHidden, onValidate }) {
+export default function PickPlayerScreen({ currentPlayer, team, season, nbaRoster, userRoster, rosterSize, multiSeason, statMode, keepHidden, onValidate, globalPickedIds = new Set() }) {
   // Working copy of the user's roster for this session
   const [myRoster, setMyRoster] = useState([...userRoster])
   // Track which players from nbaRoster have been picked (by player id)
@@ -19,8 +19,12 @@ export default function PickPlayerScreen({ currentPlayer, team, season, nbaRoste
   // Drag state
   const dragSource = useRef(null)
 
+  function isUnavailable(id) {
+    return pickedIds.has(id) || globalPickedIds.has(id)
+  }
+
   function handleNbaPlayerClick(player) {
-    if (pickedIds.has(player.id)) return // already placed
+    if (isUnavailable(player.id)) return // already placed
 
     if (!selectedSource) {
       // Select this player as source
@@ -86,6 +90,7 @@ export default function PickPlayerScreen({ currentPlayer, team, season, nbaRoste
   // ── Drag & Drop ──────────────────────────────────────────
 
   function onDragStartNba(e, player) {
+    if (isUnavailable(player.id)) { e.preventDefault(); return }
     dragSource.current = { type: 'nba', player }
     e.dataTransfer.effectAllowed = 'move'
   }
@@ -107,7 +112,7 @@ export default function PickPlayerScreen({ currentPlayer, team, season, nbaRoste
     if (!src) return
 
     if (src.type === 'nba') {
-      if (pickedIds.has(src.player.id)) return
+      if (isUnavailable(src.player.id)) return
       const prev = myRoster[slotIdx]
       const newRoster = [...myRoster]
       newRoster[slotIdx] = { ...src.player, season }
@@ -192,7 +197,7 @@ export default function PickPlayerScreen({ currentPlayer, team, season, nbaRoste
                 <div className={styles.empty}>No roster data available</div>
               )}
               {nbaRoster.map(player => {
-                const isPicked = pickedIds.has(player.id)
+                const isPicked = isUnavailable(player.id)
                 const isSelected = selectedSource?.type === 'nba' && selectedSource.player.id === player.id
                 return (
                   <div
