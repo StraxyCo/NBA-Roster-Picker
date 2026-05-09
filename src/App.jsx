@@ -2,6 +2,7 @@ import { useState } from 'react'
 import SetupScreen from './screens/SetupScreen.jsx'
 import HomeScreen from './screens/HomeScreen.jsx'
 import JerseyGuesserScreen from './screens/JerseyGuesserScreen.jsx'
+import WhoHasMoreScreen from './screens/WhoHasMoreScreen.jsx'
 import JerseyGuesserGameScreen from './screens/JerseyGuesserGameScreen.jsx'
 import OrderDrawScreen from './screens/OrderDrawScreen.jsx'
 import TurnScreen from './screens/TurnScreen.jsx'
@@ -55,6 +56,7 @@ const SCREENS = {
   FINAL: 'FINAL',
   JERSEY_GUESSER: 'JERSEY_GUESSER',
   JERSEY_GUESSER_GAME: 'JERSEY_GUESSER_GAME',
+  WHO_HAS_MORE: 'WHO_HAS_MORE',
 }
 
 function buildEmptyRoster(size) { return Array(size).fill(null) }
@@ -215,6 +217,7 @@ export default function App() {
         <HomeScreen onSelectGame={(game) => {
           if (game === 'ROSTER_PICKER') setScreen(SCREENS.SETUP)
           if (game === 'JERSEY_GUESSER') setScreen(SCREENS.JERSEY_GUESSER)
+          if (game === 'WHO_HAS_MORE') setScreen(SCREENS.WHO_HAS_MORE)
         }} />
       )}
       {screen === SCREENS.JERSEY_GUESSER && (
@@ -228,6 +231,9 @@ export default function App() {
           savedGames={jerseyGames}
           onDeleteGame={deleteJerseyGame}
         />
+      )}
+      {screen === SCREENS.WHO_HAS_MORE && (
+        <WhoHasMoreScreen onBack={() => setScreen(SCREENS.HOME)} />
       )}
       {screen === SCREENS.JERSEY_GUESSER_GAME && (
         <JerseyGuesserGameScreen
