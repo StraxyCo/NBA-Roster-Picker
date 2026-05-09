@@ -24,6 +24,13 @@ export default function HomeScreen({ onSelectGame }) {
           </div>
           <div className={styles.arrow}>→</div>
         </button>
+        <button className={styles.gameCard} onClick={() => onSelectGame('WHO_HAS_MORE')}>
+          <div className={styles.gameInfo}>
+            <h2>Who Has More</h2>
+            <p>Guess which player had higher stats in a given season.</p>
+          </div>
+          <div className={styles.arrow}>→</div>
+        </button>
       </div>
     </div>
   )
