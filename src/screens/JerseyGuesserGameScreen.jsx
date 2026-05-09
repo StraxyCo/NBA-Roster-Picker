@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import styles from './JerseyGuesserGameScreen.module.css'
+import { playerWeight, weightedShuffle, weightedPick } from '../utils/playerSelection.js'
 
 const CURRENT_SEASON = '2025-26'
 
@@ -16,32 +17,6 @@ function shuffle(arr) {
   return a
 }
 
-function playerWeight(p) {
-  const total = (p.min ?? 0) * (p.gp ?? 0)
-  return total > 0 ? total : 1
-}
-
-function weightedShuffle(arr, weights) {
-  const items = [...arr], ws = [...weights], result = []
-  while (items.length > 0) {
-    const total = ws.reduce((a, b) => a + b, 0)
-    let r = Math.random() * total, i = 0
-    while (i < ws.length - 1) { r -= ws[i]; if (r <= 0) break; i++ }
-    result.push(items[i])
-    items.splice(i, 1); ws.splice(i, 1)
-  }
-  return result
-}
-
-function weightedPick(players, weights) {
-  const total = weights.reduce((a, b) => a + b, 0)
-  let r = Math.random() * total
-  for (let i = 0; i < players.length; i++) {
-    r -= weights[i]
-    if (r <= 0) return players[i]
-  }
-  return players[players.length - 1]
-}
 
 function buildWrongChoices(correct, players, weights) {
   const chosen = new Set()

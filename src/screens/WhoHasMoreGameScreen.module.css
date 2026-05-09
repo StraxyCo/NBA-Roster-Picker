@@ -1,0 +1,467 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 24px 40px;
+}
+
+.loading {
+  margin: auto;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--white-50);
+}
+
+/* ── Top bar ── */
+.topBar {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 0;
+  flex-wrap: wrap;
+}
+
+.backArrow {
+  background: none;
+  border: none;
+  color: var(--white-50);
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: color 0.2s;
+  padding: 4px 8px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.backArrow:hover { color: var(--white); }
+
+.roundInfo {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gold);
+  flex-shrink: 0;
+}
+
+.scorePills {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+.scorePill {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--white-40);
+  background: var(--navy-3);
+  border: 1px solid var(--white-10);
+  border-radius: 99px;
+  padding: 4px 10px;
+  transition: all 0.15s;
+}
+
+.scorePillActive {
+  color: var(--navy);
+  background: var(--gold);
+  border-color: var(--gold);
+}
+
+/* ── Turn label ── */
+.turnLabel {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--white-50);
+  margin-top: 4px;
+  margin-bottom: 12px;
+}
+
+/* ── Question text ── */
+.questionText {
+  font-family: var(--font-display);
+  font-size: clamp(1.1rem, 3.5vw, 1.5rem);
+  font-weight: 700;
+  color: var(--white);
+  text-align: center;
+  max-width: 520px;
+  line-height: 1.3;
+  margin-bottom: 24px;
+}
+
+/* ── Feedback banner ── */
+.feedbackBanner {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 10px 20px;
+  border-radius: var(--radius);
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.feedbackCorrect {
+  background: rgba(39, 174, 96, 0.15);
+  border: 1px solid rgba(39, 174, 96, 0.4);
+  color: #2ecc71;
+}
+
+.feedbackWrong {
+  background: rgba(231, 76, 60, 0.15);
+  border: 1px solid rgba(231, 76, 60, 0.4);
+  color: #e74c3c;
+}
+
+/* ── Players grid ── */
+.playersGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+  width: 100%;
+  max-width: 640px;
+  margin-bottom: 24px;
+}
+
+/* ── Player card ── */
+.playerCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 12px 12px;
+  background: var(--navy-3);
+  border: 2px solid var(--white-10);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.playerCard:hover:not(:disabled) {
+  border-color: var(--gold);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(245, 197, 24, 0.2);
+}
+
+.playerCard:disabled {
+  cursor: default;
+}
+
+.playerCardWinner {
+  border-color: #2ecc71;
+  background: rgba(39, 174, 96, 0.1);
+}
+
+.playerCardDimmed {
+  opacity: 0.45;
+}
+
+.playerCardWrong {
+  border-color: #e74c3c;
+  background: rgba(231, 76, 60, 0.08);
+}
+
+/* ── Headshot ── */
+.headshotWrap {
+  position: relative;
+  width: 88px;
+  height: 88px;
+  flex-shrink: 0;
+}
+
+.headshot {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  border-radius: var(--radius);
+  background: var(--navy-4);
+}
+
+.headshotFallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--navy-4);
+  border-radius: var(--radius);
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--white-30);
+}
+
+.winnerBadge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 22px;
+  height: 22px;
+  background: #2ecc71;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--navy);
+}
+
+.playerName {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--white);
+  text-align: center;
+  line-height: 1.2;
+}
+
+.statLabel {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.9rem;
+  color: var(--gold);
+  text-align: center;
+}
+
+/* ── Primary button ── */
+.primaryBtn {
+  width: 100%;
+  max-width: 400px;
+  background: var(--gold);
+  color: var(--navy);
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 14px;
+  border-radius: var(--radius);
+  border: none;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+.primaryBtn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(245, 197, 24, 0.4); }
+.primaryBtn:active { transform: translateY(0); }
+
+/* ── Season draw screen ── */
+.drawScreen {
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+  margin: auto;
+  animation: fadeUp 0.4s ease both;
+}
+
+.eyebrow {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 32px;
+}
+
+.seasonBox {
+  width: 240px;
+  height: 140px;
+  margin: 0 auto 24px;
+  background: var(--navy-3);
+  border: 2px solid var(--white-10);
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.seasonBoxSpinning {
+  border-color: var(--white-20);
+}
+
+.seasonBoxSpinning::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.04) 50%, transparent 60%);
+  animation: shimmer 0.6s linear infinite;
+}
+
+.seasonBoxLocked {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 1px var(--gold), 0 0 40px rgba(245, 197, 24, 0.2);
+}
+
+.questionMark {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 4rem;
+  color: var(--white-10);
+}
+
+.seasonText {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 2.2rem;
+  color: var(--white);
+  letter-spacing: 0.04em;
+}
+
+.drawnInfo {
+  margin-bottom: 8px;
+}
+
+.drawnSeason {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(1.6rem, 5vw, 2.4rem);
+  text-transform: uppercase;
+  color: var(--white);
+  margin-bottom: 6px;
+}
+
+.drawnStat {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.drawBtn {
+  display: block;
+  width: 100%;
+  background: var(--gold);
+  color: var(--navy);
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 16px;
+  border-radius: var(--radius);
+  border: none;
+  cursor: pointer;
+  margin-top: 24px;
+  transition: all 0.18s ease;
+}
+.drawBtn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(245, 197, 24, 0.4); }
+.drawBtn:active { transform: translateY(0); }
+
+/* ── Recap ── */
+.recap {
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+  margin: auto;
+  padding: 40px 0;
+  animation: fadeUp 0.4s ease both;
+}
+
+.recapEyebrow {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 12px;
+}
+
+.recapHeadline {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(2rem, 7vw, 3rem);
+  text-transform: uppercase;
+  color: var(--white);
+  margin-bottom: 32px;
+  line-height: 1.1;
+}
+
+.recapList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 32px;
+}
+
+.recapRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--navy-3);
+  border: 1px solid var(--white-10);
+  border-radius: var(--radius-lg);
+}
+
+.recapRowTop {
+  border-color: var(--gold);
+  background: rgba(245, 197, 24, 0.06);
+}
+
+.recapRank {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--white-50);
+  width: 32px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.recapName {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--white);
+  flex: 1;
+  text-align: left;
+}
+
+.recapScore {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.2rem;
+  color: var(--gold);
+}
+
+.recapScoreLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--white-40);
+}
+
+/* ── Animations ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+@media (max-width: 400px) {
+  .seasonBox { width: 200px; height: 120px; }
+  .seasonText { font-size: 1.8rem; }
+  .playersGrid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+}
