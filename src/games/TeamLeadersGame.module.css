@@ -106,7 +106,7 @@
 .drawBtn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(245,197,24,0.4); }
 
 /* Final screen (scrollable) */
-.finalScreen { min-height: 100vh; display: flex; justify-content: center; padding: 40px 20px 60px; }
+.finalScreen { min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 40px 20px 60px; }
 .finalContent { width: 100%; max-width: 560px; display: flex; flex-direction: column; align-items: center; gap: 20px; text-align: center; }
 
 /* Per-player history blocks */

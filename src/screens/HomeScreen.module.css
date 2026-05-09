@@ -95,17 +95,15 @@
   background: var(--surface);
   border: 1px solid rgba(255,255,255,0.07);
   border-radius: var(--radius-lg);
-  padding: 20px;
+  padding: 20px 20px 36px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  gap: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
   text-align: left;
   color: var(--white);
   width: 100%;
-  min-height: 110px;
+  position: relative;
 }
 
 .gameCard:hover {
@@ -138,11 +136,13 @@
 }
 
 .arrow {
+  position: absolute;
+  bottom: 14px;
+  right: 16px;
   font-family: var(--font-display);
   font-size: 1rem;
-  color: rgba(245,197,24,0.5);
+  color: rgba(245,197,24,0.45);
   font-weight: 800;
-  align-self: flex-end;
   transition: color 0.2s;
 }
 
@@ -151,6 +151,9 @@
 }
 
 .comingSoonBadge {
+  position: absolute;
+  bottom: 14px;
+  right: 16px;
   font-family: var(--font-display);
   font-size: 0.6rem;
   font-weight: 700;
@@ -161,5 +164,4 @@
   border-radius: 4px;
   padding: 3px 8px;
   white-space: nowrap;
-  align-self: flex-end;
 }
