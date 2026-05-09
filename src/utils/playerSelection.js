@@ -1,6 +1,5 @@
 export function playerWeight(p) {
-  const total = (p.min ?? 0) * (p.gp ?? 0)
-  return total > 0 ? total : 1
+  return (p.min ?? 0) * (p.gp ?? 0)
 }
 
 export function weightedPick(players, weights) {
@@ -14,7 +13,12 @@ export function weightedPick(players, weights) {
 }
 
 export function weightedShuffle(arr, weights) {
-  const items = [...arr], ws = [...weights], result = []
+  // exclude zero-weight entries upfront so they are never selected
+  const items = [], ws = []
+  for (let i = 0; i < arr.length; i++) {
+    if (weights[i] > 0) { items.push(arr[i]); ws.push(weights[i]) }
+  }
+  const result = []
   while (items.length > 0) {
     const total = ws.reduce((a, b) => a + b, 0)
     let r = Math.random() * total, i = 0
