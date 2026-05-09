@@ -233,7 +233,12 @@ export default function App() {
         />
       )}
       {screen === SCREENS.WHO_HAS_MORE && (
-        <WhoHasMoreScreen onBack={() => setScreen(SCREENS.HOME)} />
+        <WhoHasMoreScreen
+          onBack={() => setScreen(SCREENS.HOME)}
+          onStart={({ players, seasons, stats, rounds, optionsPerQuestion }) => {
+            // game config saved here when gameplay is implemented
+          }}
+        />
       )}
       {screen === SCREENS.JERSEY_GUESSER_GAME && (
         <JerseyGuesserGameScreen
