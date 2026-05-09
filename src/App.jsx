@@ -235,6 +235,9 @@ export default function App() {
   const currentUserRoster = rosters[currentPlayer] || []
   const picksCount        = currentUserRoster.filter(Boolean).length
   const multiSeason       = seasons.length > 1
+  const globalPickedIds   = new Set(
+    Object.values(rosters).flatMap(roster => roster.filter(Boolean).map(p => p.id))
+  )
 
   return (
     <>
@@ -323,7 +326,7 @@ export default function App() {
       {screen === SCREENS.PICK_PLAYER && (
         <PickPlayerScreen
           currentPlayer={currentPlayer} team={currentTeam} season={currentSeason}
-          nbaRoster={currentRoster} userRoster={currentUserRoster}
+          nbaRoster={currentRoster} userRoster={currentUserRoster} globalPickedIds={globalPickedIds}
           rosterSize={rosterSize} multiSeason={multiSeason}
           statMode={statMode} keepHidden={keepHidden}
           onValidate={handlePickValidated}
