@@ -222,7 +222,7 @@ function SeasonModal({ allSeasons, current, onConfirm, onClose }) {
 
 // ── Main screen ─────────────────────────────────────────────────────────────
 export default function WhoHasMoreScreen({ onBack, onStart, savedGames, onDeleteGame }) {
-  const { players, createPlayer } = usePlayers()
+  const { players, loading, createPlayer } = usePlayers()
   const [view, setView] = useState(null) // null | 'stats' | 'games'
 
   const [selectedPlayers, setSelectedPlayers] = useState([null, null, null, null])
@@ -236,6 +236,18 @@ export default function WhoHasMoreScreen({ onBack, onStart, savedGames, onDelete
 
   const [rounds, setRounds] = useState(5)
   const [optionsPerQuestion, setOptionsPerQuestion] = useState(4)
+
+  useEffect(() => {
+    if (!loading && players.length > 0) {
+      const top = players.slice(0, 2)
+      setSelectedPlayers(prev => {
+        const next = [...prev]
+        if (!next[0] && top[0]) next[0] = top[0]
+        if (!next[1] && top[1]) next[1] = top[1]
+        return next
+      })
+    }
+  }, [loading, players])
 
   useEffect(() => {
     getAvailableSeasons().then(s => {

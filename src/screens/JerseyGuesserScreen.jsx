@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import styles from './JerseyGuesserScreen.module.css'
 import { usePlayers } from '../hooks/useProfiles.js'
 
@@ -181,10 +181,23 @@ function AddPlayerModal({ players, slotsUsed, onSelect, onClose, onCreate }) {
 }
 
 export default function JerseyGuesserScreen({ onBack, onStart, savedGames, onDeleteGame }) {
-  const { players, createPlayer } = usePlayers()
+  const { players, loading, createPlayer } = usePlayers()
 
   // 4 player slots — each is null or a player object
   const [selectedPlayers, setSelectedPlayers] = useState([null, null, null, null])
+
+  useEffect(() => {
+    if (!loading && players.length > 0) {
+      const top = players.slice(0, 2)
+      setSelectedPlayers(prev => {
+        const next = [...prev]
+        if (!next[0] && top[0]) next[0] = top[0]
+        if (!next[1] && top[1]) next[1] = top[1]
+        return next
+      })
+    }
+  }, [loading, players])
+
   const [showAddPlayerModal, setShowAddPlayerModal] = useState(false)
   const [addingSlot, setAddingSlot] = useState(null)
   const [view, setView] = useState(null) // null | 'stats' | 'games'
