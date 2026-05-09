@@ -127,8 +127,9 @@
 
 /* ── Players grid ── */
 .playersGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 14px;
   width: 100%;
   max-width: 720px;
@@ -137,6 +138,7 @@
 
 /* ── Player card ── */
 .playerCard {
+  width: 160px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -463,5 +465,5 @@
 @media (max-width: 400px) {
   .seasonBox { width: 200px; height: 120px; }
   .seasonText { font-size: 1.8rem; }
-  .playersGrid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+  .playerCard { width: 140px; }
 }
