@@ -235,7 +235,7 @@ export default function WhoHasMoreScreen({ onBack, onStart, savedGames, onDelete
   const [selectedStats, setSelectedStats] = useState(new Set(DEFAULT_STATS))
 
   const [rounds, setRounds] = useState(5)
-  const [optionsPerQuestion, setOptionsPerQuestion] = useState(2)
+  const [optionsPerQuestion, setOptionsPerQuestion] = useState(4)
 
   useEffect(() => {
     getAvailableSeasons().then(s => {
