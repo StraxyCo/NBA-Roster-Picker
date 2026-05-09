@@ -10,6 +10,7 @@ const STAT_OPTIONS = [
   { value: 'stlg', label: 'STL/G' },
   { value: 'blkg', label: 'BLK/G' },
   { value: 'ming', label: 'MIN/G' },
+  { value: 'fg3m', label: 'FG3M' },
 ]
 const DEFAULT_STATS = new Set(['ppg', 'rpg', 'apg'])
 
