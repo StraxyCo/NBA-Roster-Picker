@@ -4,6 +4,7 @@ import StatsOverUnderSetupScreen, { ALL_STATS } from '../screens/StatsOverUnderS
 import OrderDrawScreen from '../screens/OrderDrawScreen.jsx'
 import StatsOverUnderGameScreen from '../screens/StatsOverUnderGameScreen.jsx'
 import { useStatsOverUnderGames } from '../hooks/useProfiles.js'
+import { playerWeight, weightedPick } from '../utils/playerSelection.js'
 import styles from './StatsOverUnderGame.module.css'
 
 const PHASES = {
@@ -33,7 +34,9 @@ function pickRandomEntry(careers, seasons, selectedStats) {
       }
     }
   }
-  return pool.length ? pool[Math.floor(Math.random() * pool.length)] : null
+  if (!pool.length) return null
+  const weights = pool.map(playerWeight)
+  return weightedPick(pool, weights)
 }
 
 // ── Between-turns interstitial ──────────────────────────────────────────────
