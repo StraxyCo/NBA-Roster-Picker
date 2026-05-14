@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { usePlayers } from '../hooks/useProfiles.js'
 import { ALL_SEASONS } from '../data/seasons.js'
 import styles from './TeamLeadersSetupScreen.module.css'
@@ -188,12 +188,24 @@ function SeasonsModal({ selected, onSave, onClose }) {
 
 // ── Main export ─────────────────────────────────────────────────────────────
 export default function TeamLeadersSetupScreen({ onBack, onStart, savedGames, onDeleteGame }) {
-  const { players, createPlayer } = usePlayers()
+  const { players, loading, createPlayer } = usePlayers()
 
   const MAX_SLOTS = 4
   const [selectedPlayers, setSelectedPlayers] = useState(Array(MAX_SLOTS).fill(null))
   const [addingSlot, setAddingSlot] = useState(null)
   const [view, setView] = useState(null)
+
+  useEffect(() => {
+    if (!loading && players.length > 0) {
+      const top = players.slice(0, 2)
+      setSelectedPlayers(prev => {
+        const next = [...prev]
+        if (!next[0] && top[0]) next[0] = top[0]
+        if (!next[1] && top[1]) next[1] = top[1]
+        return next
+      })
+    }
+  }, [loading, players])
 
   const [rounds, setRounds]                     = useState(5)
   const [seasons, setSeasons]                   = useState(ALL_SEASONS)
