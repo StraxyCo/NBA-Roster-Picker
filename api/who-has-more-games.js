@@ -29,6 +29,29 @@ async function hset(key, field, value) {
   })
 }
 
+function normalizePlayer(raw) {
+  const p = typeof raw === 'string' ? JSON.parse(raw) : { ...raw }
+  if (!p.stats) {
+    p.stats = {
+      rosterPicker:  { played: p.gamesPlayed || 0,       wins: p.wins || 0 },
+      jerseyGuesser: { played: p.jerseyGamesPlayed || 0, wins: p.jerseyWins || 0 },
+    }
+    delete p.gamesPlayed
+    delete p.wins
+    delete p.jerseyGamesPlayed
+    delete p.jerseyWins
+  }
+  // Migrate flat whoHasMore fields into nested stats (may exist even if p.stats already set)
+  if (p.whoHasMoreGamesPlayed !== undefined || p.whoHasMoreWins !== undefined) {
+    if (!p.stats.whoHasMore) p.stats.whoHasMore = { played: 0, wins: 0 }
+    p.stats.whoHasMore.played += p.whoHasMoreGamesPlayed || 0
+    p.stats.whoHasMore.wins += p.whoHasMoreWins || 0
+    delete p.whoHasMoreGamesPlayed
+    delete p.whoHasMoreWins
+  }
+  return p
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS')
@@ -61,9 +84,10 @@ export default async function handler(req, res) {
       for (const pid of playerIds) {
         const pRaw = await hget('players', pid)
         if (!pRaw) continue
-        const player = typeof pRaw === 'string' ? JSON.parse(pRaw) : pRaw
-        player.whoHasMoreGamesPlayed = (player.whoHasMoreGamesPlayed || 0) + 1
-        if (pid === winnerId) player.whoHasMoreWins = (player.whoHasMoreWins || 0) + 1
+        const player = normalizePlayer(pRaw)
+        if (!player.stats.whoHasMore) player.stats.whoHasMore = { played: 0, wins: 0 }
+        player.stats.whoHasMore.played++
+        if (pid === winnerId) player.stats.whoHasMore.wins++
         await hset('players', pid, JSON.stringify(player))
       }
 
@@ -81,9 +105,10 @@ export default async function handler(req, res) {
       for (const pid of (game.playerIds || [])) {
         const pRaw = await hget('players', pid)
         if (!pRaw) continue
-        const player = typeof pRaw === 'string' ? JSON.parse(pRaw) : pRaw
-        player.whoHasMoreGamesPlayed = Math.max(0, (player.whoHasMoreGamesPlayed || 0) - 1)
-        if (pid === game.winnerId) player.whoHasMoreWins = Math.max(0, (player.whoHasMoreWins || 0) - 1)
+        const player = normalizePlayer(pRaw)
+        if (!player.stats.whoHasMore) player.stats.whoHasMore = { played: 0, wins: 0 }
+        player.stats.whoHasMore.played = Math.max(0, player.stats.whoHasMore.played - 1)
+        if (pid === game.winnerId) player.stats.whoHasMore.wins = Math.max(0, player.stats.whoHasMore.wins - 1)
         await hset('players', pid, JSON.stringify(player))
       }
 
