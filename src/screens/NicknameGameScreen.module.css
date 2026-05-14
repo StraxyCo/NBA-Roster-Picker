@@ -1,0 +1,342 @@
+.container {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 24px 100px;
+}
+
+.backArrow {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  background: none;
+  border: none;
+  color: var(--white-50);
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: color 0.2s;
+  z-index: 10;
+  padding: 8px;
+  line-height: 1;
+}
+.backArrow:hover { color: var(--white); }
+
+.loading {
+  margin-top: 120px;
+  color: var(--white-40);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* Header */
+.header {
+  margin-top: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 32px;
+}
+
+.roundPill {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  background: rgba(245, 197, 24, 0.1);
+  border: 1px solid rgba(245, 197, 24, 0.25);
+  border-radius: 99px;
+  padding: 4px 14px;
+}
+
+.turnLabel {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--white);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Card */
+.card {
+  width: 100%;
+  max-width: 440px;
+  background: var(--navy-3);
+  border: 1px solid var(--white-10);
+  border-radius: var(--radius-lg);
+  padding: 32px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.prompt {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--white-40);
+  margin: 0;
+}
+
+.nickname {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 6vw, 3rem);
+  font-weight: 800;
+  color: var(--white);
+  text-align: center;
+  margin: 0;
+  line-height: 1.1;
+}
+
+/* Input */
+.inputBlock {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.inputWrapper {
+  position: relative;
+  width: 100%;
+}
+
+.input {
+  width: 100%;
+  background: var(--navy-4);
+  border: 1px solid var(--white-20);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  color: var(--white);
+  font-size: 1rem;
+  font-family: var(--font-body);
+  transition: border-color 0.15s;
+  box-sizing: border-box;
+}
+.input:focus { border-color: var(--gold); outline: none; }
+.input::placeholder { color: var(--white-20); }
+
+.suggestions {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--navy-2);
+  border: 1px solid var(--white-20);
+  border-radius: var(--radius);
+  overflow: hidden;
+  z-index: 100;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.suggestion {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 16px;
+  background: none;
+  border: none;
+  color: var(--white-80);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.1s;
+  border-bottom: 1px solid var(--white-05);
+}
+.suggestion:last-child { border-bottom: none; }
+.suggestion:hover { background: var(--navy-3); color: var(--gold); }
+
+/* Feedback */
+.feedbackBlock {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.result {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0;
+}
+.correct { color: #2ecc71; }
+.wrong   { color: #e74c3c; }
+
+.guessedName {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--white-60);
+  margin: 0;
+}
+
+.correctAnswer {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--gold);
+  margin: 0;
+}
+
+/* Action button */
+.actionBtn {
+  width: 100%;
+  background: var(--gold);
+  color: var(--navy);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 13px;
+  border-radius: var(--radius);
+  border: none;
+  cursor: pointer;
+  transition: all 0.18s;
+  margin-top: 4px;
+}
+.actionBtn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(245, 197, 24, 0.35); }
+.actionBtn:active { transform: translateY(0); }
+.actionBtn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+/* Scoreboard */
+.scoreboard {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--navy-2);
+  border-top: 1px solid var(--white-10);
+  flex-wrap: wrap;
+}
+
+.scoreChip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: var(--navy-3);
+  border: 1px solid var(--white-10);
+  border-radius: 99px;
+  transition: all 0.15s;
+}
+
+.scoreChipActive {
+  border-color: var(--gold);
+  background: rgba(245, 197, 24, 0.08);
+}
+
+.scoreChipName {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--white-70);
+}
+.scoreChipActive .scoreChipName { color: var(--white); }
+
+.scoreChipVal {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--gold);
+  min-width: 16px;
+  text-align: right;
+}
+
+/* Final screen */
+.finalContent {
+  margin-top: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.gameOver {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--white-40);
+  margin: 0;
+}
+
+.winnerName {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 7vw, 3.5rem);
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin: 0;
+  text-align: center;
+  text-shadow: 0 4px 20px rgba(245, 197, 24, 0.4);
+}
+
+.scoreList {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.scoreRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--navy-3);
+  border: 1px solid var(--white-10);
+  border-radius: var(--radius);
+}
+
+.scoreRowFirst {
+  border-color: rgba(245, 197, 24, 0.35);
+  background: rgba(245, 197, 24, 0.06);
+}
+
+.scoreRank {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--white-30);
+  width: 24px;
+}
+.scoreRowFirst .scoreRank { color: var(--gold); }
+
+.scoreName {
+  flex: 1;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--white-80);
+}
+.scoreRowFirst .scoreName { color: var(--white); }
+
+.scoreVal {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--white-50);
+}
+.scoreRowFirst .scoreVal { color: var(--gold); }
