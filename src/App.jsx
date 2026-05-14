@@ -7,6 +7,7 @@ import TeamLeadersGame from './games/TeamLeadersGame.jsx'
 import StatsOverUnderGame from './games/StatsOverUnderGame.jsx'
 import AllStarsGame from './games/AllStarsGame.jsx'
 import WhosThatGuyGame from './games/WhosThatGuyGame.jsx'
+import NicknameGame from './games/NicknameGame.jsx'
 
 export default function App() {
   return (
@@ -19,6 +20,7 @@ export default function App() {
       <Route path="/stats-over-under" element={<StatsOverUnderGame />} />
       <Route path="/all-stars" element={<AllStarsGame />} />
       <Route path="/whos-that-guy" element={<WhosThatGuyGame />} />
+      <Route path="/nickname-game" element={<NicknameGame />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )

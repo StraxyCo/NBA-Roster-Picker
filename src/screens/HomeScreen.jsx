@@ -47,6 +47,12 @@ const GAMES = [
     desc: 'Identify a player from their career stat line.',
     active: true,
   },
+  {
+    path: '/nickname-game',
+    name: 'The Nickname Game',
+    desc: 'Guess the player from their nickname.',
+    active: true,
+  },
 ]
 
 export default function HomeScreen() {
