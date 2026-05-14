@@ -190,7 +190,7 @@ function SeasonsModal({ selected, onSave, onClose }) {
 export default function TeamLeadersSetupScreen({ onBack, onStart, savedGames, onDeleteGame }) {
   const { players, createPlayer } = usePlayers()
 
-  const MAX_SLOTS = 6
+  const MAX_SLOTS = 4
   const [selectedPlayers, setSelectedPlayers] = useState(Array(MAX_SLOTS).fill(null))
   const [addingSlot, setAddingSlot] = useState(null)
   const [view, setView] = useState(null)
