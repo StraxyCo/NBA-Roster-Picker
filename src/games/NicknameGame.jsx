@@ -32,7 +32,7 @@ export default function NicknameGame() {
           players={config.players}
           seasons={config.seasons}
           rounds={config.rounds}
-          onBack={() => navigate('/')}
+          onBack={() => setPhase(PHASES.SETUP)}
           onSaveGame={saveGame}
         />
       )}

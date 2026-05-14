@@ -34,7 +34,7 @@ export default function WhoHasMoreGame() {
           stats={config.stats}
           rounds={config.rounds}
           optionsPerQuestion={config.optionsPerQuestion}
-          onBack={() => navigate('/')}
+          onBack={() => setPhase(PHASES.SETUP)}
           onSaveGame={saveGame}
         />
       )}
