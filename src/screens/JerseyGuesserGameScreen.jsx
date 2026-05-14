@@ -96,7 +96,7 @@ export default function JerseyGuesserGameScreen({ players, rounds, onBack, onSav
   }
 
   function advanceTurn() {
-    const next = playerQueue.current.pop()
+    const next = playerQueue.current.shift()
     if (!next) { saveAndRecap(scores); return }
     setCurrentNbaPlayer(next)
     setInputVal('')
