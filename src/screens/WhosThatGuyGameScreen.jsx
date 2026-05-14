@@ -17,7 +17,7 @@ export default function WhosThatGuyGameScreen({ mysteryPlayer, allPlayers, showT
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
-    if (!q) return allPlayers
+    if (q.length < 2) return []
     return allPlayers.filter(p => p.name.toLowerCase().includes(q))
   }, [allPlayers, query])
 
@@ -111,7 +111,7 @@ export default function WhosThatGuyGameScreen({ mysteryPlayer, allPlayers, showT
                     {p.name}
                   </button>
                 ))}
-                {filtered.length === 0 && query && (
+                {filtered.length === 0 && query.trim().length >= 2 && (
                   <p className={styles.hint}>No players match "{query}"</p>
                 )}
               </div>
