@@ -30,7 +30,6 @@ export default function NicknameGame() {
       {phase === PHASES.PLAYING && config && (
         <NicknameGameScreen
           players={config.players}
-          seasons={config.seasons}
           rounds={config.rounds}
           onBack={() => navigate('/')}
           onSaveGame={saveGame}

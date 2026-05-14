@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import styles from './NicknameSetupScreen.module.css'
 import { usePlayers } from '../hooks/useProfiles.js'
-import { getAvailableSeasons } from '../hooks/useRoster.js'
 
 function Modal({ onClose, children }) {
   return (
@@ -88,119 +87,6 @@ function AddPlayerModal({ players, slotsUsed, onSelect, onClose, onCreate }) {
   )
 }
 
-function SeasonModal({ allSeasons, current, onConfirm, onClose }) {
-  const [draft, setDraft] = useState(new Set(current))
-
-  function toggle(s) {
-    setDraft(prev => {
-      const next = new Set(prev)
-      if (next.has(s)) { if (next.size === 1) return prev; next.delete(s) }
-      else next.add(s)
-      return next
-    })
-  }
-
-  return (
-    <Modal onClose={onClose}>
-      <h3 className={styles.modalTitle}>Select seasons</h3>
-      <div className={styles.seasonModalLinks}>
-        <button className={styles.textBtn} onClick={() => setDraft(new Set(allSeasons))}>Select all</button>
-        <span className={styles.textBtnSep}>·</span>
-        <button className={styles.textBtn} onClick={() => setDraft(new Set([allSeasons[0]]))}>Unselect all</button>
-      </div>
-      <div className={styles.seasonCheckList}>
-        {allSeasons.map(s => (
-          <label key={s} className={styles.seasonCheckRow}>
-            <input
-              type="checkbox"
-              checked={draft.has(s)}
-              onChange={() => toggle(s)}
-              className={styles.seasonCheckbox}
-            />
-            <span className={styles.seasonCheckLabel}>{s}</span>
-          </label>
-        ))}
-      </div>
-      <div className={styles.modalActions}>
-        <button className={styles.btnPrimary} onClick={() => onConfirm(draft)}>Confirm selection</button>
-        <button className={styles.btnSecondary} onClick={onClose}>Back</button>
-      </div>
-    </Modal>
-  )
-}
-
-function StatsView({ players, onClose }) {
-  const sorted = [...players]
-    .filter(p => (p.stats?.nicknameGame?.played || 0) > 0)
-    .sort((a, b) => (b.stats?.nicknameGame?.wins || 0) - (a.stats?.nicknameGame?.wins || 0))
-  return (
-    <Modal onClose={onClose}>
-      <h3 className={styles.modalTitle}>Stats</h3>
-      <div className={styles.statsTable}>
-        <div className={styles.statsHeader}>
-          <span className={styles.statsColPlayer}>Player</span>
-          <span className={styles.statsCol}>GP</span>
-          <span className={styles.statsCol}>Wins</span>
-          <span className={styles.statsCol}>Win%</span>
-        </div>
-        {sorted.length === 0 && <p className={styles.emptyNote}>No games recorded yet.</p>}
-        {sorted.map(p => {
-          const gp  = p.stats?.nicknameGame?.played || 0
-          const w   = p.stats?.nicknameGame?.wins || 0
-          const pct = gp > 0 ? Math.round((w / gp) * 100) : 0
-          return (
-            <div key={p.id} className={styles.statsRow}>
-              <span className={styles.statsColPlayer}>{p.name}</span>
-              <span className={styles.statsCol}>{gp}</span>
-              <span className={styles.statsCol}>{w}</span>
-              <span className={styles.statsCol}>{pct}%</span>
-            </div>
-          )
-        })}
-      </div>
-      <div className={styles.modalActions}>
-        <button className={styles.btnSecondary} onClick={onClose}>Close</button>
-      </div>
-    </Modal>
-  )
-}
-
-function GamesView({ games, onDelete, onClose }) {
-  const [deletingId, setDeletingId] = useState(null)
-  const game = games.find(g => g.id === deletingId)
-  return (
-    <>
-      <Modal onClose={onClose}>
-        <h3 className={styles.modalTitle}>Games played</h3>
-        <div className={styles.gamesTable}>
-          <div className={styles.gamesHeader}>
-            <span className={styles.gamesColPlayers}>Players</span>
-            <span className={styles.gamesColWinner}>Winner</span>
-            <span className={styles.gamesColAction}></span>
-          </div>
-          {games.length === 0 && <p className={styles.emptyNote}>No games recorded yet.</p>}
-          {games.map(g => (
-            <div key={g.id} className={styles.gamesRow}>
-              <span className={styles.gamesColPlayers}>{(g.playerNames || []).join(', ')}</span>
-              <span className={styles.gamesColWinner}>{g.winnerName}</span>
-              <button className={styles.iconBtn} onClick={() => setDeletingId(g.id)}>🗑️</button>
-            </div>
-          ))}
-        </div>
-        <div className={styles.modalActions}>
-          <button className={styles.btnSecondary} onClick={onClose}>Close</button>
-        </div>
-      </Modal>
-      {game && (
-        <ConfirmModal
-          message="Delete this game? Player stats will be updated."
-          onConfirm={async () => { await onDelete(game.id); setDeletingId(null) }}
-          onCancel={() => setDeletingId(null)}
-        />
-      )}
-    </>
-  )
-}
 
 export default function NicknameSetupScreen({ onBack, onStart, savedGames, onDeleteGame }) {
   const { players, loading, createPlayer } = usePlayers()
@@ -209,9 +95,6 @@ export default function NicknameSetupScreen({ onBack, onStart, savedGames, onDel
   const [selectedPlayers, setSelectedPlayers] = useState([null, null, null, null])
   const [addingSlot, setAddingSlot] = useState(null)
 
-  const [allSeasons, setAllSeasons] = useState(['2025-26'])
-  const [selectedSeasons, setSelectedSeasons] = useState(new Set(['2025-26']))
-  const [showSeasonModal, setShowSeasonModal] = useState(false)
 
   const [rounds, setRounds] = useState(5)
 
@@ -227,12 +110,6 @@ export default function NicknameSetupScreen({ onBack, onStart, savedGames, onDel
     }
   }, [loading, players])
 
-  useEffect(() => {
-    getAvailableSeasons().then(s => {
-      setAllSeasons(s)
-      setSelectedSeasons(new Set(s))
-    }).catch(() => {})
-  }, [])
 
   function clearSlot(idx) {
     setSelectedPlayers(prev => { const next = [...prev]; next[idx] = null; return next })
@@ -243,12 +120,6 @@ export default function NicknameSetupScreen({ onBack, onStart, savedGames, onDel
       setSelectedPlayers(prev => { const next = [...prev]; next[addingSlot] = player; return next })
       setAddingSlot(null)
     }
-  }
-
-  function seasonLabel() {
-    if (selectedSeasons.size === 1) return [...selectedSeasons][0]
-    if (selectedSeasons.size === allSeasons.length) return 'All seasons'
-    return `${selectedSeasons.size} seasons`
   }
 
   const slotsUsedIds = selectedPlayers.filter(Boolean).map(p => p.id)
@@ -293,14 +164,6 @@ export default function NicknameSetupScreen({ onBack, onStart, savedGames, onDel
         </div>
 
         <div className={styles.section}>
-          <span className={styles.sectionLabel}>Season</span>
-          <button className={styles.seasonTrigger} onClick={() => setShowSeasonModal(true)}>
-            <span className={styles.seasonTriggerLabel}>{seasonLabel()}</span>
-            <span className={styles.seasonTriggerCaret}>▾</span>
-          </button>
-        </div>
-
-        <div className={styles.section}>
           <div className={styles.optionRow}>
             <div className={styles.optionLabel}>
               <span className={styles.optionTitle}>Rounds</span>
@@ -319,7 +182,7 @@ export default function NicknameSetupScreen({ onBack, onStart, savedGames, onDel
       <button
         className={styles.startBtn}
         disabled={!canStart}
-        onClick={() => onStart({ players: activePlayers, seasons: [...selectedSeasons], rounds })}
+        onClick={() => onStart({ players: activePlayers, rounds })}
       >
         Start Game
       </button>
@@ -331,15 +194,6 @@ export default function NicknameSetupScreen({ onBack, onStart, savedGames, onDel
           onSelect={handleAddPlayer}
           onClose={() => setAddingSlot(null)}
           onCreate={createPlayer}
-        />
-      )}
-
-      {showSeasonModal && (
-        <SeasonModal
-          allSeasons={allSeasons}
-          current={selectedSeasons}
-          onConfirm={draft => { setSelectedSeasons(draft); setShowSeasonModal(false) }}
-          onClose={() => setShowSeasonModal(false)}
         />
       )}
 
