@@ -47,6 +47,14 @@ function normalizePlayer(raw) {
     delete p.jerseyGamesPlayed
     delete p.jerseyWins
   }
+  // Migrate stale flat whoHasMore fields that may exist alongside p.stats
+  if (p.whoHasMoreGamesPlayed !== undefined || p.whoHasMoreWins !== undefined) {
+    if (!p.stats.whoHasMore) p.stats.whoHasMore = { played: 0, wins: 0 }
+    p.stats.whoHasMore.played += p.whoHasMoreGamesPlayed || 0
+    p.stats.whoHasMore.wins += p.whoHasMoreWins || 0
+    delete p.whoHasMoreGamesPlayed
+    delete p.whoHasMoreWins
+  }
   return p
 }
 
