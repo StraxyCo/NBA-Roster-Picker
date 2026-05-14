@@ -209,7 +209,7 @@ export default function TeamLeadersGame() {
       winnerName:  winners.length > 1 ? `Tie (${winners.join(', ')})` : winners[0],
     })
 
-    navigate('/')
+    setPhase(PHASES.SETUP)
   }
 
   const currentPlayerName  = turnOrder[turnIndex % turnOrder.length] || ''
