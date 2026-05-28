@@ -4,12 +4,12 @@ import styles from './TeammateChainGameScreen.module.css'
 
 export default function TeammateChainGameScreen({
   chainPlayer,        // { id, name } — current player in the chain
-  linkTeam,           // { teamAbbr, teamName, season } | null — last link's team (for "no same team" hint)
+  lastLink,           // { team, teamAbbr, season } | null — last connection's team
   noSameTeam,
   allPlayers,
-  currentPlayer,      // human player's name
-  scores, turnOrder,
-  onSubmit,           // ({ guessPlayer, connection }) => void — connection: { season, teamAbbr } | null
+  currentPlayer,      // human player guessing now
+  nextPlayer,         // human player waiting
+  onSubmit,           // ({ guessPlayer }) => void
   onBack,
 }) {
   const [query, setQuery] = useState('')
@@ -28,12 +28,9 @@ export default function TeammateChainGameScreen({
       {/* Top bar */}
       <div className={styles.topBar}>
         {onBack && <button className={styles.backArrow} onClick={onBack}>←</button>}
-        <div className={styles.scorePills}>
-          {(turnOrder || []).map(name => (
-            <span key={name} className={`${styles.scorePill} ${name === currentPlayer ? styles.scorePillActive : ''}`}>
-              {name} · {scores?.[name] ?? 0}
-            </span>
-          ))}
+        <div className={styles.players}>
+          <span className={styles.playerActive}>{currentPlayer}</span>
+          <span className={styles.playerWaiting}>{nextPlayer}</span>
         </div>
       </div>
 
@@ -43,9 +40,9 @@ export default function TeammateChainGameScreen({
         <div className={styles.chainCard}>
           <div className={styles.chainLabel}>Name a teammate of</div>
           <h2 className={styles.chainName}>{chainPlayer.name}</h2>
-          {linkTeam && noSameTeam && (
+          {lastLink && noSameTeam && (
             <div className={styles.chainConstraint}>
-              Can't use {linkTeam.teamName} ({linkTeam.season})
+              Can't use {lastLink.team} ({lastLink.season})
             </div>
           )}
         </div>

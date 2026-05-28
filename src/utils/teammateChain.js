@@ -9,18 +9,28 @@ const ABBR_TO_ID = {
 /**
  * Find a teammate connection between two players.
  * Returns { season, teamAbbr, teamName } if they played together, else null.
- * If excludeTeamAbbr is set, connections through that franchise are skipped.
+ * If excludeTeamAbbr is set and playerA played for multiple teams, skip that franchise.
  */
 export function findTeammateConnection(playerAId, playerBId, careers, rosters, excludeTeamAbbr = null) {
   const careerA = careers[String(playerAId)]
   if (!careerA) return null
 
+  // Count unique franchises this player played for
+  const franchiseIds = new Set()
+  for (const { teamAbbr } of careerA.seasons) {
+    if (teamAbbr !== 'TOT') {
+      const id = ABBR_TO_ID[teamAbbr]
+      if (id) franchiseIds.add(id)
+    }
+  }
+  // If player only played for one franchise, don't apply constraint
+  const applyConstraint = excludeTeamAbbr && franchiseIds.size > 1
+
   for (const { season, teamAbbr } of careerA.seasons) {
     if (teamAbbr === 'TOT') continue
 
-    // Apply "no same team" constraint
-    if (excludeTeamAbbr) {
-      // Resolve both to a canonical franchise id
+    // Apply "no same team" constraint only if player played for multiple teams
+    if (applyConstraint) {
       const excludeId = ABBR_TO_ID[excludeTeamAbbr]
       const currentId = ABBR_TO_ID[teamAbbr]
       if (currentId && excludeId && currentId === excludeId) continue

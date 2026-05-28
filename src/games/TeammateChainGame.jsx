@@ -1,64 +1,39 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import TeammateChainSetupScreen from '../screens/TeammateChainSetupScreen.jsx'
-import OrderDrawScreen from '../screens/OrderDrawScreen.jsx'
 import TeammateChainGameScreen from '../screens/TeammateChainGameScreen.jsx'
 import { useTeammateChainGames } from '../hooks/useProfiles.js'
 import { findTeammateConnection, pickStartingPlayer, getAllPlayers } from '../utils/teammateChain.js'
 import styles from './WhosThatGuyGame.module.css'
 
-const PHASES = { SETUP: 'setup', ORDER_DRAW: 'order_draw', PLAYING: 'playing', FINAL: 'final' }
+const PHASES = { SETUP: 'setup', PLAYING: 'playing', FINAL: 'final' }
 
-function FinalScreen({ scores, turnOrder, history, onFinish }) {
-  const sorted = [...turnOrder].sort((a, b) => (scores[b] || 0) - (scores[a] || 0))
-  const topScore = scores[sorted[0]] || 0
-  const winners = sorted.filter(n => (scores[n] || 0) === topScore)
-  const label = winners.length === 1 ? winners[0] : `Tie — ${winners.join(' & ')}`
-
+function FinalScreen({ winner, history, onFinish }) {
   return (
     <div className={styles.finalScreen}>
       <div className={styles.finalContent}>
         <div className={styles.eyebrow}>Game Over</div>
-        <h2 className={styles.winnerName}>{label}</h2>
-        <p className={styles.winnerSub}>{winners.length > 1 ? 'tied for the win!' : 'wins!'}</p>
+        <h2 className={styles.winnerName}>{winner} wins!</h2>
+        <p className={styles.winnerSub}>The chain broke.</p>
 
-        <div className={styles.scoreBoard}>
-          <div className={styles.scoreBoardLabel}>Final Scores</div>
-          {sorted.map(name => (
-            <div key={name} className={styles.scoreRow}>
-              <span className={styles.scorePlayerName}>{name}</span>
-              <span className={styles.scorePoints}>{scores[name] || 0} pts</span>
+        {/* Chain history */}
+        <div className={styles.chainHistory}>
+          <div className={styles.chainHistoryLabel}>The Chain</div>
+          {history.map((h, i) => (
+            <div key={i} className={`${styles.historyRow} ${h.correct ? styles.historyCorrect : styles.historyWrong}`}>
+              <span className={styles.historyNum}>{i + 1}.</span>
+              <div className={styles.historyBody}>
+                <span className={styles.historyLink}>{h.prevPlayer} → {h.guesser}: {h.guessedPlayer}</span>
+                {h.correct && (
+                  <span style={{ color: 'var(--white-40)', fontSize: '0.75rem' }}>
+                    via {h.connection.teamName} ({h.connection.season})
+                  </span>
+                )}
+              </div>
+              <span className={styles.historyIcon}>{h.correct ? '✓' : '✗'}</span>
             </div>
           ))}
         </div>
-
-        {/* Chain history */}
-        {sorted.map(name => {
-          const turns = history.filter(h => h.human === name)
-          if (!turns.length) return null
-          return (
-            <div key={name} className={styles.playerHistory}>
-              <div className={styles.playerHistoryHeader}>
-                <span className={styles.playerHistoryName}>{name}</span>
-                <span className={styles.playerHistoryScore}>{scores[name] || 0} pts</span>
-              </div>
-              {turns.map((h, i) => (
-                <div key={i} className={`${styles.historyRow} ${h.correct ? styles.historyCorrect : styles.historyWrong}`}>
-                  <span className={styles.historyIcon}>{h.correct ? '✓' : '✗'}</span>
-                  <div className={styles.historyBody}>
-                    <span className={styles.historyMystery}>{h.chainPlayer} → {h.guess}</span>
-                    {h.correct && h.connection && (
-                      <span className={styles.historyGuess} style={{ color: 'var(--white-40)' }}>
-                        via {h.connection.teamName} ({h.connection.season})
-                      </span>
-                    )}
-                    {!h.correct && <span className={styles.historyGuess}>Not a teammate</span>}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )
-        })}
 
         <button className={styles.finishBtn} onClick={onFinish}>New Game</button>
       </div>
@@ -75,15 +50,12 @@ export default function TeammateChainGame() {
   const [careers, setCareers]   = useState(null)
   const [rosters, setRosters]   = useState(null)
 
-  const [turnOrder, setTurnOrder]   = useState([])
-  const [playerObjects, setPlayerObjects] = useState([])
-  const [turnIndex, setTurnIndex]   = useState(0)
-  const [scores, setScores]         = useState({})
-  const [history, setHistory]       = useState([])
-
-  // Current chain state
-  const [chainPlayer, setChainPlayer] = useState(null)    // { id, name }
-  const [lastLinkTeam, setLastLinkTeam] = useState(null)  // { teamAbbr, teamName, season }
+  const [players, setPlayers]           = useState([])      // {id, name}[] — human players
+  const [currentPlayerIdx, setCurrentPlayerIdx] = useState(0) // index in players array
+  const [chainPlayer, setChainPlayer]   = useState(null)    // current player in chain
+  const [lastLink, setLastLink]         = useState(null)    // {from, to, team, season}
+  const [history, setHistory]           = useState([])      // chain of guesses
+  const [scores, setScores]             = useState({})      // player -> wins
 
   useEffect(() => {
     Promise.all([
@@ -96,23 +68,22 @@ export default function TeammateChainGame() {
   const allPlayers = useMemo(() => careers ? getAllPlayers(careers) : [], [careers])
   const dataLoaded = careers !== null && rosters !== null
 
-  function handleStart(cfg) { setConfig(cfg); setPhase(PHASES.ORDER_DRAW) }
-
-  function handleOrderDrawn(order) {
-    setTurnOrder(order)
-    setPlayerObjects(config.players.filter(p => order.includes(p.name)).sort((a, b) => order.indexOf(a.name) - order.indexOf(b.name)))
-    setTurnIndex(0)
-    setScores(Object.fromEntries(order.map(n => [n, 0])))
-    setHistory([])
+  function handleStart(cfg) {
+    setConfig(cfg)
+    setPlayers(cfg.players)
+    setScores(Object.fromEntries(cfg.players.map(p => [p.name, 0])))
+    setCurrentPlayerIdx(0)
 
     const start = pickStartingPlayer(careers, rosters)
     setChainPlayer(start)
-    setLastLinkTeam(null)
+    setLastLink(null)
+    setHistory([])
     setPhase(PHASES.PLAYING)
   }
 
-  const maxTurns = config ? config.rounds * (turnOrder.length || 1) : 0
-  const currentPlayerName = turnOrder[turnIndex % (turnOrder.length || 1)] || ''
+  const currentPlayerName = players[currentPlayerIdx]?.name || ''
+  const nextPlayerIdx = (currentPlayerIdx + 1) % players.length
+  const nextPlayerName = players[nextPlayerIdx]?.name || ''
 
   function handleSubmit({ guessPlayer }) {
     const connection = findTeammateConnection(
@@ -120,46 +91,38 @@ export default function TeammateChainGame() {
       guessPlayer.id,
       careers,
       rosters,
-      config.noSameTeam ? lastLinkTeam?.teamAbbr : null
+      config.noSameTeam && lastLink ? lastLink.teamAbbr : null
     )
     const correct = connection !== null
 
-    const histEntry = {
-      human: currentPlayerName,
-      chainPlayer: chainPlayer.name,
-      guess: guessPlayer.name,
+    // Record the guess
+    setHistory(prev => [...prev, {
+      prevPlayer: chainPlayer.name,
+      guesser: currentPlayerName,
+      guessedPlayer: guessPlayer.name,
       correct,
       connection,
-    }
-    setHistory(prev => [...prev, histEntry])
+    }])
 
     if (correct) {
-      setScores(prev => ({ ...prev, [currentPlayerName]: (prev[currentPlayerName] || 0) + 1 }))
-      // Chain advances to the named player
+      // Chain continues to next player's turn
       setChainPlayer(guessPlayer)
-      setLastLinkTeam(connection)
+      setLastLink({ from: chainPlayer.id, to: guessPlayer.id, teamAbbr: connection.teamAbbr, team: connection.teamName, season: connection.season })
+      setCurrentPlayerIdx(nextPlayerIdx)
     } else {
-      // Chain breaks — reset with a new starting player
-      const newStart = pickStartingPlayer(careers, rosters)
-      setChainPlayer(newStart)
-      setLastLinkTeam(null)
+      // Chain breaks — next player wins
+      setScores(prev => ({ ...prev, [nextPlayerName]: (prev[nextPlayerName] || 0) + 1 }))
+      setPhase(PHASES.FINAL)
     }
-
-    const nextTurn = turnIndex + 1
-    setTurnIndex(nextTurn)
-    if (nextTurn >= maxTurns) setPhase(PHASES.FINAL)
   }
 
   async function handleFinish() {
-    const sorted = [...turnOrder].sort((a, b) => (scores[b] || 0) - (scores[a] || 0))
-    const topScore = scores[sorted[0]] || 0
-    const winners = sorted.filter(n => (scores[n] || 0) === topScore)
-    const winner = winners.length === 1 ? playerObjects.find(p => p.name === winners[0]) : null
+    const winner = players[nextPlayerIdx]
     await saveGame({
-      playerIds: playerObjects.map(p => p.id),
-      playerNames: playerObjects.map(p => p.name),
-      winnerId: winner?.id ?? null,
-      winnerName: winners.length > 1 ? `Tie (${winners.join(', ')})` : winners[0],
+      playerIds: players.map(p => p.id),
+      playerNames: players.map(p => p.name),
+      winnerId: winner.id,
+      winnerName: winner.name,
     })
     setPhase(PHASES.SETUP)
   }
@@ -174,29 +137,21 @@ export default function TeammateChainGame() {
           onDeleteGame={deleteGame}
         />
       )}
-      {phase === PHASES.ORDER_DRAW && config && (
-        <OrderDrawScreen
-          players={config.players.map(p => p.name)}
-          onOrderDrawn={handleOrderDrawn}
-        />
-      )}
       {phase === PHASES.PLAYING && chainPlayer && (
         <TeammateChainGameScreen
           chainPlayer={chainPlayer}
-          linkTeam={lastLinkTeam}
+          lastLink={lastLink}
           noSameTeam={config.noSameTeam}
           allPlayers={allPlayers}
           currentPlayer={currentPlayerName}
-          scores={scores}
-          turnOrder={turnOrder}
+          nextPlayer={nextPlayerName}
           onSubmit={handleSubmit}
           onBack={() => setPhase(PHASES.SETUP)}
         />
       )}
       {phase === PHASES.FINAL && (
         <FinalScreen
-          scores={scores}
-          turnOrder={turnOrder}
+          winner={nextPlayerName}
           history={history}
           onFinish={handleFinish}
         />
