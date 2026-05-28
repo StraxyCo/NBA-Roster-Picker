@@ -1,75 +1,90 @@
-import { useState, useRef } from 'react'
+import { useState, useMemo, useRef } from 'react'
 import { SLOT_LABELS, getLogoUrl } from '../data/teams.js'
 import styles from './PickPlayerScreen.module.css'
 
+// Basketball-Reference team abbreviation differs from NBA API in a few cases
+function getBrefUrl(teamAbbr, season) {
+  if (!season) return null
+  const startYear = parseInt(season)   // parseInt('2009-10') → 2009
+  const endYear = startYear + 1
+  let a = teamAbbr
+  if (teamAbbr === 'PHX') a = 'PHO'
+  else if (teamAbbr === 'BKN') a = endYear < 2013 ? 'NJN' : 'BRK'
+  else if (teamAbbr === 'CHA') a = endYear < 2015 ? 'CHA' : 'CHO'
+  else if (teamAbbr === 'NOP') a = endYear === 2006 ? 'NOK' : endYear < 2014 ? 'NOH' : 'NOP'
+  else if (teamAbbr === 'OKC') a = endYear < 2009 ? 'SEA' : 'OKC'
+  return `https://www.basketball-reference.com/teams/${a}/${endYear}.html`
+}
+
+function fmtN(v, d = 1) {
+  if (v == null) return '—'
+  const n = parseFloat(v)
+  return isNaN(n) ? '—' : d === 0 ? Math.round(n).toString() : n.toFixed(d)
+}
+
+const SORT_OPTIONS = [
+  { key: 'alpha', label: 'A–Z' },
+  { key: 'gp',   label: 'GP' },
+  { key: 'min',  label: 'MIN' },
+  { key: 'pts',  label: 'PTS' },
+]
+
 export default function PickPlayerScreen({ currentPlayer, team, season, nbaRoster, userRoster, rosterSize, multiSeason, statMode, keepHidden, onValidate, globalPickedIds = new Set() }) {
-  // Working copy of the user's roster for this session
   const [myRoster, setMyRoster] = useState([...userRoster])
-  // Track which players from nbaRoster have been picked (by player id)
   const [pickedIds, setPickedIds] = useState(() => {
     const ids = new Set()
     userRoster.forEach(p => { if (p) ids.add(p.id) })
     return ids
   })
-
-  // Click-to-assign state: first click = select source, second click = assign target
   const [selectedSource, setSelectedSource] = useState(null)
-  // { type: 'nba', playerId } | { type: 'slot', slotIdx } | null
-
-  // Drag state
+  const [sortBy, setSortBy] = useState('alpha')
   const dragSource = useRef(null)
+
+  const sortedRoster = useMemo(() => {
+    const arr = [...nbaRoster]
+    if (sortBy === 'alpha') return arr.sort((a, b) => a.name.localeCompare(b.name))
+    return arr.sort((a, b) => (b[sortBy] ?? 0) - (a[sortBy] ?? 0))
+  }, [nbaRoster, sortBy])
 
   function isUnavailable(id) {
     return pickedIds.has(id) || globalPickedIds.has(id)
   }
 
   function handleNbaPlayerClick(player) {
-    if (isUnavailable(player.id)) return // already placed
-
+    if (isUnavailable(player.id)) return
     if (!selectedSource) {
-      // Select this player as source
       setSelectedSource({ type: 'nba', player })
     } else if (selectedSource.type === 'nba' && selectedSource.player.id === player.id) {
-      // Deselect
       setSelectedSource(null)
     } else {
-      // Re-select different nba player
       setSelectedSource({ type: 'nba', player })
     }
   }
 
   function handleSlotClick(slotIdx) {
     if (!selectedSource) {
-      // If slot is filled, select it as source (for reassignment)
       if (myRoster[slotIdx]) {
         setSelectedSource({ type: 'slot', slotIdx, player: myRoster[slotIdx] })
       }
       return
     }
-
     if (selectedSource.type === 'nba') {
-      // Place NBA player into slot — attach season
       const prev = myRoster[slotIdx]
       const newRoster = [...myRoster]
       newRoster[slotIdx] = { ...selectedSource.player, season }
-
       const newPicked = new Set(pickedIds)
       newPicked.add(selectedSource.player.id)
       if (prev) newPicked.delete(prev.id)
-
       setMyRoster(newRoster)
       setPickedIds(newPicked)
       setSelectedSource(null)
     } else if (selectedSource.type === 'slot') {
-      // Move player from one slot to another
       const fromIdx = selectedSource.slotIdx
       if (fromIdx === slotIdx) { setSelectedSource(null); return }
-
       const newRoster = [...myRoster]
       const displaced = newRoster[slotIdx]
       newRoster[slotIdx] = newRoster[fromIdx]
-      newRoster[fromIdx] = displaced  // swap
-
+      newRoster[fromIdx] = displaced
       setMyRoster(newRoster)
       setSelectedSource(null)
     }
@@ -86,8 +101,6 @@ export default function PickPlayerScreen({ currentPlayer, team, season, nbaRoste
     setPickedIds(newPicked)
     setSelectedSource(null)
   }
-
-  // ── Drag & Drop ──────────────────────────────────────────
 
   function onDragStartNba(e, player) {
     if (isUnavailable(player.id)) { e.preventDefault(); return }
@@ -110,7 +123,6 @@ export default function PickPlayerScreen({ currentPlayer, team, season, nbaRoste
     e.preventDefault()
     const src = dragSource.current
     if (!src) return
-
     if (src.type === 'nba') {
       if (isUnavailable(src.player.id)) return
       const prev = myRoster[slotIdx]
@@ -137,13 +149,10 @@ export default function PickPlayerScreen({ currentPlayer, team, season, nbaRoste
   const [showStatReveal, setShowStatReveal] = useState(false)
   const [pendingRoster, setPendingRoster]   = useState(null)
 
-  function countFilledSlots(roster) {
-    return roster.filter(p => p !== null).length
-  }
-
+  function countFilledSlots(roster) { return roster.filter(p => p !== null).length }
   const originalCount = countFilledSlots(userRoster)
-  const currentCount = countFilledSlots(myRoster)
-  const canValidate = currentCount === originalCount + 1
+  const currentCount  = countFilledSlots(myRoster)
+  const canValidate   = currentCount === originalCount + 1
 
   function handleValidate() {
     if (statMode !== 'standard' && !keepHidden) {
@@ -166,6 +175,8 @@ export default function PickPlayerScreen({ currentPlayer, team, season, nbaRoste
     return labels[statMode] || statMode
   }
 
+  const brefUrl = season ? getBrefUrl(team.abbr, season) : null
+
   return (
     <div className={styles.screen}>
       <div className={styles.content}>
@@ -181,7 +192,11 @@ export default function PickPlayerScreen({ currentPlayer, team, season, nbaRoste
           <div className={styles.teamInfo}>
             <div className={styles.eyebrow}>{currentPlayer}'s pick</div>
             <h1 className={styles.teamName}>{team.name}{season ? <span className={styles.teamSeason}> · {season}</span> : ''}</h1>
-            <p className={styles.hint}>Click a player, then click a slot — or drag & drop</p>
+            {brefUrl && (
+              <a href={brefUrl} target="_blank" rel="noreferrer" className={styles.brefBtn}>
+                Basketball Reference ↗
+              </a>
+            )}
           </div>
         </div>
 
@@ -190,14 +205,33 @@ export default function PickPlayerScreen({ currentPlayer, team, season, nbaRoste
           <div className={styles.panel}>
             <div className={styles.panelHeader}>
               <span className={styles.panelTitle}>Team Roster</span>
-              <span className={styles.panelCount}>{nbaRoster.length} players</span>
+              <div className={styles.sortBtns}>
+                {SORT_OPTIONS.map(({ key, label }) => (
+                  <button
+                    key={key}
+                    className={`${styles.sortBtn} ${sortBy === key ? styles.sortBtnActive : ''}`}
+                    onClick={() => setSortBy(key)}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {/* Column header for stats */}
+            <div className={styles.statsColHeader}>
+              <span className={styles.statsColSpacer} />
+              <span>GP</span>
+              <span>MIN</span>
+              <span>PTS</span>
+              <span>REB</span>
+              <span>AST</span>
             </div>
             <div className={styles.nbaList}>
               {nbaRoster.length === 0 && (
                 <div className={styles.empty}>No roster data available</div>
               )}
-              {nbaRoster.map(player => {
-                const isPicked = isUnavailable(player.id)
+              {sortedRoster.map(player => {
+                const isPicked   = isUnavailable(player.id)
                 const isSelected = selectedSource?.type === 'nba' && selectedSource.player.id === player.id
                 return (
                   <div
@@ -209,7 +243,14 @@ export default function PickPlayerScreen({ currentPlayer, team, season, nbaRoste
                   >
                     <span className={styles.playerPos}>{player.position || '—'}</span>
                     <span className={styles.playerName}>{player.name}</span>
-                    {isPicked && <span className={styles.pickedBadge}>✓</span>}
+                    <div className={styles.playerStats}>
+                      <span>{fmtN(player.gp, 0)}</span>
+                      <span>{fmtN(player.min)}</span>
+                      <span>{fmtN(player.pts)}</span>
+                      <span>{fmtN(player.reb)}</span>
+                      <span>{fmtN(player.ast)}</span>
+                    </div>
+                    {isPicked  && <span className={styles.pickedBadge}>✓</span>}
                     {isSelected && <span className={styles.selectedArrow}>→</span>}
                   </div>
                 )
@@ -228,18 +269,13 @@ export default function PickPlayerScreen({ currentPlayer, team, season, nbaRoste
             <div className={styles.slotList}>
               {Array.from({ length: rosterSize }).map((_, i) => {
                 const player = myRoster[i]
-                const isSelected = selectedSource?.type === 'slot' && selectedSource.slotIdx === i
-                const isTarget = selectedSource !== null && !player
+                const isSelected     = selectedSource?.type === 'slot' && selectedSource.slotIdx === i
+                const isTarget       = selectedSource !== null && !player
                 const isTargetFilled = selectedSource !== null && !!player && !(selectedSource.type === 'slot' && selectedSource.slotIdx === i)
                 return (
                   <div
                     key={i}
-                    className={`${styles.slot}
-                      ${player ? styles.slotFilled : ''}
-                      ${isSelected ? styles.slotSelected : ''}
-                      ${isTarget ? styles.slotTarget : ''}
-                      ${isTargetFilled ? styles.slotTargetFilled : ''}
-                    `}
+                    className={`${styles.slot} ${player ? styles.slotFilled : ''} ${isSelected ? styles.slotSelected : ''} ${isTarget ? styles.slotTarget : ''} ${isTargetFilled ? styles.slotTargetFilled : ''}`}
                     onClick={() => handleSlotClick(i)}
                     onDragOver={onDragOverSlot}
                     onDrop={e => onDropSlot(e, i)}
@@ -272,17 +308,11 @@ export default function PickPlayerScreen({ currentPlayer, team, season, nbaRoste
           </div>
         </div>
 
-        {/* Validate button */}
-        <button
-          className={styles.validateBtn}
-          onClick={handleValidate}
-          disabled={!canValidate}
-        >
+        <button className={styles.validateBtn} onClick={handleValidate} disabled={!canValidate}>
           Validate Picks
         </button>
       </div>
 
-      {/* Stat reveal overlay */}
       {showStatReveal && pendingRoster && (
         <div className={styles.revealOverlay}>
           <div className={styles.revealModal}>

@@ -19,6 +19,12 @@ function getStatKey(statMode) {
   return statMode
 }
 
+function fmtN(v, d = 1) {
+  if (v == null) return '—'
+  const n = parseFloat(v)
+  return isNaN(n) ? '—' : d === 0 ? Math.round(n).toString() : n.toFixed(d)
+}
+
 function formatStat(val, statMode) {
   if (val === undefined || val === null) return '—'
   const n = parseFloat(val)
@@ -106,12 +112,19 @@ export default function FinalScreen({ rosters, turnOrder, rosterSize, multiSeaso
                         {gameMode === 'teams' ? (
                           <>
                             <span className={styles.slotLabel}>{i + 1}</span>
-                            <span className={styles.slotPlayer}>
-                              {entry
-                                ? <>{entry.name}<span className={styles.slotSeasonTag}>{entry.season}</span></>
-                                : <em>—</em>
-                              }
-                            </span>
+                            <div className={styles.slotBody}>
+                              <span className={styles.slotPlayer}>
+                                {entry
+                                  ? <>{entry.name}<span className={styles.slotSeasonTag}>{entry.season}</span></>
+                                  : <em>—</em>
+                                }
+                              </span>
+                              {entry && (
+                                <span className={styles.slotStatLine}>
+                                  {fmtN(entry.gp, 0)}G · {fmtN(entry.min)}m · {fmtN(entry.pts)} · {fmtN(entry.reb)}r · {fmtN(entry.ast)}a
+                                </span>
+                              )}
+                            </div>
                             {statsInView && entry && (
                               <span className={styles.slotStatVal}>
                                 {formatStat(statVal, statMode)} {STAT_LABELS[statMode]}
@@ -121,12 +134,19 @@ export default function FinalScreen({ rosters, turnOrder, rosterSize, multiSeaso
                         ) : (
                           <>
                             <span className={styles.slotLabel}>{SLOT_LABELS[i] || i + 1}</span>
-                            <span className={styles.slotPlayer}>
-                              {entry
-                                ? <>{entry.name}{multiSeason && entry.season && <span className={styles.slotSeasonTag}>{entry.season}</span>}</>
-                                : <em>—</em>
-                              }
-                            </span>
+                            <div className={styles.slotBody}>
+                              <span className={styles.slotPlayer}>
+                                {entry
+                                  ? <>{entry.name}{multiSeason && entry.season && <span className={styles.slotSeasonTag}>{entry.season}</span>}</>
+                                  : <em>—</em>
+                                }
+                              </span>
+                              {entry && (
+                                <span className={styles.slotStatLine}>
+                                  {fmtN(entry.gp, 0)}G · {fmtN(entry.min)}m · {fmtN(entry.pts)} · {fmtN(entry.reb)}r · {fmtN(entry.ast)}a
+                                </span>
+                              )}
+                            </div>
                             {statsInView && entry ? (
                               <span className={styles.slotStatVal}>
                                 {formatStat(statVal, statMode)} {STAT_LABELS[statMode]}
