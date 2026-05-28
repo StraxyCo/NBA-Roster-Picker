@@ -119,13 +119,14 @@
   color: var(--white-40);
 }
 
-/* Column header row — mirrors nbaPlayer flex structure for pixel-perfect alignment */
-/* nbaList padding (8px) + nbaPlayer padding (12px) = 20px from panel edge */
+/* Column header row — mirrors nbaPlayer flex structure for pixel-perfect alignment.
+   Left:  8px (list) + 12px (row) = 20px
+   Right: 8px (list) + 12px (row) + 6px (scrollbar-gutter) = 26px */
 .statsColHeader {
   display: flex;
   align-items: center;
   gap: 10px;  /* same gap as nbaPlayer */
-  padding: 5px 20px;
+  padding: 5px 26px 5px 20px;
   border-bottom: 1px solid var(--white-05);
   background: var(--navy-4);
 }
@@ -183,6 +184,7 @@
 .nbaList {
   max-height: 420px;
   overflow-y: auto;
+  scrollbar-gutter: stable; /* reserve 6px scrollbar space always */
   padding: 8px;
   display: flex;
   flex-direction: column;
