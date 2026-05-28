@@ -119,44 +119,65 @@
   color: var(--white-40);
 }
 
-/* Sort buttons */
-.sortBtns { display: flex; gap: 3px; }
-.sortBtn {
-  font-family: var(--font-display);
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  padding: 3px 7px;
-  border-radius: 4px;
-  border: 1px solid var(--white-10);
-  background: transparent;
-  color: var(--white-30);
-  cursor: pointer;
-  transition: all 0.12s;
-}
-.sortBtn:hover { color: var(--white-60); border-color: var(--white-20); }
-.sortBtnActive { background: rgba(245,197,24,0.1); border-color: var(--gold); color: var(--gold); }
-
-/* Stats column header (above player list) */
+/* Column header row — mirrors nbaPlayer flex structure for pixel-perfect alignment */
+/* nbaList padding (8px) + nbaPlayer padding (12px) = 20px from panel edge */
 .statsColHeader {
   display: flex;
   align-items: center;
-  padding: 4px 12px 4px 20px;
+  gap: 10px;  /* same gap as nbaPlayer */
+  padding: 5px 20px;
   border-bottom: 1px solid var(--white-05);
   background: var(--navy-4);
 }
-.statsColSpacer { flex: 1; }
-.statsColHeader span {
+
+.colPosSpacer {
+  width: 28px;
+  flex-shrink: 0;
+}
+
+/* "Player" column label button */
+.colHeaderName {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
   font-family: var(--font-display);
-  font-size: 0.6rem;
+  font-size: 0.62rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--white-20);
+  color: var(--white-30);
+  text-align: left;
+  transition: color 0.12s;
+}
+.colHeaderName:hover { color: var(--white-60); }
+
+/* Stat label buttons sub-container — mirrors playerStats */
+.colHeaderStats {
+  display: flex;
+  flex-shrink: 0;
+}
+
+.colStatBtn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--white-30);
   width: 34px;
   text-align: right;
+  transition: color 0.12s;
 }
+.colStatBtn:hover { color: var(--white-60); }
+
+.colHeaderActive { color: var(--gold) !important; }
 
 /* NBA player list */
 .nbaList {
@@ -224,15 +245,15 @@
   flex-shrink: 0;
 }
 .playerStats span {
-  font-family: var(--font-display);
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--white-40);
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--white-80);
   width: 34px;
   text-align: right;
 }
 .nbaPlayerPicked .playerStats span { color: var(--white-20); }
-.nbaPlayerSelected .playerStats span { color: var(--gold); opacity: 0.8; }
+.nbaPlayerSelected .playerStats span { color: var(--gold); }
 
 .pickedBadge {
   font-size: 0.75rem;

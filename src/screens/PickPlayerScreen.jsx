@@ -22,11 +22,12 @@ function fmtN(v, d = 1) {
   return isNaN(n) ? '—' : d === 0 ? Math.round(n).toString() : n.toFixed(d)
 }
 
-const SORT_OPTIONS = [
-  { key: 'alpha', label: 'A–Z' },
-  { key: 'gp',   label: 'GP' },
-  { key: 'min',  label: 'MIN' },
-  { key: 'pts',  label: 'PTS' },
+const COL_HEADERS = [
+  { key: 'gp',  label: 'GP' },
+  { key: 'min', label: 'MIN' },
+  { key: 'pts', label: 'PTS' },
+  { key: 'reb', label: 'REB' },
+  { key: 'ast', label: 'AST' },
 ]
 
 export default function PickPlayerScreen({ currentPlayer, team, season, nbaRoster, userRoster, rosterSize, multiSeason, statMode, keepHidden, onValidate, globalPickedIds = new Set() }) {
@@ -205,26 +206,28 @@ export default function PickPlayerScreen({ currentPlayer, team, season, nbaRoste
           <div className={styles.panel}>
             <div className={styles.panelHeader}>
               <span className={styles.panelTitle}>Team Roster</span>
-              <div className={styles.sortBtns}>
-                {SORT_OPTIONS.map(({ key, label }) => (
+              <span className={styles.panelCount}>{nbaRoster.length} players</span>
+            </div>
+            {/* Column header — mirrors exact flex structure of player rows */}
+            <div className={styles.statsColHeader}>
+              <span className={styles.colPosSpacer} />
+              <button
+                className={`${styles.colHeaderName} ${sortBy === 'alpha' ? styles.colHeaderActive : ''}`}
+                onClick={() => setSortBy('alpha')}
+              >
+                Player
+              </button>
+              <div className={styles.colHeaderStats}>
+                {COL_HEADERS.map(({ key, label }) => (
                   <button
                     key={key}
-                    className={`${styles.sortBtn} ${sortBy === key ? styles.sortBtnActive : ''}`}
+                    className={`${styles.colStatBtn} ${sortBy === key ? styles.colHeaderActive : ''}`}
                     onClick={() => setSortBy(key)}
                   >
                     {label}
                   </button>
                 ))}
               </div>
-            </div>
-            {/* Column header for stats */}
-            <div className={styles.statsColHeader}>
-              <span className={styles.statsColSpacer} />
-              <span>GP</span>
-              <span>MIN</span>
-              <span>PTS</span>
-              <span>REB</span>
-              <span>AST</span>
             </div>
             <div className={styles.nbaList}>
               {nbaRoster.length === 0 && (
