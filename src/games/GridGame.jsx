@@ -101,29 +101,23 @@ export default function GridGame() {
     setPhase(PHASES.PLAYING)
   }
 
-  const maxTurns = config ? config.rounds * (turnOrder.length || 1) : 0
   const currentPlayerName = turnOrder[turnIndex % (turnOrder.length || 1)] || ''
 
   function handleCellSubmit(r, c, { player, correct }) {
-    setCells(prev => {
-      const next = prev.map(row => [...row])
-      if (correct) {
-        next[r][c] = { playerName: player.name, pickedBy: currentPlayerName, correct: true }
-        setScores(s => ({ ...s, [currentPlayerName]: (s[currentPlayerName] || 0) + 1 }))
-      } else {
-        // Mark as wrong attempt (still claimable) — just advance turn
-        next[r][c] = next[r][c] // no change if already null
-      }
-      return next
-    })
+    const nextCells = cells.map(row => [...row])
+    nextCells[r][c] = { playerName: player.name, pickedBy: currentPlayerName, correct }
+    if (correct) {
+      setScores(s => ({ ...s, [currentPlayerName]: (s[currentPlayerName] || 0) + 1 }))
+    }
+    setCells(nextCells)
 
-    const nextTurn = turnIndex + 1
-    setTurnIndex(nextTurn)
-
-    // Check game end conditions
-    const allFilled = cells.every(row => row.every(cell => cell?.correct))
-    if (nextTurn >= maxTurns || allFilled) {
+    // Check if all cells filled
+    const allFilled = nextCells.every(row => row.every(cell => cell !== null))
+    if (allFilled) {
       setPhase(PHASES.FINAL)
+    } else {
+      // Advance to next player
+      setTurnIndex(turnIndex + 1)
     }
   }
 
@@ -167,8 +161,6 @@ export default function GridGame() {
           scores={scores}
           turnOrder={turnOrder}
           cells={cells}
-          turnCount={turnIndex}
-          maxTurns={maxTurns}
           onCellSubmit={handleCellSubmit}
           onBack={() => setPhase(PHASES.SETUP)}
         />

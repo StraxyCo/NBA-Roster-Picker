@@ -6,17 +6,13 @@ import styles from './GridGameScreen.module.css'
 function CellSearch({ rowCat, colCat, allPlayers, careers, onSubmit, onClose }) {
   const [query, setQuery] = useState('')
   const [picked, setPicked] = useState(null)
-  const [result, setResult] = useState(null) // null | 'correct' | 'wrong'
 
   const filtered = useMemo(() => filterPlayers(allPlayers, query), [allPlayers, query])
 
   function handleValidate() {
     if (!picked) return
     const ok = validateCell(picked.id, rowCat, colCat, careers)
-    setResult(ok ? 'correct' : 'wrong')
-    setTimeout(() => {
-      onSubmit({ player: picked, correct: ok })
-    }, 800)
+    onSubmit({ player: picked, correct: ok })
   }
 
   return (
@@ -28,13 +24,7 @@ function CellSearch({ rowCat, colCat, allPlayers, careers, onSubmit, onClose }) 
           <span className={styles.catPill}>{colCat.label}</span>
         </div>
 
-        {result ? (
-          <div className={`${styles.resultFlash} ${result === 'correct' ? styles.flashCorrect : styles.flashWrong}`}>
-            {result === 'correct' ? '✓ Correct!' : '✗ Wrong'}
-          </div>
-        ) : (
-          <>
-            <div className={`${styles.searchSlot} ${picked ? styles.searchSlotFilled : ''}`}>
+        <div className={`${styles.searchSlot} ${picked ? styles.searchSlotFilled : ''}`}>
               {picked
                 ? <><span className={styles.searchSlotName}>{picked.name}</span><button className={styles.searchSlotClear} onClick={() => { setPicked(null); setQuery('') }}>✕</button></>
                 : <span className={styles.searchSlotEmpty}>Search for a player…</span>
@@ -65,8 +55,6 @@ function CellSearch({ rowCat, colCat, allPlayers, careers, onSubmit, onClose }) 
                 Submit →
               </button>
             </div>
-          </>
-        )}
       </div>
     </div>
   )
@@ -77,7 +65,6 @@ export default function GridGameScreen({
   rowCats, colCats, allPlayers, careers,
   currentPlayer, scores, turnOrder,
   cells,              // cells[r][c] = null | { playerName, pickedBy, correct }
-  turnCount, maxTurns,
   onCellSubmit,       // (r, c, { player, correct }) => void
   onBack,
 }) {
@@ -158,7 +145,7 @@ export default function GridGameScreen({
       </div>
 
       <div className={styles.footer}>
-        <span className={styles.footerTurns}>{Math.max(0, maxTurns - turnCount)} turns remaining</span>
+        <span className={styles.footerTurns}>{cells.flat().filter(c => c !== null).length} / {rows * cols} cells filled</span>
       </div>
 
       {selected && (

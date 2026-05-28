@@ -117,7 +117,6 @@ export default function GridSetupScreen({ onBack, onStart, savedGames, onDeleteG
   const [addingSlot, setAddingSlot] = useState(null)
   const [view, setView] = useState(null)
   const [gridSize, setGridSize] = useState(4)
-  const [rounds, setRounds] = useState(3)
   const [seasons, setSeasons] = useState(ALL_SEASONS)
   const [showSeasons, setShowSeasons] = useState(false)
 
@@ -178,18 +177,6 @@ export default function GridSetupScreen({ onBack, onStart, savedGames, onDeleteG
 
           <div className={styles.optionRow}>
             <div className={styles.optionLabel}>
-              <span className={styles.optionTitle}>Turns per player</span>
-              <span className={styles.optionDesc}>Attempts each player gets</span>
-            </div>
-            <div className={styles.stepper}>
-              <button className={styles.stepBtn} onClick={() => setRounds(r => Math.max(1, r - 1))} disabled={rounds <= 1}>−</button>
-              <span className={styles.stepValue}>{rounds}</span>
-              <button className={styles.stepBtn} onClick={() => setRounds(r => Math.min(10, r + 1))} disabled={rounds >= 10}>+</button>
-            </div>
-          </div>
-
-          <div className={styles.optionRow}>
-            <div className={styles.optionLabel}>
               <span className={styles.optionTitle}>Seasons</span>
               <span className={styles.optionDesc}>{seasonLabel}</span>
             </div>
@@ -199,7 +186,7 @@ export default function GridSetupScreen({ onBack, onStart, savedGames, onDeleteG
       </div>
 
       <button className={styles.startBtn} disabled={!canStart}
-        onClick={() => onStart({ players: activePlayers, gridSize, rounds, seasons })}>
+        onClick={() => onStart({ players: activePlayers, gridSize, seasons })}>
         Start Game
       </button>
 
