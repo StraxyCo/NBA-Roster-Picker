@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import WhoHasMoreScreen from '../screens/WhoHasMoreScreen.jsx'
+import OrderDrawScreen from '../screens/OrderDrawScreen.jsx'
 import WhoHasMoreGameScreen from '../screens/WhoHasMoreGameScreen.jsx'
 import { useWhoHasMoreGames } from '../hooks/useProfiles.js'
 
-const PHASES = { SETUP: 'setup', PLAYING: 'playing' }
+const PHASES = { SETUP: 'setup', ORDER_DRAW: 'order_draw', PLAYING: 'playing' }
 
 export default function WhoHasMoreGame() {
   const navigate = useNavigate()
@@ -14,6 +15,14 @@ export default function WhoHasMoreGame() {
 
   function handleStart(cfg) {
     setConfig(cfg)
+    setPhase(PHASES.ORDER_DRAW)
+  }
+
+  function handleOrderDrawn(order) {
+    setConfig(prev => ({
+      ...prev,
+      players: [...prev.players].sort((a, b) => order.indexOf(a.name) - order.indexOf(b.name)),
+    }))
     setPhase(PHASES.PLAYING)
   }
 
@@ -25,6 +34,12 @@ export default function WhoHasMoreGame() {
           onStart={handleStart}
           savedGames={games}
           onDeleteGame={deleteGame}
+        />
+      )}
+      {phase === PHASES.ORDER_DRAW && config && (
+        <OrderDrawScreen
+          players={config.players.map(p => p.name)}
+          onOrderDrawn={handleOrderDrawn}
         />
       )}
       {phase === PHASES.PLAYING && config && (
