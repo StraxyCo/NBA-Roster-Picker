@@ -240,13 +240,6 @@ export default function WhoHasMoreGameScreen({ players, seasons, stats, rounds, 
             )}
           </div>
 
-          {drawAnim === 'done' && currentSeason && currentStat && (
-            <div className={styles.drawnInfo}>
-              <div className={styles.drawnSeason}>{formatSeason(currentSeason)}</div>
-              <div className={styles.drawnStat}>{STAT_CONFIG[currentStat].label}</div>
-            </div>
-          )}
-
           {drawAnim === 'ready' && (
             <button className={styles.drawBtn} onClick={startSpin}>Draw Season</button>
           )}

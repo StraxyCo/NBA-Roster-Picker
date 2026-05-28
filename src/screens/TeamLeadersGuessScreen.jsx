@@ -57,7 +57,7 @@ export default function TeamLeadersGuessScreen({ team, season, roster, categorie
     onResult({ picks, leaders, score })
   }
 
-  const sortedRoster = [...roster].sort((a, b) => (b.pts ?? 0) - (a.pts ?? 0))
+  const sortedRoster = [...roster].sort((a, b) => a.name.localeCompare(b.name))
 
   // ── Recap phase ────────────────────────────────────────────────────────────
   if (phase === 'recap') {

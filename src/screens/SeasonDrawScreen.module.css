@@ -1,0 +1,103 @@
+.screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+}
+
+.drawBox {
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+  animation: fadeUp 0.4s ease both;
+}
+
+.eyebrow {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 32px;
+}
+
+.seasonCard {
+  width: 240px;
+  height: 140px;
+  margin: 0 auto 32px;
+  background: var(--navy-3);
+  border: 2px solid var(--white-10);
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.seasonCardSpinning { border-color: var(--white-20); }
+
+.seasonCardSpinning::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.04) 50%, transparent 60%);
+  animation: shimmer 0.6s linear infinite;
+}
+
+.seasonCardLocked {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 1px var(--gold), 0 0 40px rgba(245,197,24,0.2);
+}
+
+.questionMark {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 4rem;
+  color: var(--white-10);
+}
+
+.seasonText {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 2.2rem;
+  color: var(--white);
+  letter-spacing: 0.04em;
+}
+
+.drawBtn {
+  display: block;
+  width: 100%;
+  background: var(--gold);
+  color: var(--navy);
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 16px;
+  border-radius: var(--radius);
+  border: none;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+.drawBtn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(245,197,24,0.4); }
+.drawBtn:active { transform: translateY(0); }
+
+@keyframes shimmer {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(100%); }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 480px) {
+  .seasonCard { width: 200px; height: 120px; }
+  .seasonText { font-size: 1.8rem; }
+}

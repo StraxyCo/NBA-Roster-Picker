@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import TeamLeadersSetupScreen from '../screens/TeamLeadersSetupScreen.jsx'
 import OrderDrawScreen from '../screens/OrderDrawScreen.jsx'
+import SeasonDrawScreen from '../screens/SeasonDrawScreen.jsx'
 import TeamDrawScreen from '../screens/TeamDrawScreen.jsx'
 import TeamLeadersGuessScreen from '../screens/TeamLeadersGuessScreen.jsx'
 import { useTeamLeadersGames } from '../hooks/useProfiles.js'
@@ -20,6 +21,7 @@ const ALL_TEAM_STATS = [
 const PHASES = {
   SETUP: 'setup',
   ORDER_DRAW: 'order_draw',
+  SEASON_DRAW: 'season_draw',
   BETWEEN_TURNS: 'between_turns',
   TEAM_DRAW: 'team_draw',
   GUESSING: 'guessing',
@@ -27,12 +29,12 @@ const PHASES = {
 }
 
 // ── Between-turns interstitial ───────────────────────────────────────────────
-function BetweenTurns({ currentPlayer, currentRound, totalRounds, scores, turnOrder, onDraw }) {
+function BetweenTurns({ currentPlayer, currentRound, totalRounds, roundSeason, scores, turnOrder, onDraw }) {
   const hasScores = turnOrder.some(name => (scores[name] || 0) > 0)
   return (
     <div className={styles.screen}>
       <div className={styles.content}>
-        <div className={styles.eyebrow}>Round {currentRound} / {totalRounds}</div>
+        <div className={styles.eyebrow}>Round {currentRound} / {totalRounds}{roundSeason ? ` · ${roundSeason}` : ''}</div>
         <h2 className={styles.turnName}>{currentPlayer}</h2>
         <p className={styles.turnSubtitle}>Your turn — draw a team to guess!</p>
 
@@ -133,12 +135,13 @@ export default function TeamLeadersGame() {
   const [config, setConfig] = useState(null)
 
   // Game state
-  const [turnOrder, setTurnOrder]         = useState([])   // player names in order
-  const [playerObjects, setPlayerObjects] = useState([])   // full player objects
-  const [turnIndex, setTurnIndex]         = useState(0)    // 0 … rounds*players-1
-  const [scores, setScores]              = useState({})    // { playerName: totalPoints }
-  const [history, setHistory]            = useState([])     // per-turn recap
-  const [drawnEntries, setDrawnEntries]  = useState([])    // for eliminate logic
+  const [turnOrder, setTurnOrder]         = useState([])
+  const [playerObjects, setPlayerObjects] = useState([])
+  const [turnIndex, setTurnIndex]         = useState(0)
+  const [scores, setScores]              = useState({})
+  const [history, setHistory]            = useState([])
+  const [drawnEntries, setDrawnEntries]  = useState([])
+  const [roundSeason, setRoundSeason]    = useState(null)  // season drawn for current round
   const [currentTeam, setCurrentTeam]    = useState(null)
   const [currentSeason, setCurrentSeason] = useState(null)
   const [currentRoster, setCurrentRoster] = useState([])
@@ -155,6 +158,13 @@ export default function TeamLeadersGame() {
     setScores(Object.fromEntries(order.map(n => [n, 0])))
     setDrawnEntries([])
     setHistory([])
+    setRoundSeason(null)
+    setPhase(PHASES.SEASON_DRAW)
+  }
+
+  function handleSeasonDrawn(season) {
+    setRoundSeason(season)
+    setDrawnEntries([])   // reset eliminate pool for each new round
     setPhase(PHASES.BETWEEN_TURNS)
   }
 
@@ -181,14 +191,18 @@ export default function TeamLeadersGame() {
     }])
 
     const nextIndex = turnIndex + 1
+    setTurnIndex(nextIndex)
+    setCurrentTeam(null)
+    setCurrentSeason(null)
+    setCurrentRoster([])
+
     if (nextIndex >= config.rounds * turnOrder.length) {
-      setTurnIndex(nextIndex)
       setPhase(PHASES.FINAL)
+    } else if (nextIndex % turnOrder.length === 0) {
+      // All players done for this round — draw a new season
+      setRoundSeason(null)
+      setPhase(PHASES.SEASON_DRAW)
     } else {
-      setTurnIndex(nextIndex)
-      setCurrentTeam(null)
-      setCurrentSeason(null)
-      setCurrentRoster([])
       setPhase(PHASES.BETWEEN_TURNS)
     }
   }
@@ -209,7 +223,7 @@ export default function TeamLeadersGame() {
       winnerName:  winners.length > 1 ? `Tie (${winners.join(', ')})` : winners[0],
     })
 
-    setPhase(PHASES.SETUP)
+    navigate('/')
   }
 
   const currentPlayerName  = turnOrder[turnIndex % turnOrder.length] || ''
@@ -234,11 +248,20 @@ export default function TeamLeadersGame() {
         />
       )}
 
+      {phase === PHASES.SEASON_DRAW && config && (
+        <SeasonDrawScreen
+          eyebrow={`Round ${currentRound} of ${config.rounds}`}
+          seasons={config.seasons}
+          onDrawn={handleSeasonDrawn}
+        />
+      )}
+
       {phase === PHASES.BETWEEN_TURNS && (
         <BetweenTurns
           currentPlayer={currentPlayerName}
           currentRound={currentRound}
           totalRounds={config.rounds}
+          roundSeason={roundSeason}
           scores={scores}
           turnOrder={turnOrder}
           onDraw={() => setPhase(PHASES.TEAM_DRAW)}
@@ -250,7 +273,7 @@ export default function TeamLeadersGame() {
           drawnEntries={drawnEntries}
           eliminateTeams={config.eliminateTeams}
           eliminateFranchises={config.eliminateFranchises}
-          seasons={config.seasons}
+          seasons={roundSeason ? [roundSeason] : config.seasons}
           onTeamDrawn={handleTeamDrawn}
         />
       )}
