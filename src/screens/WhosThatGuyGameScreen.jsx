@@ -68,17 +68,31 @@ export default function WhosThatGuyGameScreen({ mysteryPlayer, allPlayers, showT
               <span className={styles.colStat}>AST</span>
               <span className={styles.colStat}>3PM</span>
             </div>
-            {mysteryPlayer.seasons.map((s, i) => (
-              <div key={i} className={styles.statRow}>
-                <span className={styles.colYear}>{fmtSeason(s.season)}</span>
-                {showTeams && <span className={styles.colTeam}>{s.teamAbbr}</span>}
-                <span className={styles.colStat}>{fmtStat('gp', s.gp)}</span>
-                <span className={styles.colStat}>{fmtStat('pts', s.pts)}</span>
-                <span className={styles.colStat}>{fmtStat('reb', s.reb)}</span>
-                <span className={styles.colStat}>{fmtStat('ast', s.ast)}</span>
-                <span className={styles.colStat}>{fmtStat('fg3m', s.fg3m)}</span>
-              </div>
-            ))}
+            {(() => {
+              // Count entries per season to detect traded-midseason rows
+              const counts = {}
+              mysteryPlayer.seasons.forEach(s => { counts[s.season] = (counts[s.season] || 0) + 1 })
+              return mysteryPlayer.seasons.map((s, i) => {
+                const multi = counts[s.season] > 1
+                const isTot = s.teamAbbr === 'TOT'
+                const isSub = multi && !isTot   // individual team line within a traded season
+                return (
+                  <div key={i} className={`${styles.statRow} ${isSub ? styles.statRowSub : ''}`}>
+                    <span className={styles.colYear}>{fmtSeason(s.season)}</span>
+                    {showTeams && (
+                      <span className={`${styles.colTeam} ${isSub ? styles.colTeamSub : ''}`}>
+                        {s.teamAbbr}
+                      </span>
+                    )}
+                    <span className={styles.colStat}>{fmtStat('gp', s.gp)}</span>
+                    <span className={styles.colStat}>{fmtStat('pts', s.pts)}</span>
+                    <span className={styles.colStat}>{fmtStat('reb', s.reb)}</span>
+                    <span className={styles.colStat}>{fmtStat('ast', s.ast)}</span>
+                    <span className={styles.colStat}>{fmtStat('fg3m', s.fg3m)}</span>
+                  </div>
+                )
+              })
+            })()}
           </div>
         </div>
 
