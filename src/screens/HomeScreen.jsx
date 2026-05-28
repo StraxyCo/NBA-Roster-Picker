@@ -53,6 +53,18 @@ const GAMES = [
     desc: 'Guess the player from their nickname.',
     active: true,
   },
+  {
+    path: '/the-grid',
+    name: 'The Grid',
+    desc: 'Fill a grid matching players to two categories at once.',
+    active: true,
+  },
+  {
+    path: '/teammate-chain',
+    name: 'Teammate Chain',
+    desc: 'Link NBA players through shared teammates.',
+    active: true,
+  },
 ]
 
 export default function HomeScreen() {

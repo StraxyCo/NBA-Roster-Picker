@@ -367,3 +367,47 @@ export function useJerseyGames() {
 
   return { games, loading, reload: load, saveGame, deleteGame }
 }
+
+export function useGridGames() {
+  const [games, setGames] = useState([])
+  const [loading, setLoading] = useState(true)
+  const load = useCallback(async () => {
+    try { const res = await fetch('/api/grid-games'); const data = await res.json(); setGames(Array.isArray(data) ? data : []) }
+    catch (e) { console.error('useGridGames load error', e) }
+    finally { setLoading(false) }
+  }, [])
+  useEffect(() => { load() }, [load])
+  async function saveGame({ playerIds, playerNames, winnerId, winnerName }) {
+    const res = await fetch('/api/grid-games', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ playerIds, playerNames, winnerId, winnerName }) })
+    if (!res.ok) throw new Error('Failed to save grid game')
+    const game = await res.json(); setGames(prev => [game, ...prev]); return game
+  }
+  async function deleteGame(id) {
+    const res = await fetch(`/api/grid-games?id=${id}`, { method: 'DELETE' })
+    if (!res.ok) throw new Error('Failed to delete grid game')
+    setGames(prev => prev.filter(g => g.id !== id))
+  }
+  return { games, loading, reload: load, saveGame, deleteGame }
+}
+
+export function useTeammateChainGames() {
+  const [games, setGames] = useState([])
+  const [loading, setLoading] = useState(true)
+  const load = useCallback(async () => {
+    try { const res = await fetch('/api/teammate-chain-games'); const data = await res.json(); setGames(Array.isArray(data) ? data : []) }
+    catch (e) { console.error('useTeammateChainGames load error', e) }
+    finally { setLoading(false) }
+  }, [])
+  useEffect(() => { load() }, [load])
+  async function saveGame({ playerIds, playerNames, winnerId, winnerName }) {
+    const res = await fetch('/api/teammate-chain-games', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ playerIds, playerNames, winnerId, winnerName }) })
+    if (!res.ok) throw new Error('Failed to save teammate-chain game')
+    const game = await res.json(); setGames(prev => [game, ...prev]); return game
+  }
+  async function deleteGame(id) {
+    const res = await fetch(`/api/teammate-chain-games?id=${id}`, { method: 'DELETE' })
+    if (!res.ok) throw new Error('Failed to delete teammate-chain game')
+    setGames(prev => prev.filter(g => g.id !== id))
+  }
+  return { games, loading, reload: load, saveGame, deleteGame }
+}

@@ -1,0 +1,39 @@
+.screen { min-height: 100vh; display: flex; flex-direction: column; padding: 0 24px 60px; }
+
+.topBar { display: flex; align-items: center; gap: 10px; padding: 14px 0 10px; flex-wrap: wrap; }
+.backArrow { background: none; border: none; color: var(--white-50); font-size: 1.4rem; cursor: pointer; padding: 4px 8px; line-height: 1; flex-shrink: 0; transition: color 0.15s; }
+.backArrow:hover { color: var(--white); }
+.scorePills { display: flex; flex-wrap: wrap; gap: 6px; }
+.scorePill { font-family: var(--font-display); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 4px 10px; border-radius: var(--radius); border: 1px solid var(--white-10); color: var(--white-40); }
+.scorePillActive { border-color: var(--gold); color: var(--gold); background: rgba(245,197,24,0.06); }
+
+.content { width: 100%; max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; padding-top: 16px; }
+
+.eyebrow { font-family: var(--font-display); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); }
+
+.chainCard { background: var(--navy-3); border: 1px solid var(--white-10); border-radius: var(--radius-lg); padding: 28px 24px; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
+.chainLabel { font-family: var(--font-display); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--white-40); }
+.chainName { font-family: var(--font-display); font-size: clamp(2rem, 7vw, 3rem); font-weight: 800; text-transform: uppercase; color: var(--white); margin: 0; line-height: 1.1; text-shadow: 0 4px 16px rgba(0,0,0,0.4); }
+.chainConstraint { font-family: var(--font-display); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(239,68,68,0.7); border: 1px solid rgba(239,68,68,0.25); border-radius: 99px; padding: 3px 12px; }
+
+.pickerPanel { display: flex; flex-direction: column; gap: 10px; }
+
+.slot { border-radius: var(--radius); min-height: 52px; display: flex; align-items: center; padding: 0 14px; border: 1px solid var(--white-10); }
+.slotEmpty { background: var(--navy-3); border-style: dashed; justify-content: center; }
+.slotFilled { background: var(--navy-2); border-color: var(--gold); justify-content: space-between; }
+.slotName { font-family: var(--font-body); font-weight: 700; font-size: 1rem; color: var(--white); }
+.slotPlaceholder { font-size: 0.85rem; color: var(--white-30); }
+.slotClear { background: none; border: none; cursor: pointer; color: var(--white-40); font-size: 1rem; padding: 4px; }
+.slotClear:hover { color: var(--white); }
+
+.searchInput { width: 100%; padding: 10px 12px; background: var(--navy-3); border: 1px solid var(--white-10); border-radius: var(--radius); color: var(--white); font-family: var(--font-body); font-size: 0.9rem; box-sizing: border-box; }
+.searchInput:focus { outline: none; border-color: var(--gold); }
+.searchInput::placeholder { color: var(--white-30); }
+
+.searchList { display: flex; flex-direction: column; gap: 3px; max-height: 260px; overflow-y: auto; scrollbar-gutter: stable; border: 1px solid var(--white-10); border-radius: var(--radius); padding: 4px; background: var(--navy-3); }
+.searchItem { padding: 9px 12px; background: transparent; border: 1px solid transparent; border-radius: var(--radius); font-family: var(--font-body); font-size: 0.88rem; color: var(--white-70); cursor: pointer; text-align: left; transition: all 0.12s; }
+.searchItem:hover { background: var(--navy-4); color: var(--white); border-color: var(--white-10); }
+.hint { font-size: 0.82rem; color: var(--white-30); text-align: center; margin: 0; }
+
+.validateBtn { width: 100%; background: var(--gold); color: var(--navy); font-family: var(--font-display); font-size: 1rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; padding: 14px; border-radius: var(--radius); border: none; cursor: pointer; transition: all 0.18s; }
+.validateBtn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(245,197,24,0.4); }
