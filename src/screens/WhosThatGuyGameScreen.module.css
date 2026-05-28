@@ -1,6 +1,9 @@
 .screen { min-height: 100vh; display: flex; flex-direction: column; padding: 24px 20px 40px; }
 
-.topBar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.topBar { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+.scorePills { display: flex; flex-wrap: wrap; gap: 6px; margin-left: auto; }
+.scorePill { font-family: var(--font-display); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 4px 10px; border-radius: var(--radius); border: 1px solid var(--white-10); color: var(--white-40); }
+.scorePillActive { border-color: var(--gold); color: var(--gold); background: rgba(245,197,24,0.06); }
 .eyebrow { font-family: var(--font-display); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); }
 .resultBadge { font-family: var(--font-display); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 10px; border-radius: 4px; }
 .badgeCorrect { background: rgba(34,197,94,0.15); color: #22c55e; }

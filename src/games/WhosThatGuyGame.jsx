@@ -244,6 +244,8 @@ export default function WhosThatGuyGame() {
           allPlayers={allPlayers}
           showTeams={config.showTeams}
           currentPlayer={currentPlayerName}
+          scores={scores}
+          turnOrder={turnOrder}
           onResult={handleResult}
         />
       )}

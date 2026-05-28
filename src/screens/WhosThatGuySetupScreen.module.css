@@ -95,3 +95,9 @@
 .gamesColAction { width: 32px; }
 .iconBtn { background: none; border: none; cursor: pointer; font-size: 1rem; padding: 2px; opacity: 0.5; transition: opacity 0.15s; }
 .iconBtn:hover { opacity: 1; }
+
+/* Slide toggle (replaces Yes/No modeToggle for boolean options) */
+.toggle { width: 44px; height: 24px; background: var(--white-20); border-radius: 12px; position: relative; transition: background 0.2s; flex-shrink: 0; cursor: pointer; border: none; }
+.toggleOn { background: var(--gold); }
+.toggleKnob { position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; background: var(--white); border-radius: 50%; transition: transform 0.2s; pointer-events: none; }
+.toggleOn .toggleKnob { transform: translateX(20px); }

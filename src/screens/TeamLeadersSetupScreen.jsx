@@ -304,11 +304,8 @@ export default function TeamLeadersSetupScreen({ onBack, onStart, savedGames, on
               <span className={styles.optionTitle}>Eliminate drawn teams</span>
               <span className={styles.optionDesc}>No duplicate team + season</span>
             </div>
-            <button
-              className={`${styles.toggle} ${eliminateTeams ? styles.toggleOn : ''}`}
-              onClick={() => setEliminateTeams(v => !v)}
-            >
-              {eliminateTeams ? 'Yes' : 'No'}
+            <button className={`${styles.toggle} ${eliminateTeams ? styles.toggleOn : ''}`} onClick={() => setEliminateTeams(v => !v)}>
+              <span className={styles.toggleKnob} />
             </button>
           </div>
 
@@ -317,11 +314,8 @@ export default function TeamLeadersSetupScreen({ onBack, onStart, savedGames, on
               <span className={styles.optionTitle}>Eliminate drawn franchises</span>
               <span className={styles.optionDesc}>No same franchise across seasons</span>
             </div>
-            <button
-              className={`${styles.toggle} ${eliminateFranchises ? styles.toggleOn : ''}`}
-              onClick={() => setElimFranch(v => !v)}
-            >
-              {eliminateFranchises ? 'Yes' : 'No'}
+            <button className={`${styles.toggle} ${eliminateFranchises ? styles.toggleOn : ''}`} onClick={() => setElimFranch(v => !v)}>
+              <span className={styles.toggleKnob} />
             </button>
           </div>
         </div>

@@ -286,6 +286,7 @@ export default function TeamLeadersGame() {
           categories={resultCats}
           currentPlayer={currentPlayerName}
           onResult={handleResult}
+          onBack={() => setPhase(PHASES.BETWEEN_TURNS)}
         />
       )}
 

@@ -239,10 +239,9 @@ export default function AllStarsSetupScreen({ onBack, onStart, savedGames, onDel
               <span className={styles.optionTitle}>Show player stats</span>
               <span className={styles.optionDesc}>GP, PTS, REB, AST in roster</span>
             </div>
-            <div className={styles.modeToggle}>
-              <button className={`${styles.modeBtn} ${showPlayerStats ? styles.modeBtnOn : ''}`} onClick={() => setShowPlayerStats(true)}>Yes</button>
-              <button className={`${styles.modeBtn} ${!showPlayerStats ? styles.modeBtnOn : ''}`} onClick={() => setShowPlayerStats(false)}>No</button>
-            </div>
+            <button className={`${styles.toggle} ${showPlayerStats ? styles.toggleOn : ''}`} onClick={() => setShowPlayerStats(v => !v)}>
+              <span className={styles.toggleKnob} />
+            </button>
           </div>
 
           <div className={styles.optionRow}>
@@ -250,10 +249,9 @@ export default function AllStarsSetupScreen({ onBack, onStart, savedGames, onDel
               <span className={styles.optionTitle}>Team hints</span>
               <span className={styles.optionDesc}>All-star count per team</span>
             </div>
-            <div className={styles.modeToggle}>
-              <button className={`${styles.modeBtn} ${showTeamHints ? styles.modeBtnOn : ''}`} onClick={() => setShowTeamHints(true)}>Yes</button>
-              <button className={`${styles.modeBtn} ${!showTeamHints ? styles.modeBtnOn : ''}`} onClick={() => setShowTeamHints(false)}>No</button>
-            </div>
+            <button className={`${styles.toggle} ${showTeamHints ? styles.toggleOn : ''}`} onClick={() => setShowTeamHints(v => !v)}>
+              <span className={styles.toggleKnob} />
+            </button>
           </div>
         </div>
       </div>

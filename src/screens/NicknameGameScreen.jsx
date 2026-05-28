@@ -140,7 +140,7 @@ export default function NicknameGameScreen({ players, rounds, onBack, onSaveGame
               </div>
             ))}
           </div>
-          <button className={styles.actionBtn} onClick={onBack}>Back to Home</button>
+          <button className={styles.actionBtn} onClick={onBack}>New Game</button>
         </div>
       </div>
     )
@@ -152,10 +152,18 @@ export default function NicknameGameScreen({ players, rounds, onBack, onSaveGame
     <div className={styles.container}>
       <button className={styles.backArrow} onClick={onBack}>←</button>
 
-      <div className={styles.header}>
-        <span className={styles.roundPill}>Round {currentRound} / {rounds}</span>
-        <span className={styles.turnLabel}>{currentPlayer.name}'s turn</span>
+      <div className={styles.topBar}>
+        <div className={styles.roundInfo}>Round {currentRound} / {rounds}</div>
+        <div className={styles.scorePills}>
+          {players.map(p => (
+            <span key={p.name} className={`${styles.scorePill} ${p.name === currentPlayer.name ? styles.scorePillActive : ''}`}>
+              {p.name} · {scores[p.name]}
+            </span>
+          ))}
+        </div>
       </div>
+
+      <div className={styles.turnLabel}>{currentPlayer.name}'s turn</div>
 
       <div className={styles.card}>
         <p className={styles.prompt}>Who goes by…</p>
@@ -213,14 +221,6 @@ export default function NicknameGameScreen({ players, rounds, onBack, onSaveGame
         )}
       </div>
 
-      <div className={styles.scoreboard}>
-        {players.map((p, i) => (
-          <div key={p.name} className={`${styles.scoreChip} ${i === currentPlayerIdx ? styles.scoreChipActive : ''}`}>
-            <span className={styles.scoreChipName}>{p.name}</span>
-            <span className={styles.scoreChipVal}>{scores[p.name]}</span>
-          </div>
-        ))}
-      </div>
     </div>
   )
 }

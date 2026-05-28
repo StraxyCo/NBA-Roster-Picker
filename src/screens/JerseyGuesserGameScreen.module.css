@@ -237,8 +237,8 @@
   margin-bottom: 4px;
 }
 
-.feedbackIconCorrect { color: #4ade80; }
-.feedbackIconWrong   { color: #f87171; }
+.feedbackIconCorrect { color: #22c55e; }
+.feedbackIconWrong   { color: #ef4444; }
 
 .feedbackHeading {
   font-family: var(--font-display);

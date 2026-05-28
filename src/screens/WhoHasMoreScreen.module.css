@@ -180,27 +180,27 @@
 }
 
 .statChip {
-  padding: 6px 14px;
-  border-radius: 99px;
+  padding: 6px 12px;
+  border-radius: var(--radius);
   border: 1px solid var(--white-20);
   background: transparent;
-  color: var(--white-50);
+  color: var(--white-40);
   font-family: var(--font-display);
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   cursor: pointer;
   transition: all 0.15s;
 }
-.statChip:hover { border-color: var(--white-40); color: var(--white-80); }
+.statChip:hover { border-color: var(--white-40); color: var(--white-60); }
 
 .statChipOn {
-  background: var(--gold);
   border-color: var(--gold);
-  color: var(--navy);
+  color: var(--gold);
+  background: rgba(245,197,24,0.1);
 }
-.statChipOn:hover { background: var(--gold); border-color: var(--gold); color: var(--navy); opacity: 0.9; }
+.statChipOn:hover { border-color: var(--gold); color: var(--gold); }
 
 /* Option rows */
 .optionRow {

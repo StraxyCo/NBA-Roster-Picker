@@ -1,4 +1,12 @@
-.screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px 24px; }
+.screen { min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 0 24px 40px; }
+
+/* ── Top bar (back + persistent scores) ─────────────────────────────────── */
+.topBar { width: 100%; max-width: 480px; display: flex; align-items: center; gap: 12px; padding: 16px 0 8px; flex-wrap: wrap; }
+.backArrow { background: none; border: none; color: var(--white-50); font-size: 1.4rem; cursor: pointer; padding: 4px 8px; line-height: 1; flex-shrink: 0; transition: color 0.15s; }
+.backArrow:hover { color: var(--white); }
+.scorePills { display: flex; flex-wrap: wrap; gap: 6px; margin-left: auto; }
+.scorePill { font-family: var(--font-display); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 4px 10px; border-radius: var(--radius); border: 1px solid var(--white-10); color: var(--white-40); }
+.scorePillActive { border-color: var(--gold); color: var(--gold); background: rgba(245,197,24,0.06); }
 
 .content { width: 100%; max-width: 400px; display: flex; flex-direction: column; align-items: center; gap: 24px; text-align: center; }
 .contentWide { width: 100%; max-width: 480px; display: flex; flex-direction: column; align-items: center; gap: 20px; text-align: center; }
@@ -75,12 +83,12 @@
 .qiUnit { font-family: var(--font-display); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--white-40); min-width: 26px; }
 .qiBtns { display: flex; gap: 4px; }
 .qiBtn { padding: 5px 10px; border-radius: var(--radius); border: 1.5px solid transparent; font-family: var(--font-display); font-size: 0.72rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; transition: all 0.12s; white-space: nowrap; }
-.qiBtnUnder { background: rgba(59,130,246,0.08); border-color: rgba(59,130,246,0.3); color: #93c5fd; }
-.qiBtnUnder:hover { background: rgba(59,130,246,0.2); border-color: #3b82f6; }
-.qiBtnUnderActive { background: rgba(59,130,246,0.25); border-color: #3b82f6; color: #fff; }
-.qiBtnOver { background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.3); color: #fca5a5; }
-.qiBtnOver:hover { background: rgba(239,68,68,0.2); border-color: #ef4444; }
-.qiBtnOverActive { background: rgba(239,68,68,0.25); border-color: #ef4444; color: #fff; }
+.qiBtnUnder { background: var(--navy-4); border-color: var(--white-20); color: var(--white-50); }
+.qiBtnUnder:hover { border-color: var(--white-40); color: var(--white-80); }
+.qiBtnUnderActive { background: var(--navy-3); border-color: var(--white-60); color: var(--white); }
+.qiBtnOver { background: var(--navy-4); border-color: var(--white-20); color: var(--white-50); }
+.qiBtnOver:hover { border-color: var(--white-40); color: var(--white-80); }
+.qiBtnOverActive { background: rgba(245,197,24,0.12); border-color: var(--gold); color: var(--gold); }
 .validateBtn { width: 100%; background: var(--gold); color: var(--navy); font-family: var(--font-display); font-size: 1rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; padding: 14px; border-radius: var(--radius); border: none; cursor: pointer; transition: all 0.18s; }
 .validateBtn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(245,197,24,0.4); }
 .validateBtn:disabled { opacity: 0.4; cursor: not-allowed; }

@@ -167,8 +167,7 @@ export default function JerseyGuesserGameScreen({ players, rounds, onBack, onSav
               </div>
             ))}
           </div>
-          <div className={styles.recapInfo}>Max possible: {totalTurns * 2} pts ({rounds} round{rounds !== 1 ? 's' : ''} × 2 pts)</div>
-          <button className={styles.primaryBtn} onClick={onBack}>Play Again</button>
+          <button className={styles.primaryBtn} onClick={onBack}>New Game</button>
         </div>
       </div>
     )

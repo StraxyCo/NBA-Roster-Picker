@@ -256,10 +256,9 @@ export default function WhosThatGuySetupScreen({ onBack, onStart, savedGames, on
               <span className={styles.optionTitle}>Show teams</span>
               <span className={styles.optionDesc}>Show team column in stat table</span>
             </div>
-            <div className={styles.modeToggle}>
-              <button className={`${styles.modeBtn} ${showTeams ? styles.modeBtnOn : ''}`} onClick={() => setShowTeams(true)}>Yes</button>
-              <button className={`${styles.modeBtn} ${!showTeams ? styles.modeBtnOn : ''}`} onClick={() => setShowTeams(false)}>No</button>
-            </div>
+            <button className={`${styles.toggle} ${showTeams ? styles.toggleOn : ''}`} onClick={() => setShowTeams(v => !v)}>
+              <span className={styles.toggleKnob} />
+            </button>
           </div>
         </div>
       </div>

@@ -13,10 +13,13 @@ export default function StatsOverUnderGameScreen({
   teamAbbr,
   questions,
   currentPlayer,
+  scores,
+  turnOrder,
   onResult,
+  onBack,
 }) {
   const [phase, setPhase] = useState('reveal')
-  const [answers, setAnswers] = useState({}) // { [key]: 'over'|'under' }
+  const [answers, setAnswers] = useState({})
 
   const allAnswered = questions.every(q => answers[q.key] !== undefined)
   const answeredCount = Object.keys(answers).length
@@ -25,9 +28,7 @@ export default function StatsOverUnderGameScreen({
     setAnswers(prev => ({ ...prev, [key]: choice }))
   }
 
-  function handleValidate() {
-    setPhase('recap')
-  }
+  function handleValidate() { setPhase('recap') }
 
   function handleFinish() {
     const score = questions.filter(q => {
@@ -37,10 +38,27 @@ export default function StatsOverUnderGameScreen({
     onResult({ score })
   }
 
+  // Shared top bar shown on all phases
+  const topBar = (
+    <div className={styles.topBar}>
+      {onBack && <button className={styles.backArrow} onClick={onBack}>←</button>}
+      {turnOrder && turnOrder.length > 0 && (
+        <div className={styles.scorePills}>
+          {turnOrder.map(name => (
+            <span key={name} className={`${styles.scorePill} ${name === currentPlayer ? styles.scorePillActive : ''}`}>
+              {name} · {scores?.[name] ?? 0}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+
   // ── Reveal ────────────────────────────────────────────────────────────────
   if (phase === 'reveal') {
     return (
       <div className={styles.screen}>
+        {topBar}
         <div className={styles.content}>
           <div className={styles.eyebrow}>{currentPlayer}'s turn</div>
           <div className={styles.playerCard}>
@@ -56,10 +74,11 @@ export default function StatsOverUnderGameScreen({
     )
   }
 
-  // ── Picking (all questions at once) ───────────────────────────────────────
+  // ── Picking ───────────────────────────────────────────────────────────────
   if (phase === 'picking') {
     return (
       <div className={styles.screen}>
+        {topBar}
         <div className={styles.contentWide}>
           <div className={styles.questionHeader}>
             <span className={styles.questionMeta}>{nbaPlayerName} · {season}</span>
@@ -89,11 +108,7 @@ export default function StatsOverUnderGameScreen({
             })}
           </div>
 
-          <button
-            className={styles.validateBtn}
-            onClick={handleValidate}
-            disabled={!allAnswered}
-          >
+          <button className={styles.validateBtn} onClick={handleValidate} disabled={!allAnswered}>
             Validate picks →
           </button>
         </div>
@@ -110,6 +125,7 @@ export default function StatsOverUnderGameScreen({
 
     return (
       <div className={styles.screen}>
+        {topBar}
         <div className={styles.contentWide}>
           <div className={styles.eyebrow}>{currentPlayer}</div>
           <div className={styles.recapScoreWrap}>

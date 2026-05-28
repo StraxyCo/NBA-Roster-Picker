@@ -4,7 +4,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 40px 24px 100px;
+  padding: 40px 24px 60px;
 }
 
 .backArrow {
@@ -32,36 +32,63 @@
   letter-spacing: 0.1em;
 }
 
-/* Header */
-.header {
-  margin-top: 48px;
+/* Top bar — mirrors Jersey Guesser pattern */
+.topBar {
+  width: 100%;
+  max-width: 440px;
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 8px;
-  margin-bottom: 32px;
+  padding: 48px 0 0;
+  margin-bottom: 16px;
 }
 
-.roundPill {
+.roundInfo {
   font-family: var(--font-display);
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--gold);
-  background: rgba(245, 197, 24, 0.1);
-  border: 1px solid rgba(245, 197, 24, 0.25);
-  border-radius: 99px;
-  padding: 4px 14px;
+  text-align: center;
+}
+
+.scorePills {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.scorePill {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: var(--radius);
+  border: 1px solid var(--white-10);
+  color: var(--white-40);
+  background: transparent;
+  transition: all 0.15s;
+}
+
+.scorePillActive {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: rgba(245, 197, 24, 0.06);
 }
 
 .turnLabel {
   font-family: var(--font-display);
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: var(--white);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--white-60);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.1em;
+  text-align: center;
+  margin-bottom: 16px;
 }
 
 /* Card */
@@ -173,8 +200,8 @@
   letter-spacing: 0.08em;
   margin: 0;
 }
-.correct { color: #2ecc71; }
-.wrong   { color: #e74c3c; }
+.correct { color: #22c55e; }
+.wrong   { color: #ef4444; }
 
 .guessedName {
   font-family: var(--font-display);

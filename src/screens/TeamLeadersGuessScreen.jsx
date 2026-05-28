@@ -14,7 +14,7 @@ function computeScore(picks, leaders, categories) {
   return correct + (correct === categories.length ? 1 : 0)
 }
 
-export default function TeamLeadersGuessScreen({ team, season, roster, categories, currentPlayer, onResult }) {
+export default function TeamLeadersGuessScreen({ team, season, roster, categories, currentPlayer, onResult, onBack }) {
   const [phase, setPhase] = useState('guessing')
   const [selectedNbaPlayer, setSelectedNbaPlayer] = useState(null)
   const [picks, setPicks] = useState(() => Object.fromEntries(categories.map(c => [c.key, null])))
@@ -119,6 +119,7 @@ export default function TeamLeadersGuessScreen({ team, season, roster, categorie
   // ── Guessing phase ─────────────────────────────────────────────────────────
   return (
     <div className={styles.screen}>
+      {onBack && <button className={styles.backArrow} onClick={onBack}>←</button>}
       <div className={styles.content}>
         <div className={styles.teamHeader}>
           <img src={getLogoUrl(team.slug)} alt={team.name} className={styles.teamLogo} onError={e => { e.target.style.opacity = '0.2' }} />

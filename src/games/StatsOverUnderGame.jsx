@@ -231,6 +231,9 @@ export default function StatsOverUnderGame() {
           teamAbbr={currentEntry.teamAbbr}
           questions={currentQuestions}
           currentPlayer={currentPlayerName}
+          scores={scores}
+          turnOrder={turnOrder}
+          onBack={() => setPhase(PHASES.BETWEEN_TURNS)}
           onResult={handleResult}
         />
       )}

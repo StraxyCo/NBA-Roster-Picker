@@ -212,7 +212,7 @@
   right: -6px;
   width: 22px;
   height: 22px;
-  background: #2ecc71;
+  background: #22c55e;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -223,7 +223,7 @@
 }
 
 .playerName {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-weight: 700;
   font-size: 0.95rem;
   color: var(--white);
@@ -232,8 +232,8 @@
 }
 
 .statLabel {
-  font-family: var(--font-display);
-  font-weight: 800;
+  font-family: var(--font-body);
+  font-weight: 700;
   font-size: 0.9rem;
   color: var(--gold);
   text-align: center;

@@ -10,7 +10,7 @@ function fmtStat(key, val) {
 
 // mysteryPlayer: { id, name, seasons: [{season, teamAbbr, gp, pts, reb, ast, fg3m, ...}] }
 // allPlayers: [{ id, name }] sorted alphabetically
-export default function WhosThatGuyGameScreen({ mysteryPlayer, allPlayers, showTeams, currentPlayer, onResult }) {
+export default function WhosThatGuyGameScreen({ mysteryPlayer, allPlayers, showTeams, currentPlayer, scores, turnOrder, onResult }) {
   const [phase, setPhase]               = useState('picking')
   const [query, setQuery]               = useState('')
   const [pickedPlayer, setPickedPlayer] = useState(null)
@@ -40,6 +40,13 @@ export default function WhosThatGuyGameScreen({ mysteryPlayer, allPlayers, showT
     <div className={styles.screen}>
       <div className={styles.topBar}>
         <span className={styles.eyebrow}>{currentPlayer}'s turn</span>
+        <div className={styles.scorePills}>
+          {(turnOrder || []).map(name => (
+            <span key={name} className={`${styles.scorePill} ${name === currentPlayer ? styles.scorePillActive : ''}`}>
+              {name} · {scores?.[name] ?? 0}
+            </span>
+          ))}
+        </div>
         {phase === 'recap' && (
           <span className={`${styles.resultBadge} ${isCorrect ? styles.badgeCorrect : styles.badgeWrong}`}>
             {isCorrect ? '✓ Correct' : '✗ Wrong'}
