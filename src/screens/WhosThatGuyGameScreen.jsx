@@ -8,7 +8,7 @@ function fmtStat(key, val) {
   return Number(val).toFixed(1)
 }
 
-// mysteryPlayer: { id, name, seasons: [{season, teamAbbr, gp, pts, reb, ast, fg3m, ...}] }
+// mysteryPlayer: { id, name, seasons: [{season, teamAbbr, gp, min, pts, reb, ast, fg3m, ...}] }
 // allPlayers: [{ id, name }] sorted alphabetically
 export default function WhosThatGuyGameScreen({ mysteryPlayer, allPlayers, showTeams, currentPlayer, scores, turnOrder, onResult }) {
   const [phase, setPhase]               = useState('picking')
@@ -63,6 +63,7 @@ export default function WhosThatGuyGameScreen({ mysteryPlayer, allPlayers, showT
               <span className={styles.colYear}>Year</span>
               {showTeams && <span className={styles.colTeam}>Team</span>}
               <span className={styles.colStat}>GP</span>
+              <span className={styles.colStat}>MIN</span>
               <span className={styles.colStat}>PTS</span>
               <span className={styles.colStat}>REB</span>
               <span className={styles.colStat}>AST</span>
@@ -85,6 +86,7 @@ export default function WhosThatGuyGameScreen({ mysteryPlayer, allPlayers, showT
                       </span>
                     )}
                     <span className={styles.colStat}>{fmtStat('gp', s.gp)}</span>
+                    <span className={styles.colStat}>{fmtStat('min', s.min)}</span>
                     <span className={styles.colStat}>{fmtStat('pts', s.pts)}</span>
                     <span className={styles.colStat}>{fmtStat('reb', s.reb)}</span>
                     <span className={styles.colStat}>{fmtStat('ast', s.ast)}</span>
