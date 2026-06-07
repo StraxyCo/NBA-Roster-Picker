@@ -1,5 +1,6 @@
 // node scripts/fetch-careers.mjs                   → fetch careers for all players in rosters.json
 // node scripts/fetch-careers.mjs --player 2544     → fetch/refresh one player by NBA ID
+// node scripts/fetch-careers.mjs --missing min     → refetch every player whose seasons lack the given field
 
 import { writeFileSync, readFileSync, existsSync } from 'fs'
 
@@ -31,6 +32,7 @@ async function fetchCareer(playerId) {
     season:   row[h.indexOf('SEASON_ID')],
     teamAbbr: row[h.indexOf('TEAM_ABBREVIATION')],
     gp:       row[h.indexOf('GP')]   ?? 0,
+    min:      +(row[h.indexOf('MIN')]  ?? 0).toFixed(1),
     pts:      +(row[h.indexOf('PTS')]  ?? 0).toFixed(1),
     reb:      +(row[h.indexOf('REB')]  ?? 0).toFixed(1),
     ast:      +(row[h.indexOf('AST')]  ?? 0).toFixed(1),
@@ -44,6 +46,9 @@ async function fetchCareer(playerId) {
 
 const playerArgIdx = process.argv.indexOf('--player')
 const SINGLE_PLAYER = playerArgIdx !== -1 ? String(process.argv[playerArgIdx + 1]) : null
+
+const missingArgIdx = process.argv.indexOf('--missing')
+const MISSING_FIELD = missingArgIdx !== -1 ? String(process.argv[missingArgIdx + 1]) : null
 
 // ── Load existing ────────────────────────────────────────────────────────────
 
@@ -64,7 +69,12 @@ for (const seasonData of Object.values(rosters)) {
 
 const toFetch = SINGLE_PLAYER
   ? (playerMap.has(SINGLE_PLAYER) ? [SINGLE_PLAYER] : (() => { console.error(`Player ID ${SINGLE_PLAYER} not found in rosters.json`); process.exit(1) })())
-  : [...playerMap.keys()].filter(id => !careers[id])  // skip already-fetched
+  : MISSING_FIELD
+    ? [...playerMap.keys()].filter(id => {
+        const seasons = careers[id]?.seasons
+        return !seasons || seasons.some(s => s[MISSING_FIELD] == null)
+      })
+    : [...playerMap.keys()].filter(id => !careers[id])  // skip already-fetched
 
 console.log(`📂 careers.json: ${Object.keys(careers).length} players cached`)
 console.log(`👤 Total unique players in rosters.json: ${playerMap.size}`)
