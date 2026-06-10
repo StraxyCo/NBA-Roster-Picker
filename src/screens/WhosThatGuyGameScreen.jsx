@@ -17,15 +17,16 @@ export default function WhosThatGuyGameScreen({ mysteryPlayer, allPlayers, showT
   const [timeLeft, setTimeLeft]         = useState(45)
 
   useEffect(() => {
+    setTimeLeft(45)
+    setPhase('picking')
+  }, [mysteryPlayer])
+
+  useEffect(() => {
     if (phase !== 'picking') return
     const timer = setInterval(() => {
       setTimeLeft(t => Math.max(0, t - 1))
     }, 1000)
     return () => clearInterval(timer)
-  }, [phase])
-
-  useEffect(() => {
-    if (phase === 'recap') setTimeLeft(45)
   }, [phase])
 
   const filtered = useMemo(() => {
