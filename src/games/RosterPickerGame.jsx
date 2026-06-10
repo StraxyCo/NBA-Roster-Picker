@@ -91,7 +91,9 @@ export default function RosterPickerGame() {
     setStatMode(statMode)
     setKeepHidden(keepHidden)
     setBans(banCount || 0)
-    setBannedPlayers({})
+    const initialBans = {}
+    players.forEach(p => { initialBans[p.name] = {} })
+    setBannedPlayers(initialBans)
     setLastGameConfig({ players, rosterSize, eliminateTeams, eliminateFranchises, seasons, gameMode, statMode, keepHidden, bans: banCount })
     const emptyRosters = {}
     players.forEach(p => { emptyRosters[p.name] = buildEmptyRoster(rosterSize) })
@@ -251,7 +253,10 @@ export default function RosterPickerGame() {
           statMode={statMode} keepHidden={keepHidden}
           bans={bans} bannedPlayers={bannedPlayers}
           onValidate={handlePickValidated}
-          onBanPlayer={(playerId) => setBannedPlayers(prev => ({ ...prev, [playerId]: true }))}
+          onBanPlayer={(playerId) => setBannedPlayers(prev => ({
+            ...prev,
+            [currentPlayer]: { ...prev[currentPlayer], [playerId]: true }
+          }))}
         />
       )}
       {screen === SCREENS.TEAM_STAT_REVEAL && lastPickedEntry && (
