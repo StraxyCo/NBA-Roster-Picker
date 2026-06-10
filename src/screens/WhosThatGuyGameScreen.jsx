@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import styles from './WhosThatGuyGameScreen.module.css'
 
 function fmtSeason(s) { return s.slice(2) }
@@ -14,6 +14,19 @@ export default function WhosThatGuyGameScreen({ mysteryPlayer, allPlayers, showT
   const [phase, setPhase]               = useState('picking')
   const [query, setQuery]               = useState('')
   const [pickedPlayer, setPickedPlayer] = useState(null)
+  const [timeLeft, setTimeLeft]         = useState(45)
+
+  useEffect(() => {
+    if (phase !== 'picking') return
+    const timer = setInterval(() => {
+      setTimeLeft(t => Math.max(0, t - 1))
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [phase])
+
+  useEffect(() => {
+    if (phase === 'recap') setTimeLeft(45)
+  }, [phase])
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -47,6 +60,11 @@ export default function WhosThatGuyGameScreen({ mysteryPlayer, allPlayers, showT
             </span>
           ))}
         </div>
+        {phase === 'picking' && (
+          <span className={`${styles.countdown} ${timeLeft < 10 ? styles.countdownWarning : ''}`}>
+            {timeLeft}s
+          </span>
+        )}
         {phase === 'recap' && (
           <span className={`${styles.resultBadge} ${isCorrect ? styles.badgeCorrect : styles.badgeWrong}`}>
             {isCorrect ? '✓ Correct' : '✗ Wrong'}
