@@ -82,11 +82,11 @@ export default function WhosThatGuyGameScreen({ mysteryPlayer, allPlayers, showT
               <span className={styles.colYear}>Year</span>
               {showTeams && <span className={styles.colTeam}>Team</span>}
               <span className={styles.colStat}>GP</span>
-              <span className={styles.colStat}>MIN</span>
               <span className={styles.colStat}>PTS</span>
               <span className={styles.colStat}>REB</span>
               <span className={styles.colStat}>AST</span>
               <span className={styles.colStat}>3PM</span>
+              <span className={styles.colStat}>MIN</span>
             </div>
             {(() => {
               // Count entries per season to detect traded-midseason rows
@@ -105,11 +105,11 @@ export default function WhosThatGuyGameScreen({ mysteryPlayer, allPlayers, showT
                       </span>
                     )}
                     <span className={styles.colStat}>{fmtStat('gp', s.gp)}</span>
-                    <span className={styles.colStat}>{fmtStat('min', s.min)}</span>
                     <span className={styles.colStat}>{fmtStat('pts', s.pts)}</span>
                     <span className={styles.colStat}>{fmtStat('reb', s.reb)}</span>
                     <span className={styles.colStat}>{fmtStat('ast', s.ast)}</span>
                     <span className={styles.colStat}>{fmtStat('fg3m', s.fg3m)}</span>
+                    <span className={styles.colStat}>{fmtStat('min', s.min)}</span>
                   </div>
                 )
               })
