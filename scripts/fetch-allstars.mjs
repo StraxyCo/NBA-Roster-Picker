@@ -1,5 +1,6 @@
-// node scripts/fetch-allstars.mjs                   → fetch all-star rosters for all seasons
+// node scripts/fetch-allstars.mjs                   → fetch missing seasons only
 // node scripts/fetch-allstars.mjs --season 2023-24  → fetch/refresh one season
+// node scripts/fetch-allstars.mjs --force           → re-fetch every season (overwrites cache)
 
 import { writeFileSync, readFileSync, existsSync } from 'fs'
 
@@ -77,20 +78,71 @@ async function fetchAllStarRosterViaGameLog(season) {
     if (!playerSet?.rowSet?.length) continue
 
     const ph = playerSet.headers
-    const players = playerSet.rowSet.map(row => ({
+    const activePlayers = playerSet.rowSet.map(row => ({
       id:       row[ph.indexOf('PLAYER_ID')],
       name:     row[ph.indexOf('PLAYER_NAME')],
       teamId:   String(row[ph.indexOf('TEAM_ID')]),
       teamAbbr: row[ph.indexOf('TEAM_ABBREVIATION')],
     }))
 
+    // Also include selected-but-DNP All-Stars (e.g. injured starters like KD in 2022).
+    // These appear in boxscoresummaryv2's InactivePlayers result set, not in the box score.
+    const inactiveSet = boxData.resultSets?.find(s => s.name === 'InactivePlayers')
+    const inactivePlayers = []
+    if (inactiveSet?.rowSet?.length) {
+      const ih = inactiveSet.headers
+      const idxId    = ih.indexOf('PLAYER_ID')
+      const idxFirst = ih.indexOf('FIRST_NAME')
+      const idxLast  = ih.indexOf('LAST_NAME')
+      const idxTeam  = ih.indexOf('TEAM_ID')
+      const idxAbbr  = ih.indexOf('TEAM_ABBREVIATION')
+      for (const row of inactiveSet.rowSet) {
+        const teamId = String(row[idxTeam])
+        // Only keep inactives on the two All-Star teams — skip stragglers
+        if (!activePlayers.some(p => p.teamId === teamId)) continue
+        inactivePlayers.push({
+          id:       row[idxId],
+          name:     `${row[idxFirst]} ${row[idxLast]}`.trim(),
+          teamId,
+          teamAbbr: row[idxAbbr],
+        })
+      }
+    }
+
+    // Dedupe (a player should never be in both lists, but be defensive)
+    const seen = new Set()
+    const players = [...activePlayers, ...inactivePlayers].filter(p => {
+      if (seen.has(p.id)) return false
+      seen.add(p.id)
+      return true
+    })
+
     if (players.length >= 20) {
-      // This looks like the main All-Star game (≥20 players)
-      // Assign east/west by which team played — use the first two team IDs found
+      // This looks like the main All-Star game (≥20 players).
+      // Figure out which teamId is East vs West. For classic East/West years
+      // the teamAbbr is "EST"/"WST" (or "E"/"W"); for the 2018-2023 captain-draft
+      // era it's "LBN"/"DRT"/"GNS"/etc. and the East/West split is meaningless
+      // in the box score — runtime CONFERENCE_HARDCODE re-routes those years
+      // by actual conference, so the order we pick here doesn't matter.
       const teamIds = [...new Set(players.map(p => p.teamId))]
       const [team1, team2] = teamIds
-      roster.east = players.filter(p => p.teamId === team1).map(({ id, name, teamAbbr }) => ({ id, name, teamAbbr }))
-      roster.west = players.filter(p => p.teamId === team2).map(({ id, name, teamAbbr }) => ({ id, name, teamAbbr }))
+      const abbr1 = (players.find(p => p.teamId === team1)?.teamAbbr || '').toUpperCase()
+      const abbr2 = (players.find(p => p.teamId === team2)?.teamAbbr || '').toUpperCase()
+      const isE = a => a === 'EST' || a === 'E' || a.startsWith('EAST')
+      const isW = a => a === 'WST' || a === 'W' || a.startsWith('WEST')
+
+      let eastTeam, westTeam
+      if (isE(abbr1) || isW(abbr2)) {
+        eastTeam = team1; westTeam = team2
+      } else if (isE(abbr2) || isW(abbr1)) {
+        eastTeam = team2; westTeam = team1
+      } else {
+        // Captain-draft era — labels are arbitrary, runtime hardcode handles it
+        eastTeam = team1; westTeam = team2
+      }
+
+      roster.east = players.filter(p => p.teamId === eastTeam).map(({ id, name, teamAbbr }) => ({ id, name, teamAbbr }))
+      roster.west = players.filter(p => p.teamId === westTeam).map(({ id, name, teamAbbr }) => ({ id, name, teamAbbr }))
       return roster
     }
   }
@@ -102,6 +154,7 @@ async function fetchAllStarRosterViaGameLog(season) {
 
 const seasonArgIdx = process.argv.indexOf('--season')
 const TARGET_SEASON = seasonArgIdx !== -1 ? process.argv[seasonArgIdx + 1] : null
+const FORCE         = process.argv.includes('--force')
 
 if (TARGET_SEASON && !ALL_SEASONS.includes(TARGET_SEASON)) {
   console.error(`❌ Unknown season: "${TARGET_SEASON}". Valid: ${ALL_SEASONS.join(', ')}`)
@@ -114,7 +167,9 @@ let allstars = existsSync(ALLSTARS_OUT) ? JSON.parse(readFileSync(ALLSTARS_OUT, 
 
 const toFetch = TARGET_SEASON
   ? [TARGET_SEASON]
-  : ALL_SEASONS.filter(s => !allstars[s])
+  : FORCE
+    ? ALL_SEASONS
+    : ALL_SEASONS.filter(s => !allstars[s])
 
 console.log(`📂 allstars.json: ${Object.keys(allstars).length} seasons cached`)
 console.log(`🔄 To fetch: ${toFetch.length} seasons\n`)
@@ -148,5 +203,7 @@ for (const season of toFetch) {
 writeFileSync(ALLSTARS_OUT, JSON.stringify(allstars, null, 2))
 console.log(`\n✅ Done. Fetched: ${fetched} / Failed: ${failed}`)
 console.log(`📝 Written: ${ALLSTARS_OUT} — verify the East/West split, then commit and push.`)
-console.log(`\n⚠️  Note: East/West labels are inferred from game team IDs.`)
-console.log(`   Open allstars.json and verify a known season (e.g. 2023-24) looks correct.`)
+console.log(`\n⚠️  Note: East/West labels are inferred from teamAbbr (EST/WST) when possible.`)
+console.log(`   For 2017-18 → 2022-23 (captain-draft era), the labels are arbitrary — the`)
+console.log(`   runtime CONFERENCE_HARDCODE in src/games/AllStarsGame.jsx re-routes those.`)
+console.log(`   Open allstars.json and spot-check a known season (e.g. 2023-24).`)

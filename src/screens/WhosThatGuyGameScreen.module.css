@@ -18,7 +18,7 @@
 /* ── Stat panel ──────────────────────────────────────────────────────────── */
 .statPanel { display: flex; flex-direction: column; }
 .statCard { background: var(--navy-2); border: 1px solid var(--white-10); border-radius: var(--radius-lg); overflow: hidden; overflow-x: auto; }
-.statHeader, .statRow { display: flex; align-items: center; padding: 9px 12px; gap: 0; min-width: 300px; }
+.statHeader, .statRow { display: flex; align-items: center; padding: 9px 12px; gap: 0; min-width: 360px; }
 .statHeader { background: var(--navy-3); border-bottom: 1px solid var(--white-10); }
 .statRow { border-bottom: 1px solid var(--white-05); }
 .statRow:last-child { border-bottom: none; }
