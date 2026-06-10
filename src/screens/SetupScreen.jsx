@@ -298,6 +298,7 @@ export default function SetupScreen({ onStart, savedGames, onDeleteGame, onBack,
   const [rosterSize, setRosterSize]   = useState(initialConfig?.rosterSize ?? 6)
   const [eliminate, setEliminate]     = useState(initialConfig?.eliminateTeams ?? true)
   const [elimFranch, setElimFranch]   = useState(initialConfig?.eliminateFranchises ?? false)
+  const [bans, setBans]               = useState(initialConfig?.bans ?? 3)
 
   // Popin state
   const [addingSlot, setAddingSlot]     = useState(null)
@@ -396,6 +397,7 @@ export default function SetupScreen({ onStart, savedGames, onDeleteGame, onBack,
       gameMode,
       statMode,
       keepHidden,
+      bans,
     })
   }
 
@@ -509,6 +511,18 @@ export default function SetupScreen({ onStart, savedGames, onDeleteGame, onBack,
                   <button className={styles.stepBtn} onClick={() => setRosterSize(s => Math.max(gameMode === 'teams' ? 1 : 5, s - 1))} disabled={rosterSize <= (gameMode === 'teams' ? 1 : 5)}>−</button>
                   <span className={styles.stepValue}>{rosterSize}</span>
                   <button className={styles.stepBtn} onClick={() => setRosterSize(s => Math.min(gameMode === 'teams' ? 10 : 12, s + 1))} disabled={rosterSize >= (gameMode === 'teams' ? 10 : 12)}>+</button>
+                </div>
+              </div>
+
+              <div className={styles.optionRow}>
+                <div className={styles.optionLabel}>
+                  <span className={styles.optionTitle}>Player bans</span>
+                  <span className={styles.optionDesc}>Per player, per game</span>
+                </div>
+                <div className={styles.stepper}>
+                  <button className={styles.stepBtn} onClick={() => setBans(b => Math.max(0, b - 1))} disabled={bans <= 0}>−</button>
+                  <span className={styles.stepValue}>{bans}</span>
+                  <button className={styles.stepBtn} onClick={() => setBans(b => Math.min(10, b + 1))} disabled={bans >= 10}>+</button>
                 </div>
               </div>
 

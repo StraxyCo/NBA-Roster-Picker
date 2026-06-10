@@ -78,8 +78,10 @@ export default function RosterPickerGame() {
   const [lastPickedEntry, setLastPickedEntry] = useState(null)
   const [pendingRosters, setPendingRosters]  = useState(null)
   const [lastGameConfig, setLastGameConfig]  = useState(null)
+  const [bans, setBans]                      = useState(0)
+  const [bannedPlayers, setBannedPlayers]    = useState({}) // { playerId: true }
 
-  function handleSetupStart({ players, rosterSize, eliminateTeams, eliminateFranchises, seasons, gameMode, statMode, keepHidden }) {
+  function handleSetupStart({ players, rosterSize, eliminateTeams, eliminateFranchises, seasons, gameMode, statMode, keepHidden, bans: banCount }) {
     setPlayers(players)
     setRosterSize(rosterSize)
     setEliminate(eliminateTeams)
@@ -88,7 +90,9 @@ export default function RosterPickerGame() {
     setGameMode(gameMode)
     setStatMode(statMode)
     setKeepHidden(keepHidden)
-    setLastGameConfig({ players, rosterSize, eliminateTeams, eliminateFranchises, seasons, gameMode, statMode, keepHidden })
+    setBans(banCount || 0)
+    setBannedPlayers({})
+    setLastGameConfig({ players, rosterSize, eliminateTeams, eliminateFranchises, seasons, gameMode, statMode, keepHidden, bans: banCount })
     const emptyRosters = {}
     players.forEach(p => { emptyRosters[p.name] = buildEmptyRoster(rosterSize) })
     setRosters(emptyRosters)
@@ -245,7 +249,9 @@ export default function RosterPickerGame() {
           nbaRoster={currentRoster} userRoster={currentUserRoster}
           rosterSize={rosterSize} multiSeason={multiSeason}
           statMode={statMode} keepHidden={keepHidden}
+          bans={bans} bannedPlayers={bannedPlayers}
           onValidate={handlePickValidated}
+          onBanPlayer={(playerId) => setBannedPlayers(prev => ({ ...prev, [playerId]: true }))}
         />
       )}
       {screen === SCREENS.TEAM_STAT_REVEAL && lastPickedEntry && (

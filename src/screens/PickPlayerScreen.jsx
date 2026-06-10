@@ -30,7 +30,7 @@ const COL_HEADERS = [
   { key: 'ast', label: 'AST' },
 ]
 
-export default function PickPlayerScreen({ currentPlayer, team, season, nbaRoster, userRoster, rosterSize, multiSeason, statMode, keepHidden, onValidate, globalPickedIds = new Set() }) {
+export default function PickPlayerScreen({ currentPlayer, team, season, nbaRoster, userRoster, rosterSize, multiSeason, statMode, keepHidden, bans = 0, bannedPlayers = {}, onValidate, onBanPlayer, globalPickedIds = new Set() }) {
   const [myRoster, setMyRoster] = useState([...userRoster])
   const [pickedIds, setPickedIds] = useState(() => {
     const ids = new Set()
@@ -39,7 +39,10 @@ export default function PickPlayerScreen({ currentPlayer, team, season, nbaRoste
   })
   const [selectedSource, setSelectedSource] = useState(null)
   const [sortBy, setSortBy] = useState('alpha')
+  const [banMode, setBanMode] = useState(false)
   const dragSource = useRef(null)
+  const bansUsed = Object.keys(bannedPlayers).length
+  const bansRemaining = bans - bansUsed
 
   const sortedRoster = useMemo(() => {
     const arr = [...nbaRoster]
@@ -48,10 +51,17 @@ export default function PickPlayerScreen({ currentPlayer, team, season, nbaRoste
   }, [nbaRoster, sortBy])
 
   function isUnavailable(id) {
-    return pickedIds.has(id) || globalPickedIds.has(id)
+    return pickedIds.has(id) || globalPickedIds.has(id) || bannedPlayers[id]
   }
 
   function handleNbaPlayerClick(player) {
+    if (banMode) {
+      if (bansRemaining > 0 && !bannedPlayers[player.id] && !pickedIds.has(player.id) && !globalPickedIds.has(player.id)) {
+        onBanPlayer(player.id)
+        setBanMode(false)
+      }
+      return
+    }
     if (isUnavailable(player.id)) return
     if (!selectedSource) {
       setSelectedSource({ type: 'nba', player })
@@ -201,6 +211,19 @@ export default function PickPlayerScreen({ currentPlayer, team, season, nbaRoste
           </div>
         </div>
 
+        {bans > 0 && (
+          <div className={styles.banSection}>
+            <button
+              className={`${styles.banBtn} ${banMode ? styles.banBtnActive : ''} ${bansRemaining === 0 ? styles.banBtnDisabled : ''}`}
+              onClick={() => setBanMode(!banMode)}
+              disabled={bansRemaining === 0}
+            >
+              {banMode ? 'Cancel ban' : `Ban (${bansRemaining})`}
+            </button>
+            {banMode && <span className={styles.banHint}>Click a player to ban</span>}
+          </div>
+        )}
+
         <div className={styles.panels}>
           {/* NBA Roster panel */}
           <div className={styles.panel}>
@@ -234,12 +257,13 @@ export default function PickPlayerScreen({ currentPlayer, team, season, nbaRoste
                 <div className={styles.empty}>No roster data available</div>
               )}
               {sortedRoster.map(player => {
+                const isBanned   = bannedPlayers[player.id]
                 const isPicked   = isUnavailable(player.id)
                 const isSelected = selectedSource?.type === 'nba' && selectedSource.player.id === player.id
                 return (
                   <div
                     key={player.id}
-                    className={`${styles.nbaPlayer} ${isPicked ? styles.nbaPlayerPicked : ''} ${isSelected ? styles.nbaPlayerSelected : ''}`}
+                    className={`${styles.nbaPlayer} ${isBanned ? styles.nbaPlayerBanned : ''} ${isPicked ? styles.nbaPlayerPicked : ''} ${isSelected ? styles.nbaPlayerSelected : ''}`}
                     onClick={() => handleNbaPlayerClick(player)}
                     draggable={!isPicked}
                     onDragStart={e => onDragStartNba(e, player)}

@@ -220,6 +220,15 @@
   border-color: var(--gold) !important;
 }
 
+.nbaPlayerBanned {
+  opacity: 0.5;
+  cursor: default;
+  background: rgba(239, 68, 68, 0.08) !important;
+  border-color: rgba(239, 68, 68, 0.3) !important;
+  text-decoration: line-through;
+  text-decoration-color: rgba(239, 68, 68, 0.5);
+}
+
 .playerPos {
   font-family: var(--font-display);
   font-weight: 700;
@@ -469,3 +478,17 @@
   font-family: var(--font-display); font-weight: 800;
   font-size: 1.1rem; color: var(--gold);
 }
+
+/* Ban section */
+.banSection { display: flex; align-items: center; gap: 12px; margin: 16px 0 20px; }
+.banBtn {
+  background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444; border-radius: var(--radius); padding: 8px 14px;
+  font-family: var(--font-display); font-size: 0.85rem; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer;
+  transition: all 0.15s;
+}
+.banBtn:hover:not(:disabled) { background: rgba(239, 68, 68, 0.2); border-color: #ef4444; }
+.banBtnActive { background: rgba(239, 68, 68, 0.25); border-color: #ef4444; }
+.banBtnDisabled { opacity: 0.4; cursor: not-allowed; }
+.banHint { font-size: 0.8rem; color: var(--white-40); font-style: italic; }
