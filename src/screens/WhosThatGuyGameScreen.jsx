@@ -52,6 +52,15 @@ export default function WhosThatGuyGameScreen({ mysteryPlayer, allPlayers, showT
 
   return (
     <div className={styles.screen}>
+      {phase === 'picking' && (
+        <div className={styles.countdownBar}>
+          <div
+            className={`${styles.countdownFill} ${timeLeft < 10 ? styles.countdownFillWarning : ''}`}
+            style={{ width: `${(timeLeft / 45) * 100}%` }}
+          />
+        </div>
+      )}
+
       <div className={styles.topBar}>
         <span className={styles.eyebrow}>{currentPlayer}'s turn</span>
         <div className={styles.scorePills}>
@@ -61,11 +70,6 @@ export default function WhosThatGuyGameScreen({ mysteryPlayer, allPlayers, showT
             </span>
           ))}
         </div>
-        {phase === 'picking' && (
-          <span className={`${styles.countdown} ${timeLeft < 10 ? styles.countdownWarning : ''}`}>
-            {timeLeft}s
-          </span>
-        )}
         {phase === 'recap' && (
           <span className={`${styles.resultBadge} ${isCorrect ? styles.badgeCorrect : styles.badgeWrong}`}>
             {isCorrect ? '✓ Correct' : '✗ Wrong'}
