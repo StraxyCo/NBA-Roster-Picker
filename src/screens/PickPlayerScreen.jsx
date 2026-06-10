@@ -38,7 +38,7 @@ export default function PickPlayerScreen({ currentPlayer, team, season, nbaRoste
     return ids
   })
   const [selectedSource, setSelectedSource] = useState(null)
-  const [sortBy, setSortBy] = useState('alpha')
+  const [sortBy, setSortBy] = useState('pts')
   const [banMode, setBanMode] = useState(false)
   const dragSource = useRef(null)
   const bansUsedByCurrentPlayer = Object.keys(bannedPlayers[currentPlayer] || {}).length
