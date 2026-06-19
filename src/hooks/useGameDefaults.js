@@ -5,14 +5,14 @@
 import { useEffect, useState } from 'react'
 
 export function loadGameDefault(game) {
-  return fetch(`/api/defaults?game=${encodeURIComponent(game)}`)
+  return fetch(`/api/players?scope=defaults&game=${encodeURIComponent(game)}`)
     .then(r => (r.ok ? r.json() : { config: null }))
     .then(d => d.config || null)
     .catch(() => null)
 }
 
 export function saveGameDefault(game, config) {
-  return fetch('/api/defaults', {
+  return fetch('/api/players?scope=defaults', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ game, config }),
