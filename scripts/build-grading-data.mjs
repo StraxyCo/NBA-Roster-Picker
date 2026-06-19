@@ -194,6 +194,16 @@ async function buildSeason(season) {
     records.push({ ...rawRecord(adv, pg), season })
   }
 
+  // preserve heights already filled by scripts/fetch-heights.mjs (rebuild must not wipe them)
+  const existingHeights = {}
+  const shardPath = `${SHARD_DIR}/${season}.json`
+  if (existsSync(shardPath)) {
+    try {
+      const prev = JSON.parse(readFileSync(shardPath, 'utf8'))
+      for (const id of Object.keys(prev.players || {})) if (prev.players[id].height_in != null) existingHeights[id] = prev.players[id].height_in
+    } catch { /* ignore malformed prior shard */ }
+  }
+
   const gf = gpFull(season)
   const minGames = Math.round((30 / 82) * gf)
   const qualified = records.filter(r => r.mpg >= 15 && r.games >= minGames)
@@ -229,7 +239,7 @@ async function buildSeason(season) {
     if (nbaId == null || !draftable.has(nbaId)) { unmapped++; continue }
     mapped++
     players[nbaId] = {
-      canonical_id: `nba_${nbaId}`, name: r.name, team: r.team, pos_bucket: posBucket(r.pos), height_in: null,
+      canonical_id: `nba_${nbaId}`, name: r.name, team: r.team, pos_bucket: posBucket(r.pos), height_in: existingHeights[nbaId] ?? null,
       gp: r.games, mpg: r.mpg,
       raw: {
         pts: r.pts, fg3m: r.fg3m, fg3a: r.fg3a, fg3_pct: r.fg3_pct, fg2a: r.fg2a, fg2_pct: r.fg2_pct,

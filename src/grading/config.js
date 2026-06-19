@@ -31,6 +31,9 @@ export const GRADING_CONFIG = {
     HOLE_Z: 0.5, // a category counts as a hole if no player reaches this z
     SHOOTER_Z: 0.3, // min 3PM volume z to count as a credible floor-spacer
     SAME_POS_PEN: 10,
+    // size/archetype height thresholds (inches) — used when height_in is present,
+    // else the engine falls back to position buckets.
+    height: { TALL_IN: 81, SMALL_IN: 76, SPREAD_IN: 8 },
   },
 
   overall: { W_OFF: 0.42, W_DEF: 0.28, W_COMP: 0.30, KAPPA: 0.15, TWP_CAP: 10,

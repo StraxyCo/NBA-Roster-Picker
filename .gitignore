@@ -7,3 +7,4 @@ package-lock.json
 
 # Grading: raw scraped HTML cache (large, re-fetchable, immutable historical pages)
 data/bref-cache/
+data/nba-cache/

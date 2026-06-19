@@ -141,15 +141,23 @@ function complementarity(pg, cfg, squash) {
   const shooterFg3 = T.filter(t => t.tpar > 0 && t.fg3m > C.SHOOTER_Z).map(t => t.fg3m)
   const team_spacing = coverZ(shooterFg3, C.RHO_COV, cov)
 
-  // size_archetype_balance: did distinct archetype roles get filled? (height-aware once available)
+  // size_archetype_balance: did distinct archetype roles get filled? Height-aware when
+  // height_in is present (filled by scripts/fetch-heights.mjs), else falls back to position.
+  const H = C.height
   const isBig = t => t.pos_bucket === 'C' || t.pos_bucket === 'F-C'
   const isGuard = t => t.pos_bucket === 'G' || t.pos_bucket === 'G-F'
+  const tall = t => (t.height != null ? t.height >= H.TALL_IN : isBig(t))
+  const small = t => (t.height != null ? t.height <= H.SMALL_IN : isGuard(t))
+  const heights = T.map(t => t.height).filter(h => h != null)
+  const spread = heights.length >= 2
+    ? Math.max(...heights) - Math.min(...heights) >= H.SPREAD_IN
+    : T.some(isBig) && T.some(isGuard)
   const slots = [
-    T.some(t => isBig(t) && t.blk > 0.5), // rim protector
-    T.some(t => isGuard(t) && t.stl > 0.3), // perimeter quickness
+    T.some(t => tall(t) && t.blk > 0.5), // rim protector
+    T.some(t => small(t) && t.stl > 0.3), // perimeter quickness
     T.some(t => t.reb > 0.7), // rebounder
     T.some(t => t.ast > 0.7), // creator
-    T.some(isBig) && T.some(isGuard), // size spread
+    spread, // size spread
   ]
   let size_archetype = (slots.filter(Boolean).length / slots.length) * 100
   const buckets = {}
