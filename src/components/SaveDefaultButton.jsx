@@ -1,10 +1,11 @@
 import { useState } from 'react'
 
-// Shared "Save as default config" control for every minigame's settings screen.
-// Inline-styled (navy/gold) so it drops into any screen without per-CSS-module work.
+// Shared, deliberately discreet "save as default" — a small muted text link, not a
+// full button, so it sits quietly under the primary Start CTA on every setup screen.
 // onSave: () => Promise<boolean> — usually () => onSaveDefault(buildConfig()).
 export default function SaveDefaultButton({ onSave, saving }) {
   const [saved, setSaved] = useState(false)
+  const [hover, setHover] = useState(false)
 
   async function handle() {
     if (saving) return
@@ -12,22 +13,24 @@ export default function SaveDefaultButton({ onSave, saving }) {
     if (ok) { setSaved(true); setTimeout(() => setSaved(false), 2000) }
   }
 
+  const color = saved ? 'var(--gold)' : hover ? 'var(--white-70)' : 'var(--white-40)'
+
   return (
-    <button
-      type="button"
-      onClick={handle}
-      disabled={saving}
-      style={{
-        width: '100%', marginTop: '10px', padding: '10px',
-        background: 'transparent', color: saved ? 'var(--gold)' : 'var(--white-50)',
-        border: `1px solid ${saved ? 'var(--gold)' : 'var(--white-20)'}`,
-        borderRadius: 'var(--radius)', fontFamily: 'var(--font-display)',
-        fontSize: '0.8rem', fontWeight: 700, letterSpacing: '0.1em',
-        textTransform: 'uppercase', cursor: saving ? 'default' : 'pointer',
-        transition: 'all 0.15s',
-      }}
-    >
-      {saving ? 'Saving…' : saved ? '✓ Saved as default' : 'Save as default config'}
-    </button>
+    <div style={{ textAlign: 'center', margin: '8px 0 2px' }}>
+      <button
+        type="button"
+        onClick={handle}
+        disabled={saving}
+        onMouseEnter={() => setHover(true)}
+        onMouseLeave={() => setHover(false)}
+        style={{
+          background: 'transparent', border: 'none', padding: '4px 6px',
+          color, fontFamily: 'var(--font-body)', fontSize: '0.74rem', fontWeight: 500,
+          letterSpacing: '0.02em', cursor: saving ? 'default' : 'pointer', transition: 'color 0.15s',
+        }}
+      >
+        {saving ? 'Saving…' : saved ? '✓ Saved as default' : 'Save as default config'}
+      </button>
+    </div>
   )
 }
