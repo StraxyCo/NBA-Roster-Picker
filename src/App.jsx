@@ -10,6 +10,7 @@ import WhosThatGuyGame from './games/WhosThatGuyGame.jsx'
 import NicknameGame from './games/NicknameGame.jsx'
 import GridGame from './games/GridGame.jsx'
 import TeammateChainGame from './games/TeammateChainGame.jsx'
+import PlayerdleGame from './games/PlayerdleGame.jsx'
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
       <Route path="/nickname-game" element={<NicknameGame />} />
       <Route path="/the-grid" element={<GridGame />} />
       <Route path="/teammate-chain" element={<TeammateChainGame />} />
+      <Route path="/playerdle" element={<PlayerdleGame />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )

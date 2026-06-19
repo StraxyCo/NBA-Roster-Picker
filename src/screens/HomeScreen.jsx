@@ -67,6 +67,12 @@ const GAMES = [
     desc: 'Link NBA players through shared teammates.',
     active: true,
   },
+  {
+    path: '/playerdle',
+    name: 'Playerdle',
+    desc: 'Guess the mystery player from colour clues.',
+    active: true,
+  },
 ]
 
 export default function HomeScreen() {
