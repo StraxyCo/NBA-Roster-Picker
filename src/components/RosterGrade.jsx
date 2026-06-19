@@ -41,6 +41,11 @@ function tier(score) {
   if (score >= 40) return 'd'
   return 'f'
 }
+// Continuous red → yellow → green for the numeric sub-scores (quick visual read).
+function valueColor(score) {
+  const h = Math.max(0, Math.min(120, score * 1.2)) // 0→red, 50→yellow, 100→green
+  return `hsl(${h}, 70%, 58%)`
+}
 
 export default function RosterGrade({ grade }) {
   const [open, setOpen] = useState({})
@@ -75,7 +80,7 @@ export default function RosterGrade({ grade }) {
                   {m.subs.map(([k, label]) => (
                     <div key={k} className={styles.subRow}>
                       <span className={styles.subLabel}>{label}</span>
-                      <span className={styles.subVal}>{Math.round(comp.subcomponents[k])}</span>
+                      <span className={styles.subVal} style={{ color: valueColor(comp.subcomponents[k]) }}>{Math.round(comp.subcomponents[k])}</span>
                     </div>
                   ))}
                 </div>

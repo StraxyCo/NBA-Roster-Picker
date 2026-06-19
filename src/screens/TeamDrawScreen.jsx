@@ -19,6 +19,8 @@ export default function TeamDrawScreen({
   eliminateTeams,      // bool — remove drawn team+season combo
   eliminateFranchises, // bool — remove all seasons of a drawn team
   seasons,             // string[] — selected seasons
+  pool: explicitPool,  // optional [{ team, season }] — pre-filtered pool (joker redraws)
+  showSeason,          // optional bool — show the season label on the reel
   onTeamDrawn,         // (team, season, players) => void
 }) {
   const [phase, setPhase]       = useState('ready')
@@ -30,22 +32,22 @@ export default function TeamDrawScreen({
 
   useEffect(() => { preloadLogos() }, [])
 
-  // Build the full pool: one entry per team×season combination
-  const fullPool = []
-  for (const season of seasons) {
-    for (const team of NBA_TEAMS) {
-      fullPool.push({ team, season })
-    }
+  // Use a pre-filtered pool when given (joker redraws), else build + filter the full pool.
+  let availablePool
+  if (explicitPool) {
+    availablePool = explicitPool
+  } else {
+    const fullPool = []
+    for (const season of seasons) for (const team of NBA_TEAMS) fullPool.push({ team, season })
+    const drawnTeamIds = new Set(drawnEntries.map(e => e.teamId))
+    availablePool = fullPool.filter(entry => {
+      if (eliminateFranchises && drawnTeamIds.has(entry.team.id)) return false
+      if (eliminateTeams && drawnEntries.some(e => e.teamId === entry.team.id && e.season === entry.season)) return false
+      return true
+    })
   }
 
-  // Filter out drawn entries
-  const drawnTeamIds = new Set(drawnEntries.map(e => e.teamId))
-
-  const availablePool = fullPool.filter(entry => {
-    if (eliminateFranchises && drawnTeamIds.has(entry.team.id)) return false
-    if (eliminateTeams && drawnEntries.some(e => e.teamId === entry.team.id && e.season === entry.season)) return false
-    return true
-  })
+  const showSeasonLabel = showSeason ?? (seasons.length > 1)
 
   function pickRandom(arr) {
     return arr[Math.floor(Math.random() * arr.length)]
@@ -139,7 +141,7 @@ export default function TeamDrawScreen({
             {(phase === 'settling' || phase === 'loading' || phase === 'done') && chosenEntry && (
               <div className={`${styles.teamName} fade-up`}>
                 {chosenEntry.team.name}
-                {seasons.length > 1 && (
+                {showSeasonLabel && (
                   <span className={styles.teamSeason}>{chosenEntry.season}</span>
                 )}
               </div>
@@ -154,7 +156,7 @@ export default function TeamDrawScreen({
             {phase === 'spinning' && displayEntry && (
               <div className={styles.spinningName}>
                 {displayTeam.name}
-                {seasons.length > 1 && <span className={styles.spinningSeason}> · {displaySeason}</span>}
+                {showSeasonLabel && <span className={styles.spinningSeason}> · {displaySeason}</span>}
               </div>
             )}
           </>

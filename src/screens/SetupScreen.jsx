@@ -300,6 +300,12 @@ export default function SetupScreen({ onStart, savedGames, onDeleteGame, onBack,
   const [elimFranch, setElimFranch]   = useState(initialConfig?.eliminateFranchises ?? false)
   const [bans, setBans]               = useState(initialConfig?.bans ?? 3)
 
+  // Bonuses (jokers) — players mode only
+  const [playBonuses, setPlayBonuses] = useState(initialConfig?.bonuses?.enabled ?? true)
+  const [bonusYear, setBonusYear]     = useState(initialConfig?.bonuses?.year ?? 1)
+  const [bonusTeam, setBonusTeam]     = useState(initialConfig?.bonuses?.team ?? 1)
+  const [bonusAll, setBonusAll]       = useState(initialConfig?.bonuses?.all ?? 1)
+
   // Popin state
   const [addingSlot, setAddingSlot]     = useState(null)
   const [view, setView]                 = useState(null)
@@ -398,6 +404,9 @@ export default function SetupScreen({ onStart, savedGames, onDeleteGame, onBack,
       statMode,
       keepHidden,
       bans,
+      bonuses: playBonuses
+        ? { enabled: true, year: multiSeason ? bonusYear : 0, team: bonusTeam, all: multiSeason ? bonusAll : 0 }
+        : { enabled: false, year: 0, team: 0, all: 0 },
     })
   }
 
@@ -547,6 +556,60 @@ export default function SetupScreen({ onStart, savedGames, onDeleteGame, onBack,
                   <button className={`${styles.toggle} ${elimFranch ? styles.toggleOn : ''}`} onClick={() => setElimFranch(e => !e)} aria-pressed={elimFranch}>
                     <span className={styles.toggleKnob} />
                   </button>
+                </div>
+              )}
+
+              {gameMode === 'players' && (
+                <div className={styles.optionRow}>
+                  <div className={styles.optionLabel}>
+                    <span className={styles.optionTitle}>Play with bonuses</span>
+                    <span className={styles.optionDesc}>Jokers to redraw a team or season</span>
+                  </div>
+                  <button className={`${styles.toggle} ${playBonuses ? styles.toggleOn : ''}`} onClick={() => setPlayBonuses(b => !b)} aria-pressed={playBonuses}>
+                    <span className={styles.toggleKnob} />
+                  </button>
+                </div>
+              )}
+
+              {gameMode === 'players' && playBonuses && multiSeason && (
+                <div className={styles.optionRow}>
+                  <div className={styles.optionLabel}>
+                    <span className={styles.optionTitle}>Redraw season</span>
+                    <span className={styles.optionDesc}>Keep the team, redraw the season</span>
+                  </div>
+                  <div className={styles.stepper}>
+                    <button className={styles.stepBtn} onClick={() => setBonusYear(n => Math.max(0, n - 1))} disabled={bonusYear <= 0}>−</button>
+                    <span className={styles.stepValue}>{bonusYear}</span>
+                    <button className={styles.stepBtn} onClick={() => setBonusYear(n => Math.min(5, n + 1))} disabled={bonusYear >= 5}>+</button>
+                  </div>
+                </div>
+              )}
+
+              {gameMode === 'players' && playBonuses && (
+                <div className={styles.optionRow}>
+                  <div className={styles.optionLabel}>
+                    <span className={styles.optionTitle}>Redraw team</span>
+                    <span className={styles.optionDesc}>Keep the season, redraw the team</span>
+                  </div>
+                  <div className={styles.stepper}>
+                    <button className={styles.stepBtn} onClick={() => setBonusTeam(n => Math.max(0, n - 1))} disabled={bonusTeam <= 0}>−</button>
+                    <span className={styles.stepValue}>{bonusTeam}</span>
+                    <button className={styles.stepBtn} onClick={() => setBonusTeam(n => Math.min(5, n + 1))} disabled={bonusTeam >= 5}>+</button>
+                  </div>
+                </div>
+              )}
+
+              {gameMode === 'players' && playBonuses && multiSeason && (
+                <div className={styles.optionRow}>
+                  <div className={styles.optionLabel}>
+                    <span className={styles.optionTitle}>Redraw all</span>
+                    <span className={styles.optionDesc}>Redraw a new team + season</span>
+                  </div>
+                  <div className={styles.stepper}>
+                    <button className={styles.stepBtn} onClick={() => setBonusAll(n => Math.max(0, n - 1))} disabled={bonusAll <= 0}>−</button>
+                    <span className={styles.stepValue}>{bonusAll}</span>
+                    <button className={styles.stepBtn} onClick={() => setBonusAll(n => Math.min(5, n + 1))} disabled={bonusAll >= 5}>+</button>
+                  </div>
                 </div>
               )}
             </section>

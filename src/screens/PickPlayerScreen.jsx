@@ -30,7 +30,7 @@ const COL_HEADERS = [
   { key: 'ast', label: 'AST' },
 ]
 
-export default function PickPlayerScreen({ currentPlayer, team, season, nbaRoster, userRoster, rosterSize, multiSeason, statMode, keepHidden, bans = 0, bannedPlayers = {}, onValidate, onBanPlayer, globalPickedIds = new Set() }) {
+export default function PickPlayerScreen({ currentPlayer, team, season, nbaRoster, userRoster, rosterSize, multiSeason, statMode, keepHidden, bans = 0, bannedPlayers = {}, bonusConfig = { year: 0, team: 0, all: 0 }, jokersLeft = { year: 0, team: 0, all: 0 }, canRedraw = { year: false, team: false, all: false }, onJoker = () => {}, onValidate, onBanPlayer, globalPickedIds = new Set() }) {
   const [myRoster, setMyRoster] = useState([...userRoster])
   const [pickedIds, setPickedIds] = useState(() => {
     const ids = new Set()
@@ -213,16 +213,39 @@ export default function PickPlayerScreen({ currentPlayer, team, season, nbaRoste
           </div>
         </div>
 
-        {bans > 0 && (
-          <div className={styles.banSection}>
-            <button
-              className={`${styles.banBtn} ${banMode ? styles.banBtnActive : ''} ${bansRemaining === 0 ? styles.banBtnDisabled : ''}`}
-              onClick={() => setBanMode(!banMode)}
-              disabled={bansRemaining === 0}
-            >
-              {banMode ? 'Cancel ban' : `Ban (${bansRemaining})`}
-            </button>
-            {banMode && <span className={styles.banHint}>Click a player to ban</span>}
+        {(bans > 0 || bonusConfig.year > 0 || bonusConfig.team > 0 || bonusConfig.all > 0) && (
+          <div className={styles.actionRow}>
+            <div className={styles.banGroup}>
+              {bans > 0 && (
+                <>
+                  <button
+                    className={`${styles.banBtn} ${banMode ? styles.banBtnActive : ''} ${bansRemaining === 0 ? styles.banBtnDisabled : ''}`}
+                    onClick={() => setBanMode(!banMode)}
+                    disabled={bansRemaining === 0}
+                  >
+                    {banMode ? 'Cancel ban' : `Ban (${bansRemaining})`}
+                  </button>
+                  {banMode && <span className={styles.banHint}>Click a player to ban</span>}
+                </>
+              )}
+            </div>
+            <div className={styles.bonusGroup}>
+              {bonusConfig.year > 0 && (
+                <button className={styles.bonusBtn} disabled={jokersLeft.year <= 0 || !canRedraw.year} onClick={() => onJoker('year')}>
+                  Redraw season ({jokersLeft.year})
+                </button>
+              )}
+              {bonusConfig.team > 0 && (
+                <button className={styles.bonusBtn} disabled={jokersLeft.team <= 0 || !canRedraw.team} onClick={() => onJoker('team')}>
+                  Redraw team ({jokersLeft.team})
+                </button>
+              )}
+              {bonusConfig.all > 0 && (
+                <button className={styles.bonusBtn} disabled={jokersLeft.all <= 0 || !canRedraw.all} onClick={() => onJoker('all')}>
+                  Redraw all ({jokersLeft.all})
+                </button>
+              )}
+            </div>
           </div>
         )}
 

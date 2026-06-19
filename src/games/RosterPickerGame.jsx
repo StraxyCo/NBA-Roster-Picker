@@ -4,10 +4,12 @@ import SetupScreen from '../screens/SetupScreen.jsx'
 import OrderDrawScreen from '../screens/OrderDrawScreen.jsx'
 import TurnScreen from '../screens/TurnScreen.jsx'
 import TeamDrawScreen from '../screens/TeamDrawScreen.jsx'
+import SeasonDrawScreen from '../screens/SeasonDrawScreen.jsx'
 import PickPlayerScreen from '../screens/PickPlayerScreen.jsx'
 import TeamModeDrawScreen from '../screens/TeamModeDrawScreen.jsx'
 import FinalScreen from '../screens/FinalScreen.jsx'
 import { useGames } from '../hooks/useProfiles.js'
+import { fetchRoster } from '../hooks/useRoster.js'
 import { NBA_TEAMS, getLogoUrl } from '../data/teams.js'
 import { prefetchShards } from '../grading/shards.js'
 
@@ -15,8 +17,11 @@ const SCREENS = {
   SETUP: 'SETUP', ORDER_DRAW: 'ORDER_DRAW', TURN: 'TURN',
   TEAM_DRAW: 'TEAM_DRAW', PICK_PLAYER: 'PICK_PLAYER',
   TEAM_MODE_DRAW: 'TEAM_MODE_DRAW', TEAM_STAT_REVEAL: 'TEAM_STAT_REVEAL',
+  REDRAW_TEAM: 'REDRAW_TEAM', REDRAW_SEASON: 'REDRAW_SEASON',
   FINAL: 'FINAL',
 }
+
+const EMPTY_BONUSES = { enabled: false, year: 0, team: 0, all: 0 }
 
 function buildEmptyRoster(size) { return Array(size).fill(null) }
 
@@ -81,8 +86,13 @@ export default function RosterPickerGame() {
   const [lastGameConfig, setLastGameConfig]  = useState(null)
   const [bans, setBans]                      = useState(0)
   const [bannedPlayers, setBannedPlayers]    = useState({}) // { playerId: true }
+  const [bonuses, setBonuses]                = useState(EMPTY_BONUSES)
+  const [jokersLeft, setJokersLeft]          = useState({}) // { [playerName]: { year, team, all } }
+  const [redrawPool, setRedrawPool]          = useState(null)   // [{ team, season }] for REDRAW_TEAM
+  const [redrawSeasons, setRedrawSeasons]    = useState(null)   // string[] for REDRAW_SEASON
+  const [redrawShowSeason, setRedrawShowSeason] = useState(true)
 
-  function handleSetupStart({ players, rosterSize, eliminateTeams, eliminateFranchises, seasons, gameMode, statMode, keepHidden, bans: banCount }) {
+  function handleSetupStart({ players, rosterSize, eliminateTeams, eliminateFranchises, seasons, gameMode, statMode, keepHidden, bans: banCount, bonuses: bonusCfg }) {
     setPlayers(players)
     setRosterSize(rosterSize)
     setEliminate(eliminateTeams)
@@ -92,10 +102,14 @@ export default function RosterPickerGame() {
     setStatMode(statMode)
     setKeepHidden(keepHidden)
     setBans(banCount || 0)
+    const cfg = bonusCfg || EMPTY_BONUSES
+    setBonuses(cfg)
     const initialBans = {}
-    players.forEach(p => { initialBans[p.name] = {} })
+    const initialJokers = {}
+    players.forEach(p => { initialBans[p.name] = {}; initialJokers[p.name] = { year: cfg.year, team: cfg.team, all: cfg.all } })
     setBannedPlayers(initialBans)
-    setLastGameConfig({ players, rosterSize, eliminateTeams, eliminateFranchises, seasons, gameMode, statMode, keepHidden, bans: banCount })
+    setJokersLeft(initialJokers)
+    setLastGameConfig({ players, rosterSize, eliminateTeams, eliminateFranchises, seasons, gameMode, statMode, keepHidden, bans: banCount, bonuses: cfg })
     const emptyRosters = {}
     players.forEach(p => { emptyRosters[p.name] = buildEmptyRoster(rosterSize) })
     setRosters(emptyRosters)
@@ -120,6 +134,65 @@ export default function RosterPickerGame() {
     if (eliminateTeams) {
       setDrawnEntries(prev => [...prev, { teamId: team.id, season }])
     }
+    setScreen(SCREENS.PICK_PLAYER)
+  }
+
+  // ── Jokers / bonuses ────────────────────────────────────────────────────────
+  // Build the allowed pool for a redraw, honouring the eliminate filters against a
+  // given drawn-set (the current pairing is freed before this is called).
+  function buildRedrawPool(type, baseDrawn) {
+    const drawnTeamIds = new Set(baseDrawn.map(e => e.teamId))
+    const blocked = (teamId, season) => {
+      if (eliminateFranchises && drawnTeamIds.has(teamId)) return true
+      if (eliminateTeams && baseDrawn.some(e => e.teamId === teamId && e.season === season)) return true
+      return false
+    }
+    const out = []
+    if (type === 'year') {
+      for (const s of seasons) {
+        if (s === currentSeason || blocked(currentTeam.id, s)) continue
+        out.push({ team: currentTeam, season: s })
+      }
+    } else if (type === 'team') {
+      for (const t of NBA_TEAMS) {
+        if (t.id === currentTeam.id || blocked(t.id, currentSeason)) continue
+        out.push({ team: t, season: currentSeason })
+      }
+    } else { // all — only the exact current pairing is excluded
+      for (const s of seasons) for (const t of NBA_TEAMS) {
+        if (t.id === currentTeam.id && s === currentSeason) continue
+        if (blocked(t.id, s)) continue
+        out.push({ team: t, season: s })
+      }
+    }
+    return out
+  }
+
+  function handleJoker(type) {
+    const player = turnOrder[currentTurnIdx]
+    if (!currentTeam || (jokersLeft[player]?.[type] ?? 0) <= 0) return
+    const freed = drawnEntries.filter(e => !(e.teamId === currentTeam.id && e.season === currentSeason))
+    const pool = buildRedrawPool(type, freed)
+    if (pool.length === 0) return
+    setJokersLeft(prev => ({ ...prev, [player]: { ...prev[player], [type]: prev[player][type] - 1 } }))
+    setDrawnEntries(freed) // the redrawn pairing no longer counts toward the filters
+    if (type === 'year') {
+      setRedrawSeasons(pool.map(e => e.season))
+      setScreen(SCREENS.REDRAW_SEASON)
+    } else {
+      setRedrawPool(pool)
+      setRedrawShowSeason(type === 'all' ? seasons.length > 1 : true)
+      setScreen(SCREENS.REDRAW_TEAM)
+    }
+  }
+
+  async function handleSeasonRedrawn(season) {
+    const result = await fetchRoster(currentTeam.id, season)
+    if (result?.error) { setScreen(SCREENS.PICK_PLAYER); return }
+    setCurrentSeason(season)
+    setCurrentRoster(result)
+    if (eliminateTeams) setDrawnEntries(prev => [...prev, { teamId: currentTeam.id, season }])
+    if (gameMode === 'players') prefetchShards([season])
     setScreen(SCREENS.PICK_PLAYER)
   }
 
@@ -202,6 +275,14 @@ export default function RosterPickerGame() {
   const picksCount        = currentUserRoster.filter(Boolean).length
   const multiSeason       = seasons.length > 1
 
+  const currJokers = jokersLeft[currentPlayer] || { year: 0, team: 0, all: 0 }
+  const freedForRedraw = currentTeam ? drawnEntries.filter(e => !(e.teamId === currentTeam.id && e.season === currentSeason)) : []
+  const canRedraw = {
+    year: bonuses.year > 0 && !!currentTeam && buildRedrawPool('year', freedForRedraw).length > 0,
+    team: bonuses.team > 0 && !!currentTeam && buildRedrawPool('team', freedForRedraw).length > 0,
+    all:  bonuses.all  > 0 && !!currentTeam && buildRedrawPool('all',  freedForRedraw).length > 0,
+  }
+
   return (
     <>
       {screen === SCREENS.SETUP && (
@@ -255,11 +336,31 @@ export default function RosterPickerGame() {
           rosterSize={rosterSize} multiSeason={multiSeason}
           statMode={statMode} keepHidden={keepHidden}
           bans={bans} bannedPlayers={bannedPlayers}
+          bonusConfig={{ year: bonuses.year, team: bonuses.team, all: bonuses.all }}
+          jokersLeft={currJokers} canRedraw={canRedraw} onJoker={handleJoker}
           onValidate={handlePickValidated}
           onBanPlayer={(playerId) => setBannedPlayers(prev => ({
             ...prev,
             [currentPlayer]: { ...prev[currentPlayer], [playerId]: true }
           }))}
+        />
+      )}
+
+      {screen === SCREENS.REDRAW_TEAM && (
+        <TeamDrawScreen
+          drawnEntries={drawnEntries} eliminateTeams={eliminateTeams}
+          eliminateFranchises={eliminateFranchises} seasons={seasons}
+          pool={redrawPool} showSeason={redrawShowSeason}
+          onTeamDrawn={handleTeamDrawn}
+        />
+      )}
+
+      {screen === SCREENS.REDRAW_SEASON && (
+        <SeasonDrawScreen
+          eyebrow="Redraw Season"
+          seasons={redrawSeasons || seasons}
+          onDrawn={handleSeasonRedrawn}
+          autoStart
         />
       )}
       {screen === SCREENS.TEAM_STAT_REVEAL && lastPickedEntry && (
