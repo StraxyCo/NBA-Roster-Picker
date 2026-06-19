@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react'
 import styles from './SetupScreen.module.css'
 import { getAvailableSeasons } from '../hooks/useRoster.js'
 import { usePlayers } from '../hooks/useProfiles.js'
+import { useGameDefaults } from '../hooks/useGameDefaults.js'
+import SaveDefaultButton from '../components/SaveDefaultButton.jsx'
 
 // ── Small shared modal shell ────────────────────────────────────────────────
 function Modal({ onClose, children }) {
@@ -276,7 +278,18 @@ function GamesView({ games, onDelete, onClose }) {
 }
 
 // ── Main SetupScreen ────────────────────────────────────────────────────────
-export default function SetupScreen({ onStart, savedGames, onDeleteGame, onBack, initialConfig = null }) {
+// Wrapper: resolve the saved default before the form mounts, then render the inner
+// with it merged into initialConfig (session lastGameConfig wins for replay).
+export default function SetupScreen(props) {
+  const { initial, loaded, save, saving } = useGameDefaults('rosterPicker')
+  if (!loaded) return null
+  const merged = (initial || props.initialConfig)
+    ? { ...(initial || {}), ...(props.initialConfig || {}) }
+    : null
+  return <SetupScreenInner {...props} initialConfig={merged} onSaveDefault={save} savingDefault={saving} />
+}
+
+function SetupScreenInner({ onStart, savedGames, onDeleteGame, onBack, initialConfig = null, onSaveDefault, savingDefault }) {
   const { players, loading, createPlayer, updatePlayer, deletePlayer } = usePlayers()
 
   // 4 slots — each is null or a player object
@@ -392,10 +405,15 @@ export default function SetupScreen({ onStart, savedGames, onDeleteGame, onBack,
     return `${selectedSeasons.size} seasons`
   }
 
-  function handleStart() {
-    if (!canStart) return
-    onStart({
-      players: filledSlots.map(p => ({ id: p.id, name: p.name })),
+  function bonusesPayload() {
+    return playBonuses
+      ? { enabled: true, year: multiSeason ? bonusYear : 0, team: bonusTeam, all: multiSeason ? bonusAll : 0 }
+      : { enabled: false, year: 0, team: 0, all: 0 }
+  }
+
+  // Options only (no human players) — what "Save as default" persists.
+  function buildDefaultConfig() {
+    return {
       rosterSize,
       eliminateTeams: eliminate,
       eliminateFranchises: elimFranch,
@@ -404,10 +422,13 @@ export default function SetupScreen({ onStart, savedGames, onDeleteGame, onBack,
       statMode,
       keepHidden,
       bans,
-      bonuses: playBonuses
-        ? { enabled: true, year: multiSeason ? bonusYear : 0, team: bonusTeam, all: multiSeason ? bonusAll : 0 }
-        : { enabled: false, year: 0, team: 0, all: 0 },
-    })
+      bonuses: bonusesPayload(),
+    }
+  }
+
+  function handleStart() {
+    if (!canStart) return
+    onStart({ players: filledSlots.map(p => ({ id: p.id, name: p.name })), ...buildDefaultConfig() })
   }
 
   return (
@@ -617,6 +638,7 @@ export default function SetupScreen({ onStart, savedGames, onDeleteGame, onBack,
         </div>
 
         {/* FULL WIDTH BOTTOM — start button */}
+        <SaveDefaultButton onSave={() => onSaveDefault(buildDefaultConfig())} saving={savingDefault} />
         <button className={styles.startBtn} onClick={handleStart} disabled={!canStart}>
           Start Game
         </button>

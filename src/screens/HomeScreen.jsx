@@ -10,6 +10,7 @@ const GAMES = [
     name: 'Roster Picker',
     desc: 'Draft your ultimate roster from historical NBA seasons.',
     active: true,
+    featured: true,
   },
   {
     path: '/jersey-guesser',
@@ -33,7 +34,8 @@ const GAMES = [
     path: '/stats-over-under',
     name: 'Stats Over/Under',
     desc: 'Bet over or under on a player\'s season statistics.',
-    active: true,
+    active: false,
+    hidden: true, // masked from the menu (Vercel load) — route/code kept
   },
   {
     path: '/all-stars',
@@ -65,6 +67,12 @@ const GAMES = [
     desc: 'Link NBA players through shared teammates.',
     active: true,
   },
+  {
+    path: '/playerdle',
+    name: 'Playerdle',
+    desc: 'Guess the mystery player from colour clues.',
+    active: true,
+  },
 ]
 
 export default function HomeScreen() {
@@ -72,8 +80,8 @@ export default function HomeScreen() {
   const { players, loading } = usePlayers()
   const [showStats, setShowStats] = useState(false)
 
-  const activeGames  = GAMES.filter(g => g.active)
-  const comingSoon   = GAMES.filter(g => !g.active)
+  const activeGames  = GAMES.filter(g => g.active && !g.hidden)
+  const comingSoon   = GAMES.filter(g => !g.active && !g.hidden)
 
   return (
     <div className={styles.container}>
@@ -93,38 +101,37 @@ export default function HomeScreen() {
 
       <div className={styles.section}>
         <div className={styles.gameList}>
-          {activeGames.map(game => (
+          {activeGames.map((game, i) => (
             <button
               key={game.path}
-              className={styles.gameCard}
+              className={`${styles.gameCard} ${game.featured ? styles.gameCardFeatured : ''}`}
               onClick={() => navigate(game.path)}
             >
+              <div className={styles.cardTop}>
+                <span className={styles.gameNum}>{String(i + 1).padStart(2, '0')}</span>
+                {game.featured && <span className={styles.featuredChip}>Featured</span>}
+              </div>
               <div className={styles.gameInfo}>
                 <h2>{game.name}</h2>
                 <p>{game.desc}</p>
               </div>
-              <div className={styles.arrow}>→</div>
             </button>
+          ))}
+
+          {comingSoon.map(game => (
+            <div key={game.path} className={`${styles.gameCard} ${styles.gameCardDisabled}`}>
+              <div className={styles.cardTop}>
+                <span className={styles.gameNum}>—</span>
+                <span className={styles.comingSoonBadge}>Soon</span>
+              </div>
+              <div className={styles.gameInfo}>
+                <h2>{game.name}</h2>
+                <p>{game.desc}</p>
+              </div>
+            </div>
           ))}
         </div>
       </div>
-
-      {comingSoon.length > 0 && (
-        <div className={styles.section}>
-          <div className={styles.sectionLabel}>Coming Soon</div>
-          <div className={styles.gameList}>
-            {comingSoon.map(game => (
-              <div key={game.path} className={`${styles.gameCard} ${styles.gameCardDisabled}`}>
-                <div className={styles.gameInfo}>
-                  <h2>{game.name}</h2>
-                  <p>{game.desc}</p>
-                </div>
-                <div className={styles.comingSoonBadge}>Soon</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {showStats && (
         <StatsModal players={players} onClose={() => setShowStats(false)} />

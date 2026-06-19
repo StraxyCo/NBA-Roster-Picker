@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import styles from './WhoHasMoreScreen.module.css'
 import { usePlayers } from '../hooks/useProfiles.js'
 import { getAvailableSeasons } from '../hooks/useRoster.js'
+import { useGameDefaults } from '../hooks/useGameDefaults.js'
+import SaveDefaultButton from '../components/SaveDefaultButton.jsx'
 
 // ── Confirm delete dialog ────────────────────────────────────────────────────
 function ConfirmModal({ message, onConfirm, onCancel }) {
@@ -221,7 +223,14 @@ function SeasonModal({ allSeasons, current, onConfirm, onClose }) {
 }
 
 // ── Main screen ─────────────────────────────────────────────────────────────
-export default function WhoHasMoreScreen({ onBack, onStart, savedGames, onDeleteGame }) {
+export default function WhoHasMoreScreen(props) {
+  const { initial, loaded, save, saving } = useGameDefaults('whoHasMore')
+  if (!loaded) return null
+  return <WhoHasMoreInner {...props} savedDefault={initial} onSaveDefault={save} savingDefault={saving} />
+}
+
+function WhoHasMoreInner({ onBack, onStart, savedGames, onDeleteGame, savedDefault, onSaveDefault, savingDefault }) {
+  const d = savedDefault || {}
   const { players, loading, createPlayer } = usePlayers()
   const [view, setView] = useState(null) // null | 'stats' | 'games'
 
@@ -229,13 +238,15 @@ export default function WhoHasMoreScreen({ onBack, onStart, savedGames, onDelete
   const [addingSlot, setAddingSlot] = useState(null)
 
   const [allSeasons, setAllSeasons] = useState(['2025-26'])
-  const [selectedSeasons, setSelectedSeasons] = useState(new Set(['2025-26']))
+  const [selectedSeasons, setSelectedSeasons] = useState(d.seasons ? new Set(d.seasons) : new Set(['2025-26']))
   const [showSeasonModal, setShowSeasonModal] = useState(false)
 
-  const [selectedStats, setSelectedStats] = useState(new Set(DEFAULT_STATS))
+  const [selectedStats, setSelectedStats] = useState(d.stats ? new Set(d.stats) : new Set(DEFAULT_STATS))
 
-  const [rounds, setRounds] = useState(5)
-  const [optionsPerQuestion, setOptionsPerQuestion] = useState(4)
+  const [rounds, setRounds] = useState(d.rounds ?? 5)
+  const [optionsPerQuestion, setOptionsPerQuestion] = useState(d.optionsPerQuestion ?? 4)
+
+  const buildDefaultConfig = () => ({ seasons: [...selectedSeasons], stats: [...selectedStats], rounds, optionsPerQuestion })
 
   useEffect(() => {
     if (!loading && players.length > 0) {
@@ -252,7 +263,7 @@ export default function WhoHasMoreScreen({ onBack, onStart, savedGames, onDelete
   useEffect(() => {
     getAvailableSeasons().then(s => {
       setAllSeasons(s)
-      setSelectedSeasons(new Set(s))
+      if (!d.seasons) setSelectedSeasons(new Set(s)) // keep a saved default if present
     }).catch(() => {})
   }, [])
 
@@ -377,6 +388,7 @@ export default function WhoHasMoreScreen({ onBack, onStart, savedGames, onDelete
 
       </div>
 
+      <SaveDefaultButton onSave={() => onSaveDefault(buildDefaultConfig())} saving={savingDefault} />
       <button
         className={styles.startBtn}
         disabled={!canStart}

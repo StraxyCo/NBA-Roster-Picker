@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import styles from './JerseyGuesserScreen.module.css'
 import { usePlayers } from '../hooks/useProfiles.js'
+import { useGameDefaults } from '../hooks/useGameDefaults.js'
+import SaveDefaultButton from '../components/SaveDefaultButton.jsx'
 
 // ── Confirm delete dialog ───────────────────────────────────────────────────
 function ConfirmModal({ message, onConfirm, onCancel }) {
@@ -180,7 +182,14 @@ function AddPlayerModal({ players, slotsUsed, onSelect, onClose, onCreate }) {
   )
 }
 
-export default function JerseyGuesserScreen({ onBack, onStart, savedGames, onDeleteGame }) {
+export default function JerseyGuesserScreen(props) {
+  const { initial, loaded, save, saving } = useGameDefaults('jersey')
+  if (!loaded) return null
+  return <JerseyGuesserInner {...props} savedDefault={initial} onSaveDefault={save} savingDefault={saving} />
+}
+
+function JerseyGuesserInner({ onBack, onStart, savedGames, onDeleteGame, savedDefault, onSaveDefault, savingDefault }) {
+  const d = savedDefault || {}
   const { players, loading, createPlayer } = usePlayers()
 
   // 4 player slots — each is null or a player object
@@ -202,7 +211,8 @@ export default function JerseyGuesserScreen({ onBack, onStart, savedGames, onDel
   const [addingSlot, setAddingSlot] = useState(null)
   const [view, setView] = useState(null) // null | 'stats' | 'games'
 
-  const [rounds, setRounds] = useState(5)
+  const [rounds, setRounds] = useState(d.rounds ?? 5)
+  const buildDefaultConfig = () => ({ rounds })
 
   function clearSlot(idx) {
     setSelectedPlayers(prev => {
@@ -290,6 +300,7 @@ export default function JerseyGuesserScreen({ onBack, onStart, savedGames, onDel
         </div>
       </div>
 
+      <SaveDefaultButton onSave={() => onSaveDefault(buildDefaultConfig())} saving={savingDefault} />
       <button
         className={styles.startBtn}
         disabled={activePlayers.length === 0}

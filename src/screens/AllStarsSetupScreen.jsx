@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { usePlayers } from '../hooks/useProfiles.js'
 import { ALL_SEASONS } from '../data/seasons.js'
 import styles from './AllStarsSetupScreen.module.css'
+import { useGameDefaults } from '../hooks/useGameDefaults.js'
+import SaveDefaultButton from '../components/SaveDefaultButton.jsx'
 
 function Modal({ onClose, children }) {
   return (
@@ -151,7 +153,14 @@ const ALLSTAR_SEASONS = [
   '2020-21','2021-22','2022-23','2023-24',
 ]
 
-export default function AllStarsSetupScreen({ onBack, onStart, savedGames, onDeleteGame }) {
+export default function AllStarsSetupScreen(props) {
+  const { initial, loaded, save, saving } = useGameDefaults('allStars')
+  if (!loaded) return null
+  return <AllStarsSetupInner {...props} savedDefault={initial} onSaveDefault={save} savingDefault={saving} />
+}
+
+function AllStarsSetupInner({ onBack, onStart, savedGames, onDeleteGame, savedDefault, onSaveDefault, savingDefault }) {
+  const d = savedDefault || {}
   const { players, loading, createPlayer } = usePlayers()
 
   const MAX_SLOTS = 4
@@ -171,9 +180,10 @@ export default function AllStarsSetupScreen({ onBack, onStart, savedGames, onDel
     }
   }, [loading, players])
 
-  const [seasons, setSeasons]             = useState(ALLSTAR_SEASONS)
-  const [showPlayerStats, setShowPlayerStats] = useState(false)
-  const [showTeamHints, setShowTeamHints]   = useState(false)
+  const [seasons, setSeasons]             = useState(d.seasons ?? ALLSTAR_SEASONS)
+  const [showPlayerStats, setShowPlayerStats] = useState(d.showPlayerStats ?? false)
+  const [showTeamHints, setShowTeamHints]   = useState(d.showTeamHints ?? false)
+  const buildDefaultConfig = () => ({ seasons, showPlayerStats, showTeamHints })
   const [showSeasons, setShowSeasons]       = useState(false)
 
   function clearSlot(idx) { setSelectedPlayers(prev => { const n = [...prev]; n[idx] = null; return n }) }
@@ -256,6 +266,7 @@ export default function AllStarsSetupScreen({ onBack, onStart, savedGames, onDel
         </div>
       </div>
 
+      <SaveDefaultButton onSave={() => onSaveDefault(buildDefaultConfig())} saving={savingDefault} />
       <button
         className={styles.startBtn}
         disabled={!canStart}

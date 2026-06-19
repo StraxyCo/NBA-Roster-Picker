@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { usePlayers } from '../hooks/useProfiles.js'
+import { useGameDefaults } from '../hooks/useGameDefaults.js'
+import SaveDefaultButton from '../components/SaveDefaultButton.jsx'
 import { ALL_SEASONS } from '../data/seasons.js'
 import styles from './WhosThatGuySetupScreen.module.css'
 
@@ -143,8 +145,15 @@ function SeasonsModal({ selected, onSave, onClose }) {
   )
 }
 
-export default function WhosThatGuySetupScreen({ onBack, onStart, savedGames, onDeleteGame }) {
+export default function WhosThatGuySetupScreen(props) {
+  const { initial, loaded, save, saving } = useGameDefaults('whosThatGuy')
+  if (!loaded) return null
+  return <WhosThatGuySetupInner {...props} savedDefault={initial} onSaveDefault={save} savingDefault={saving} />
+}
+
+function WhosThatGuySetupInner({ onBack, onStart, savedGames, onDeleteGame, savedDefault, onSaveDefault, savingDefault }) {
   const { players, loading, createPlayer } = usePlayers()
+  const d = savedDefault || {}
 
   const MAX_SLOTS = 4
   const [selectedPlayers, setSelectedPlayers] = useState(Array(MAX_SLOTS).fill(null))
@@ -163,11 +172,13 @@ export default function WhosThatGuySetupScreen({ onBack, onStart, savedGames, on
     }
   }, [loading, players])
 
-  const [rounds, setRounds]           = useState(5)
-  const [minSeasons, setMinSeasons]   = useState(7)
-  const [seasons, setSeasons]         = useState(ALL_SEASONS)
-  const [showTeams, setShowTeams]     = useState(true)
+  const [rounds, setRounds]           = useState(d.rounds ?? 5)
+  const [minSeasons, setMinSeasons]   = useState(d.minSeasons ?? 7)
+  const [seasons, setSeasons]         = useState(d.seasons ?? ALL_SEASONS)
+  const [showTeams, setShowTeams]     = useState(d.showTeams ?? true)
   const [showSeasons, setShowSeasons] = useState(false)
+
+  const buildDefaultConfig = () => ({ rounds, minSeasons, seasons, showTeams })
 
   function clearSlot(idx) { setSelectedPlayers(prev => { const n = [...prev]; n[idx] = null; return n }) }
   function handleAddPlayer(player) {
@@ -263,6 +274,7 @@ export default function WhosThatGuySetupScreen({ onBack, onStart, savedGames, on
         </div>
       </div>
 
+      <SaveDefaultButton onSave={() => onSaveDefault(buildDefaultConfig())} saving={savingDefault} />
       <button
         className={styles.startBtn}
         disabled={!canStart}

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { usePlayers } from '../hooks/useProfiles.js'
 import { ALL_SEASONS } from '../data/seasons.js'
 import styles from './StatsOverUnderSetupScreen.module.css'
+import { useGameDefaults } from '../hooks/useGameDefaults.js'
+import SaveDefaultButton from '../components/SaveDefaultButton.jsx'
 
 export const ALL_STATS = [
   { key: 'pts',  label: 'Points',      unit: 'PPG' },
@@ -153,7 +155,14 @@ function SeasonsModal({ selected, onSave, onClose }) {
 }
 
 // ── Main export ─────────────────────────────────────────────────────────────
-export default function StatsOverUnderSetupScreen({ onBack, onStart, savedGames, onDeleteGame }) {
+export default function StatsOverUnderSetupScreen(props) {
+  const { initial, loaded, save, saving } = useGameDefaults('statsOverUnder')
+  if (!loaded) return null
+  return <StatsOverUnderSetupInner {...props} savedDefault={initial} onSaveDefault={save} savingDefault={saving} />
+}
+
+function StatsOverUnderSetupInner({ onBack, onStart, savedGames, onDeleteGame, savedDefault, onSaveDefault, savingDefault }) {
+  const d = savedDefault || {}
   const { players, loading, createPlayer } = usePlayers()
 
   const MAX_SLOTS = 4
@@ -173,9 +182,10 @@ export default function StatsOverUnderSetupScreen({ onBack, onStart, savedGames,
     }
   }, [loading, players])
 
-  const [rounds, setRounds]                   = useState(5)
-  const [seasons, setSeasons]                 = useState(ALL_SEASONS)
-  const [selectedStats, setSelectedStats]     = useState(['pts', 'reb', 'ast'])
+  const [rounds, setRounds]                   = useState(d.rounds ?? 5)
+  const [seasons, setSeasons]                 = useState(d.seasons ?? ALL_SEASONS)
+  const [selectedStats, setSelectedStats]     = useState(d.selectedStats ?? ['pts', 'reb', 'ast'])
+  const buildDefaultConfig = () => ({ rounds, seasons, selectedStats })
   const [showSeasons, setShowSeasons]         = useState(false)
 
   function clearSlot(idx) { setSelectedPlayers(prev => { const n = [...prev]; n[idx] = null; return n }) }
@@ -268,6 +278,7 @@ export default function StatsOverUnderSetupScreen({ onBack, onStart, savedGames,
         </div>
       </div>
 
+      <SaveDefaultButton onSave={() => onSaveDefault(buildDefaultConfig())} saving={savingDefault} />
       <button className={styles.startBtn} disabled={!canStart} onClick={() => onStart({ players: activePlayers, rounds, seasons, selectedStats })}>
         Start Game
       </button>

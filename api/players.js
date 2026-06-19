@@ -69,6 +69,25 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') { res.status(200).end(); return }
 
   try {
+    // Per-game default settings live in the `gameDefaults` hash (folded in here to
+    // stay under Vercel's 12-function limit). GET ?scope=defaults&game=X / POST {game,config}.
+    if (req.query.scope === 'defaults') {
+      if (req.method === 'GET') {
+        const { game } = req.query
+        if (!game) return res.status(400).json({ error: 'game required' })
+        const raw = await hget('gameDefaults', game)
+        const config = raw ? (typeof raw === 'string' ? JSON.parse(raw) : raw) : null
+        return res.status(200).json({ game, config })
+      }
+      if (req.method === 'POST') {
+        const { game, config } = req.body || {}
+        if (!game || config == null) return res.status(400).json({ error: 'game and config required' })
+        await hset('gameDefaults', game, JSON.stringify(config))
+        return res.status(200).json({ ok: true })
+      }
+      return res.status(405).json({ error: 'Method not allowed' })
+    }
+
     if (req.method === 'GET') {
       const raw = await hgetall('players')
       if (!raw) return res.status(200).json([])
