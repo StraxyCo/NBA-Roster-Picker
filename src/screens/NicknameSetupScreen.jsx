@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import styles from './NicknameSetupScreen.module.css'
 import { usePlayers } from '../hooks/useProfiles.js'
-import { ALL_SEASONS } from '../data/seasons.js'
+import { ALL_SEASONS, PRE_2006 } from '../data/seasons.js'
 
 function Modal({ onClose, children }) {
   return (
@@ -96,11 +96,17 @@ function SeasonsModal({ selected, onSave, onClose }) {
     <Modal onClose={onClose}>
       <h3 className={styles.modalTitle}>Seasons</h3>
       <div className={styles.seasonModalLinks}>
-        <button className={styles.textBtn} onClick={() => setDraft([...ALL_SEASONS])}>Select all</button>
+        <button className={styles.textBtn} onClick={() => setDraft([...ALL_SEASONS, PRE_2006])}>Select all</button>
+        <span className={styles.textBtnSep}>·</span>
+        <button className={styles.textBtn} onClick={() => setDraft([...ALL_SEASONS])}>Modern only</button>
         <span className={styles.textBtnSep}>·</span>
         <button className={styles.textBtn} onClick={() => setDraft([])}>Clear</button>
       </div>
       <div className={styles.seasonCheckList}>
+        <label className={styles.seasonCheckRow} style={{ borderBottom: '1px solid var(--white-10)', paddingBottom: 8, marginBottom: 4 }}>
+          <input type="checkbox" className={styles.seasonCheckbox} checked={draft.includes(PRE_2006)} onChange={() => toggle(PRE_2006)} />
+          <span className={styles.seasonCheckLabel}>Before 2005‑06 <span style={{ color: 'var(--white-40)', fontWeight: 400 }}>· legends</span></span>
+        </label>
         {ALL_SEASONS.map(s => (
           <label key={s} className={styles.seasonCheckRow}>
             <input type="checkbox" className={styles.seasonCheckbox} checked={draft.includes(s)} onChange={() => toggle(s)} />
@@ -129,9 +135,11 @@ export default function NicknameSetupScreen({ onBack, onStart, savedGames, onDel
   const [seasons, setSeasons] = useState([...ALL_SEASONS])
   const [showSeasons, setShowSeasons] = useState(false)
 
-  const seasonLabel = seasons.length === ALL_SEASONS.length
-    ? 'All seasons'
-    : seasons.length === 1 ? seasons[0] : `${seasons.length} seasons`
+  const modernCount = seasons.filter(s => s !== PRE_2006).length
+  const hasPre = seasons.includes(PRE_2006)
+  const seasonLabel = modernCount === ALL_SEASONS.length
+    ? (hasPre ? 'All-time' : 'All seasons')
+    : `${seasons.length} selected`
 
   useEffect(() => {
     if (!loading && players.length > 0) {

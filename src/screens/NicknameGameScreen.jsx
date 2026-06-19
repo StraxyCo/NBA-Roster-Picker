@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { loadNicknames } from '../hooks/useNicknames.js'
+import { ALL_SEASONS, PRE_2006, FIRST_SEASON } from '../data/seasons.js'
 import styles from './NicknameGameScreen.module.css'
 
 function shuffle(arr) {
@@ -21,16 +22,22 @@ function buildSequence(keys, totalTurns) {
   return seq
 }
 
-// A nickname's player passes the season filters when, per career data (via the
-// crosswalk -> nickname-meta.json), they played >= minSeasons and appeared in any
-// selected season. Players we have NO career data for (pre-2005 legends) are always
-// included — the filters narrow only among data-backed players.
+// A nickname's player passes the season filters, per career data (via the crosswalk
+// -> nickname-meta.json). They pass if they meet the min-seasons gate AND either:
+//   - played in any selected modern season, OR
+//   - the "Before 2005-06" option is on and they played any pre-2005-06 season.
+// Players with NO career data are pure pre-2005 legends → included ONLY when the
+// "Before 2005-06" option is on (off by default).
 function playerPasses(p, meta, seasons, minSeasons) {
+  const sel = seasons && seasons.length ? seasons : ALL_SEASONS
+  const includePre = sel.includes(PRE_2006)
+  const modern = sel.filter(s => s !== PRE_2006)
   const m = meta && meta[p.player_id]
-  if (!m) return true
+  if (!m) return includePre // no data => only via the "Before 2005-06" toggle
   if (m.n < (minSeasons || 1)) return false
-  if (!seasons || !seasons.length) return true
-  return m.seasons.some(s => seasons.includes(s))
+  if (modern.length && m.seasons.some(s => modern.includes(s))) return true
+  if (includePre && m.seasons.some(s => s < FIRST_SEASON)) return true
+  return false
 }
 
 export default function NicknameGameScreen({ players, rounds, minSeasons = 1, seasons = null, onBack, onSaveGame }) {
