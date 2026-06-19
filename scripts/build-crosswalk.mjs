@@ -22,11 +22,15 @@ const REVIEW_OUT = `${OUT_DIR}/crosswalk-review.json`
 
 // ── normalize a display name for matching ────────────────────────────────────
 const SUFFIXES = new Set(['jr', 'sr', 'ii', 'iii', 'iv', 'v'])
+// Letters that don't NFD-decompose to ASCII (else [^a-z] would split the name):
+// Turkish dotless-i, Polish ł, Scandinavian ø, Croatian đ, etc.
+const SPECIAL = { ı: 'i', ł: 'l', ø: 'o', đ: 'd', ð: 'd', þ: 'th', ß: 'ss', æ: 'ae', œ: 'oe', ħ: 'h', ŋ: 'n' }
 function norm(s) {
   const tokens = s
     .toLowerCase()
     .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '') // strip accents
+    .replace(/[̀-ͯ]/g, '') // strip combining accents
+    .replace(/[ıłøđðþßæœħŋ]/g, ch => SPECIAL[ch] || ch) // transliterate non-decomposing letters
     .replace(/[^a-z\s]/g, ' ') // drop punctuation (J.J. -> "j j")
     .split(/\s+/)
     .filter(t => t && !SUFFIXES.has(t))

@@ -80,8 +80,9 @@ function seasonLine(rowsForPlayer) {
 
 // ── name normalize (mirror of build-crosswalk.mjs) ────────────────────────────
 const SUFFIXES = new Set(['jr', 'sr', 'ii', 'iii', 'iv', 'v'])
+const SPECIAL = { ı: 'i', ł: 'l', ø: 'o', đ: 'd', ð: 'd', þ: 'th', ß: 'ss', æ: 'ae', œ: 'oe', ħ: 'h', ŋ: 'n' }
 function norm(s) {
-  const tokens = s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z\s]/g, ' ').split(/\s+/).filter(t => t && !SUFFIXES.has(t))
+  const tokens = s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[ıłøđðþßæœħŋ]/g, ch => SPECIAL[ch] || ch).replace(/[^a-z\s]/g, ' ').split(/\s+/).filter(t => t && !SUFFIXES.has(t))
   const merged = []
   let prevInit = false
   for (const t of tokens) { if (t.length === 1 && prevInit) merged[merged.length - 1] += t; else merged.push(t); prevInit = t.length === 1 }
@@ -116,6 +117,17 @@ for (const id of Object.keys(careers)) {
 }
 for (const season of Object.keys(rosters)) for (const tid of Object.keys(rosters[season])) for (const p of rosters[season][tid]) if (!nbaName.has(p.id)) nbaName.set(p.id, p.name)
 
+// rosters-based (season -> lastName -> set<nba_id>) index — covers draftable players
+// that are MISSING from careers.json (the main reason the long tail stayed unresolved).
+const rosterSeason = {}
+for (const season of Object.keys(rosters))
+  for (const tid of Object.keys(rosters[season]))
+    for (const p of rosters[season][tid]) {
+      const ln = lastName(p.name)
+      const m = (rosterSeason[season] ||= new Map())
+      ;(m.get(ln) || m.set(ln, new Set()).get(ln)).add(p.id)
+    }
+
 // resolve a bref season line to an nba_id (auto, then co-occurrence)
 const resolvedThisRun = {}
 function resolveNbaId(line) {
@@ -127,6 +139,11 @@ function resolveNbaId(line) {
   let hit = null
   if (!TRADED.has(line.team)) hit = cands.find(c => c.team === line.team) // same team-season
   if (!hit && cands.length === 1) hit = cands[0] // unique lastname that season (covers traded/2TM)
+  // tier 3: rosters.json lastname-uniqueness (covers draftable players absent from careers.json)
+  if (!hit) {
+    const rset = rosterSeason[line.season]?.get(ln)
+    if (rset && rset.size === 1) hit = { nba_id: [...rset][0] }
+  }
   if (hit) { resolvedThisRun[hit.nba_id] = { nba_id: hit.nba_id, bref_id: line.bref_id, full_name: nbaName.get(hit.nba_id), via: 'co-occurrence', season: line.season }; brefToNba.set(line.bref_id, hit.nba_id); return hit.nba_id }
   return null
 }

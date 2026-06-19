@@ -1,0 +1,219 @@
+{
+  "ambiguous": [
+    {
+      "nba_id": 1628455,
+      "full_name": "Mike James",
+      "career": [
+        {
+          "season": "2017-18",
+          "team": "PHX"
+        },
+        {
+          "season": "2017-18",
+          "team": "NOP"
+        },
+        {
+          "season": "2017-18",
+          "team": "TOT"
+        },
+        {
+          "season": "2020-21",
+          "team": "BKN"
+        }
+      ],
+      "bref_candidates": [
+        {
+          "bref_id": "jamesmi01",
+          "full_name": "Mike James"
+        },
+        {
+          "bref_id": "jamesmi02",
+          "full_name": "Mike James"
+        }
+      ]
+    },
+    {
+      "nba_id": 202874,
+      "full_name": "Chris Wright",
+      "career": [
+        {
+          "season": "2011-12",
+          "team": "GSW"
+        },
+        {
+          "season": "2013-14",
+          "team": "MIL"
+        }
+      ],
+      "bref_candidates": [
+        {
+          "bref_id": "wrighch01",
+          "full_name": "Chris Wright"
+        },
+        {
+          "bref_id": "wrighch02",
+          "full_name": "Chris Wright"
+        }
+      ]
+    }
+  ],
+  "noMatch": [
+    {
+      "nba_id": 2775,
+      "full_name": "Ha Ha",
+      "career": [
+        {
+          "season": "2004-05",
+          "team": "POR"
+        },
+        {
+          "season": "2005-06",
+          "team": "POR"
+        }
+      ]
+    },
+    {
+      "nba_id": 201195,
+      "full_name": "Herbert Hill",
+      "career": []
+    },
+    {
+      "nba_id": 201180,
+      "full_name": "Sun Sun",
+      "career": [
+        {
+          "season": "2008-09",
+          "team": "LAL"
+        }
+      ]
+    },
+    {
+      "nba_id": 202070,
+      "full_name": "Tony Gaffney",
+      "career": []
+    },
+    {
+      "nba_id": 202221,
+      "full_name": "Brian Butch",
+      "career": []
+    },
+    {
+      "nba_id": 202238,
+      "full_name": "Kenny Hasbrouck",
+      "career": []
+    },
+    {
+      "nba_id": 201998,
+      "full_name": "Curtis Jerrells",
+      "career": []
+    },
+    {
+      "nba_id": 202375,
+      "full_name": "Magnum Rolle",
+      "career": []
+    },
+    {
+      "nba_id": 202358,
+      "full_name": "Terrico White",
+      "career": []
+    },
+    {
+      "nba_id": 202392,
+      "full_name": "Marqus Blakely",
+      "career": []
+    },
+    {
+      "nba_id": 201987,
+      "full_name": "Robert Vaden",
+      "career": []
+    },
+    {
+      "nba_id": 202364,
+      "full_name": "Da'Sean Butler",
+      "career": []
+    },
+    {
+      "nba_id": 202380,
+      "full_name": "Hamady Ndiaye",
+      "career": [
+        {
+          "season": "2010-11",
+          "team": "WAS"
+        },
+        {
+          "season": "2011-12",
+          "team": "WAS"
+        },
+        {
+          "season": "2013-14",
+          "team": "SAC"
+        }
+      ]
+    },
+    {
+      "nba_id": 202067,
+      "full_name": "Diamon Simpson",
+      "career": []
+    },
+    {
+      "nba_id": 1629129,
+      "full_name": "Trevon Bluiett",
+      "career": []
+    },
+    {
+      "nba_id": 1629341,
+      "full_name": "Tarik Phillip",
+      "career": []
+    },
+    {
+      "nba_id": 1629624,
+      "full_name": "Kenny Wooten",
+      "career": []
+    },
+    {
+      "nba_id": 1630492,
+      "full_name": "Luca Vildoza",
+      "career": []
+    },
+    {
+      "nba_id": 1630258,
+      "full_name": "Caleb Homesley",
+      "career": []
+    },
+    {
+      "nba_id": 1630597,
+      "full_name": "DJ Stewart",
+      "career": []
+    },
+    {
+      "nba_id": 1631171,
+      "full_name": "Justin Lewis",
+      "career": []
+    },
+    {
+      "nba_id": 1641945,
+      "full_name": "Jaylin Galloway",
+      "career": []
+    },
+    {
+      "nba_id": 1642379,
+      "full_name": "Taran Armstrong",
+      "career": []
+    },
+    {
+      "nba_id": 1642856,
+      "full_name": "Egor Dëmin",
+      "career": [
+        {
+          "season": "2025-26",
+          "team": "BKN"
+        }
+      ]
+    },
+    {
+      "nba_id": 1642850,
+      "full_name": "Thomas Sorber",
+      "career": []
+    }
+  ]
+}
