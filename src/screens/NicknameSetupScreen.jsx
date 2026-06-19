@@ -89,6 +89,75 @@ function AddPlayerModal({ players, slotsUsed, onSelect, onClose, onCreate }) {
 }
 
 
+function StatsView({ players, onClose }) {
+  const sorted = [...players].filter(p => (p.stats?.nicknameGame?.played || 0) > 0)
+    .sort((a, b) => (b.stats?.nicknameGame?.wins || 0) - (a.stats?.nicknameGame?.wins || 0))
+  return (
+    <Modal onClose={onClose}>
+      <h3 className={styles.modalTitle}>Nickname Game Stats</h3>
+      <div className={styles.statsTable}>
+        <div className={styles.statsHeader}>
+          <span className={styles.statsColPlayer}>Player</span>
+          <span className={styles.statsCol}>GP</span>
+          <span className={styles.statsCol}>W</span>
+          <span className={styles.statsCol}>Win%</span>
+        </div>
+        {sorted.length === 0 && <p className={styles.emptyNote}>No games recorded yet.</p>}
+        {sorted.map(p => {
+          const gp = p.stats?.nicknameGame?.played || 0
+          const w  = p.stats?.nicknameGame?.wins   || 0
+          return (
+            <div key={p.id} className={styles.statsRow}>
+              <span className={styles.statsColPlayer}>{p.name}</span>
+              <span className={styles.statsCol}>{gp}</span>
+              <span className={styles.statsCol}>{w}</span>
+              <span className={styles.statsCol}>{gp > 0 ? Math.round((w/gp)*100) : 0}%</span>
+            </div>
+          )
+        })}
+      </div>
+      <div className={styles.modalActions}><button className={styles.btnSecondary} onClick={onClose}>Close</button></div>
+    </Modal>
+  )
+}
+
+function GamesView({ games, onDelete, onClose }) {
+  const [deletingId, setDeletingId] = useState(null)
+  const game = games.find(g => g.id === deletingId)
+  return (
+    <>
+      <Modal onClose={onClose}>
+        <h3 className={styles.modalTitle}>Games played</h3>
+        <div className={styles.gamesTable}>
+          <div className={styles.gamesHeader}>
+            <span className={styles.gamesColPlayers}>Players</span>
+            <span className={styles.gamesColWinner}>Winner</span>
+            <span className={styles.gamesColAction}></span>
+          </div>
+          {games.length === 0 && <p className={styles.emptyNote}>No games recorded yet.</p>}
+          {games.map(g => (
+            <div key={g.id} className={styles.gamesRow}>
+              <span className={styles.gamesColPlayers}>{(g.playerNames || []).join(', ')}</span>
+              <span className={styles.gamesColWinner}>{g.winnerName}</span>
+              <button className={styles.iconBtn} onClick={() => setDeletingId(g.id)}>🗑️</button>
+            </div>
+          ))}
+        </div>
+        <div className={styles.modalActions}><button className={styles.btnSecondary} onClick={onClose}>Close</button></div>
+      </Modal>
+      {game && (
+        <Modal onClose={() => setDeletingId(null)}>
+          <p className={styles.confirmMsg}>Delete this game? Player stats will be updated.</p>
+          <div className={styles.modalActions}>
+            <button className={styles.btnDanger} onClick={async () => { await onDelete(game.id); setDeletingId(null) }}>Delete</button>
+            <button className={styles.btnSecondary} onClick={() => setDeletingId(null)}>Cancel</button>
+          </div>
+        </Modal>
+      )}
+    </>
+  )
+}
+
 function SeasonsModal({ selected, onSave, onClose }) {
   const [draft, setDraft] = useState(selected)
   function toggle(s) { setDraft(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]) }
