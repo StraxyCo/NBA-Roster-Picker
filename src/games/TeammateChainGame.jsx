@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import TeammateChainSetupScreen from '../screens/TeammateChainSetupScreen.jsx'
 import TeammateChainGameScreen from '../screens/TeammateChainGameScreen.jsx'
 import { useTeammateChainGames } from '../hooks/useProfiles.js'
-import { findTeammateConnection, pickStartingPlayer, getAllPlayers } from '../utils/teammateChain.js'
+import { validatePick, pickStartingPlayer, getAllPlayers, excludedConnections, hasAvailableOutside } from '../utils/teammateChain.js'
 import styles from './WhosThatGuyGame.module.css'
 
 const PHASES = { SETUP: 'setup', PLAYING: 'playing', FINAL: 'final' }
@@ -53,7 +53,8 @@ export default function TeammateChainGame() {
   const [players, setPlayers]           = useState([])      // {id, name}[] — human players
   const [currentPlayerIdx, setCurrentPlayerIdx] = useState(0) // index in players array
   const [chainPlayer, setChainPlayer]   = useState(null)    // current player in chain
-  const [lastLink, setLastLink]         = useState(null)    // {from, to, team, season}
+  const [excludedKeys, setExcludedKeys] = useState(new Set()) // team-season keys consumed by the last link
+  const [lastConnections, setLastConnections] = useState([]) // the last link's team-seasons (display/history)
   const [history, setHistory]           = useState([])      // chain of guesses
   const [scores, setScores]             = useState({})      // player -> wins
 
@@ -76,7 +77,8 @@ export default function TeammateChainGame() {
 
     const start = pickStartingPlayer(careers, rosters)
     setChainPlayer(start)
-    setLastLink(null)
+    setExcludedKeys(new Set())
+    setLastConnections([])
     setHistory([])
     setPhase(PHASES.PLAYING)
   }
@@ -85,15 +87,21 @@ export default function TeammateChainGame() {
   const nextPlayerIdx = (currentPlayerIdx + 1) % players.length
   const nextPlayerName = players[nextPlayerIdx]?.name || ''
 
+  const noSameTeam = !!config?.noSameTeam
+  const curExcluded = noSameTeam && chainPlayer && careers
+    ? excludedConnections(excludedKeys, careers, chainPlayer.id) : []
+  const exceptionActive = noSameTeam && chainPlayer && careers && excludedKeys.size > 0
+    && !hasAvailableOutside(chainPlayer.id, careers, excludedKeys)
+
   function handleSubmit({ guessPlayer }) {
-    const connection = findTeammateConnection(
+    const result = validatePick(
       chainPlayer.id,
       guessPlayer.id,
       careers,
-      rosters,
-      config.noSameTeam && lastLink ? lastLink.teamAbbr : null
+      config.noSameTeam ? excludedKeys : new Set(),
+      config.noSameTeam,
     )
-    const correct = connection !== null
+    const correct = result !== null
 
     // Record the guess
     setHistory(prev => [...prev, {
@@ -101,13 +109,14 @@ export default function TeammateChainGame() {
       guesser: currentPlayerName,
       guessedPlayer: guessPlayer.name,
       correct,
-      connection,
+      connection: correct ? result.connections[0] : null,
     }])
 
     if (correct) {
-      // Chain continues to next player's turn
+      // Chain continues — the team-seasons of this link are now excluded for the next pick.
       setChainPlayer(guessPlayer)
-      setLastLink({ from: chainPlayer.id, to: guessPlayer.id, teamAbbr: connection.teamAbbr, team: connection.teamName, season: connection.season })
+      setExcludedKeys(config.noSameTeam ? new Set(result.connections.map(c => c.key)) : new Set())
+      setLastConnections(result.connections)
       setCurrentPlayerIdx(nextPlayerIdx)
     } else {
       // Chain breaks — next player wins
@@ -140,8 +149,9 @@ export default function TeammateChainGame() {
       {phase === PHASES.PLAYING && chainPlayer && (
         <TeammateChainGameScreen
           chainPlayer={chainPlayer}
-          lastLink={lastLink}
-          noSameTeam={config.noSameTeam}
+          excluded={curExcluded}
+          exceptionActive={exceptionActive}
+          noSameTeam={noSameTeam}
           allPlayers={allPlayers}
           currentPlayer={currentPlayerName}
           nextPlayer={nextPlayerName}

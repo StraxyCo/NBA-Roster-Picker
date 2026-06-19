@@ -4,7 +4,8 @@ import styles from './TeammateChainGameScreen.module.css'
 
 export default function TeammateChainGameScreen({
   chainPlayer,        // { id, name } — current player in the chain
-  lastLink,           // { team, teamAbbr, season } | null — last connection's team
+  excluded,           // [{ teamName, season }] — team-seasons consumed by the last link
+  exceptionActive,    // bool — exclusion lifted (chain player only played the excluded team-seasons)
   noSameTeam,
   allPlayers,
   currentPlayer,      // human player guessing now
@@ -40,9 +41,14 @@ export default function TeammateChainGameScreen({
         <div className={styles.chainCard}>
           <div className={styles.chainLabel}>Name a teammate of</div>
           <h2 className={styles.chainName}>{chainPlayer.name}</h2>
-          {lastLink && noSameTeam && (
+          {noSameTeam && exceptionActive && (
             <div className={styles.chainConstraint}>
-              Can't use {lastLink.team} ({lastLink.season})
+              No exclusion — {chainPlayer.name} only played the excluded team-season(s)
+            </div>
+          )}
+          {noSameTeam && !exceptionActive && excluded && excluded.length > 0 && (
+            <div className={styles.chainConstraint}>
+              Can't reuse: {excluded.map(c => `${c.teamName} ${c.season}`).join(' · ')}
             </div>
           )}
         </div>

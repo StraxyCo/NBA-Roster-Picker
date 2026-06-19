@@ -33,7 +33,8 @@ const GAMES = [
     path: '/stats-over-under',
     name: 'Stats Over/Under',
     desc: 'Bet over or under on a player\'s season statistics.',
-    active: true,
+    active: false,
+    hidden: true, // masked from the menu (Vercel load) — route/code kept
   },
   {
     path: '/all-stars',
@@ -72,8 +73,8 @@ export default function HomeScreen() {
   const { players, loading } = usePlayers()
   const [showStats, setShowStats] = useState(false)
 
-  const activeGames  = GAMES.filter(g => g.active)
-  const comingSoon   = GAMES.filter(g => !g.active)
+  const activeGames  = GAMES.filter(g => g.active && !g.hidden)
+  const comingSoon   = GAMES.filter(g => !g.active && !g.hidden)
 
   return (
     <div className={styles.container}>
