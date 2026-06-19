@@ -9,6 +9,7 @@ import TeamModeDrawScreen from '../screens/TeamModeDrawScreen.jsx'
 import FinalScreen from '../screens/FinalScreen.jsx'
 import { useGames } from '../hooks/useProfiles.js'
 import { NBA_TEAMS, getLogoUrl } from '../data/teams.js'
+import { prefetchShards } from '../grading/shards.js'
 
 const SCREENS = {
   SETUP: 'SETUP', ORDER_DRAW: 'ORDER_DRAW', TURN: 'TURN',
@@ -114,6 +115,8 @@ export default function RosterPickerGame() {
     setCurrentTeam(team)
     setCurrentSeason(season)
     setCurrentRoster(rosterPlayers)
+    // Warm the grading shard for this season while the user picks (players mode only).
+    if (gameMode === 'players' && season) prefetchShards([season])
     if (eliminateTeams) {
       setDrawnEntries(prev => [...prev, { teamId: team.id, season }])
     }
