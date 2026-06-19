@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
+import CountdownTimer from '../components/CountdownTimer.jsx'
 import styles from './WhosThatGuyGameScreen.module.css'
 
 function fmtSeason(s) { return s.slice(2) }
@@ -14,20 +15,10 @@ export default function WhosThatGuyGameScreen({ mysteryPlayer, allPlayers, showT
   const [phase, setPhase]               = useState('picking')
   const [query, setQuery]               = useState('')
   const [pickedPlayer, setPickedPlayer] = useState(null)
-  const [timeLeft, setTimeLeft]         = useState(45)
 
   useEffect(() => {
-    setTimeLeft(45)
     setPhase('picking')
   }, [mysteryPlayer])
-
-  useEffect(() => {
-    if (phase !== 'picking') return
-    const timer = setInterval(() => {
-      setTimeLeft(t => Math.max(0, t - 1))
-    }, 1000)
-    return () => clearInterval(timer)
-  }, [phase])
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -53,12 +44,7 @@ export default function WhosThatGuyGameScreen({ mysteryPlayer, allPlayers, showT
   return (
     <div className={styles.screen}>
       {phase === 'picking' && (
-        <div className={styles.countdownBar}>
-          <div
-            className={`${styles.countdownFill} ${timeLeft < 10 ? styles.countdownFillWarning : ''}`}
-            style={{ width: `${(timeLeft / 45) * 100}%` }}
-          />
-        </div>
+        <CountdownTimer seconds={45} running={phase === 'picking'} resetKey={mysteryPlayer.id} />
       )}
 
       <div className={styles.topBar}>
