@@ -4,3 +4,7 @@ package-lock.json
 .env
 .env.local
 .DS_Store
+
+# Grading: raw scraped HTML cache (large, re-fetchable, immutable historical pages)
+data/bref-cache/
+data/nba-cache/

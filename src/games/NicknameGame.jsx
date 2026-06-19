@@ -46,6 +46,8 @@ export default function NicknameGame() {
         <NicknameGameScreen
           players={config.players}
           rounds={config.rounds}
+          minSeasons={config.minSeasons}
+          seasons={config.seasons}
           onBack={() => setPhase(PHASES.SETUP)}
           onSaveGame={saveGame}
         />

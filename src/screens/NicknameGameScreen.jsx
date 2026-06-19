@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { loadNicknames } from '../hooks/useNicknames.js'
+import { ALL_SEASONS, PRE_2006, FIRST_SEASON } from '../data/seasons.js'
 import styles from './NicknameGameScreen.module.css'
 
 function shuffle(arr) {
@@ -21,7 +22,25 @@ function buildSequence(keys, totalTurns) {
   return seq
 }
 
-export default function NicknameGameScreen({ players, rounds, onBack, onSaveGame }) {
+// A nickname's player passes the season filters, per career data (via the crosswalk
+// -> nickname-meta.json). They pass if they meet the min-seasons gate AND either:
+//   - played in any selected modern season, OR
+//   - the "Before 2005-06" option is on and they played any pre-2005-06 season.
+// Players with NO career data are pure pre-2005 legends → included ONLY when the
+// "Before 2005-06" option is on (off by default).
+function playerPasses(p, meta, seasons, minSeasons) {
+  const sel = seasons && seasons.length ? seasons : ALL_SEASONS
+  const includePre = sel.includes(PRE_2006)
+  const modern = sel.filter(s => s !== PRE_2006)
+  const m = meta && meta[p.player_id]
+  if (!m) return includePre // no data => only via the "Before 2005-06" toggle
+  if (m.n < (minSeasons || 1)) return false
+  if (modern.length && m.seasons.some(s => modern.includes(s))) return true
+  if (includePre && m.seasons.some(s => s < FIRST_SEASON)) return true
+  return false
+}
+
+export default function NicknameGameScreen({ players, rounds, minSeasons = 1, seasons = null, onBack, onSaveGame }) {
   const [nicknames, setNicknames] = useState(null)
   const [sequence, setSequence] = useState([])
 
@@ -42,13 +61,20 @@ export default function NicknameGameScreen({ players, rounds, onBack, onSaveGame
   const currentNickname = sequence[turn]
 
   useEffect(() => {
-    loadNicknames().then(data => {
+    Promise.all([
+      loadNicknames(),
+      fetch('/nickname-meta.json').then(r => (r.ok ? r.json() : {})).catch(() => ({})),
+    ]).then(([data, meta]) => {
       setNicknames(data)
-      // Only use actual nicknames — exclude keys that are the player's own real name
-      const nicknameKeys = Object.keys(data).filter(
-        key => !data[key].some(p => p.player_name === key)
+      // Real nicknames only (exclude keys that are a player's own name), then apply
+      // the season / min-seasons filters (a key is eligible if any of its players passes).
+      const isRealNickname = key => !data[key].some(p => p.player_name === key)
+      const eligible = Object.keys(data).filter(
+        key => isRealNickname(key) && data[key].some(p => playerPasses(p, meta, seasons, minSeasons)),
       )
-      setSequence(buildSequence(nicknameKeys, totalTurns))
+      // never leave an empty pool — fall back to all real nicknames if filters exclude everything
+      const keys = eligible.length ? eligible : Object.keys(data).filter(isRealNickname)
+      setSequence(buildSequence(keys, totalTurns))
       setPhase('guessing')
     })
   }, [])

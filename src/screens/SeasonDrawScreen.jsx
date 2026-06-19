@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import styles from './SeasonDrawScreen.module.css'
 
 const REEL_DURATION = 2800
@@ -7,10 +7,11 @@ const TICK_END      = 220
 
 // Generic season-draw reel. Spins through seasons and auto-calls onDrawn(season)
 // 1.2 s after locking. No repeated text shown after landing.
-export default function SeasonDrawScreen({ eyebrow, seasons, onDrawn }) {
+export default function SeasonDrawScreen({ eyebrow, seasons, onDrawn, autoStart = false }) {
   const [drawAnim, setDrawAnim]       = useState('ready')
   const [displaySeason, setDisplay]   = useState(null)
   const timerRef = useRef(null)
+  const startedRef = useRef(false)
 
   function startSpin() {
     const chosen = seasons[Math.floor(Math.random() * seasons.length)]
@@ -32,6 +33,14 @@ export default function SeasonDrawScreen({ eyebrow, seasons, onDrawn }) {
     }
     tick()
   }
+
+  useEffect(() => {
+    if (!autoStart || startedRef.current) return
+    startedRef.current = true
+    startSpin()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  useEffect(() => () => clearTimeout(timerRef.current), [])
 
   return (
     <div className={styles.screen}>

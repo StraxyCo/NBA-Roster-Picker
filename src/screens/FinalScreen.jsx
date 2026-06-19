@@ -1,5 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { SLOT_LABELS } from '../data/teams.js'
+import { gradeRoster } from '../grading/engine.js'
+import { loadShards } from '../grading/shards.js'
+import RosterGrade from '../components/RosterGrade.jsx'
 import styles from './FinalScreen.module.css'
 
 const STAT_LABELS = {
@@ -48,6 +51,31 @@ export default function FinalScreen({ rosters, turnOrder, rosterSize, multiSeaso
   const showStats = statMode && statMode !== 'standard'
   // On the final screen, stats are always visible — keepHidden only hides them during the game
   const statsInView = showStats
+
+  // ── Roster grading (players mode only) ──────────────────────────────────────
+  const gradingEnabled = gameMode === 'players'
+  const [shards, setShards] = useState(null)
+
+  useEffect(() => {
+    if (!gradingEnabled) return
+    const seasons = []
+    for (const p of turnOrder) for (const e of rosters[p] || []) if (e?.season) seasons.push(e.season)
+    let alive = true
+    loadShards(seasons).then(s => { if (alive) setShards(s) })
+    return () => { alive = false }
+  }, [gradingEnabled])
+
+  const grades = useMemo(() => {
+    if (!gradingEnabled || !shards) return null
+    const out = {}
+    for (const p of turnOrder) {
+      const picks = (rosters[p] || [])
+        .map((e, i) => (e ? { nba_id: e.id, season: e.season, team: e.team, roster_slot: i + 1 } : null))
+        .filter(Boolean)
+      if (picks.length) out[p] = gradeRoster(picks, shards)
+    }
+    return out
+  }, [gradingEnabled, shards, rosters, turnOrder])
 
   async function declareWinner(player) {
     setWinner(player)
@@ -170,6 +198,9 @@ export default function FinalScreen({ rosters, turnOrder, rosterSize, multiSeaso
                     </span>
                   </div>
                 )}
+
+                {/* Computed roster grade (players mode) */}
+                {gradingEnabled && grades?.[player] && <RosterGrade grade={grades[player]} />}
 
                 {!declared && (
                   <button className={styles.declareBtn} onClick={() => declareWinner(player)}>

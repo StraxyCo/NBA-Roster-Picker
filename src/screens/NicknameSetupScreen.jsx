@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import styles from './NicknameSetupScreen.module.css'
 import { usePlayers } from '../hooks/useProfiles.js'
+import { ALL_SEASONS, PRE_2006 } from '../data/seasons.js'
 
 function Modal({ onClose, children }) {
   return (
@@ -88,6 +89,108 @@ function AddPlayerModal({ players, slotsUsed, onSelect, onClose, onCreate }) {
 }
 
 
+function StatsView({ players, onClose }) {
+  const sorted = [...players].filter(p => (p.stats?.nicknameGame?.played || 0) > 0)
+    .sort((a, b) => (b.stats?.nicknameGame?.wins || 0) - (a.stats?.nicknameGame?.wins || 0))
+  return (
+    <Modal onClose={onClose}>
+      <h3 className={styles.modalTitle}>Nickname Game Stats</h3>
+      <div className={styles.statsTable}>
+        <div className={styles.statsHeader}>
+          <span className={styles.statsColPlayer}>Player</span>
+          <span className={styles.statsCol}>GP</span>
+          <span className={styles.statsCol}>W</span>
+          <span className={styles.statsCol}>Win%</span>
+        </div>
+        {sorted.length === 0 && <p className={styles.emptyNote}>No games recorded yet.</p>}
+        {sorted.map(p => {
+          const gp = p.stats?.nicknameGame?.played || 0
+          const w  = p.stats?.nicknameGame?.wins   || 0
+          return (
+            <div key={p.id} className={styles.statsRow}>
+              <span className={styles.statsColPlayer}>{p.name}</span>
+              <span className={styles.statsCol}>{gp}</span>
+              <span className={styles.statsCol}>{w}</span>
+              <span className={styles.statsCol}>{gp > 0 ? Math.round((w/gp)*100) : 0}%</span>
+            </div>
+          )
+        })}
+      </div>
+      <div className={styles.modalActions}><button className={styles.btnSecondary} onClick={onClose}>Close</button></div>
+    </Modal>
+  )
+}
+
+function GamesView({ games, onDelete, onClose }) {
+  const [deletingId, setDeletingId] = useState(null)
+  const game = games.find(g => g.id === deletingId)
+  return (
+    <>
+      <Modal onClose={onClose}>
+        <h3 className={styles.modalTitle}>Games played</h3>
+        <div className={styles.gamesTable}>
+          <div className={styles.gamesHeader}>
+            <span className={styles.gamesColPlayers}>Players</span>
+            <span className={styles.gamesColWinner}>Winner</span>
+            <span className={styles.gamesColAction}></span>
+          </div>
+          {games.length === 0 && <p className={styles.emptyNote}>No games recorded yet.</p>}
+          {games.map(g => (
+            <div key={g.id} className={styles.gamesRow}>
+              <span className={styles.gamesColPlayers}>{(g.playerNames || []).join(', ')}</span>
+              <span className={styles.gamesColWinner}>{g.winnerName}</span>
+              <button className={styles.iconBtn} onClick={() => setDeletingId(g.id)}>🗑️</button>
+            </div>
+          ))}
+        </div>
+        <div className={styles.modalActions}><button className={styles.btnSecondary} onClick={onClose}>Close</button></div>
+      </Modal>
+      {game && (
+        <Modal onClose={() => setDeletingId(null)}>
+          <p className={styles.confirmMsg}>Delete this game? Player stats will be updated.</p>
+          <div className={styles.modalActions}>
+            <button className={styles.btnDanger} onClick={async () => { await onDelete(game.id); setDeletingId(null) }}>Delete</button>
+            <button className={styles.btnSecondary} onClick={() => setDeletingId(null)}>Cancel</button>
+          </div>
+        </Modal>
+      )}
+    </>
+  )
+}
+
+function SeasonsModal({ selected, onSave, onClose }) {
+  const [draft, setDraft] = useState(selected)
+  function toggle(s) { setDraft(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]) }
+  return (
+    <Modal onClose={onClose}>
+      <h3 className={styles.modalTitle}>Seasons</h3>
+      <div className={styles.seasonModalLinks}>
+        <button className={styles.textBtn} onClick={() => setDraft([...ALL_SEASONS, PRE_2006])}>Select all</button>
+        <span className={styles.textBtnSep}>·</span>
+        <button className={styles.textBtn} onClick={() => setDraft([...ALL_SEASONS])}>Modern only</button>
+        <span className={styles.textBtnSep}>·</span>
+        <button className={styles.textBtn} onClick={() => setDraft([])}>Clear</button>
+      </div>
+      <div className={styles.seasonCheckList}>
+        <label className={styles.seasonCheckRow} style={{ borderBottom: '1px solid var(--white-10)', paddingBottom: 8, marginBottom: 4 }}>
+          <input type="checkbox" className={styles.seasonCheckbox} checked={draft.includes(PRE_2006)} onChange={() => toggle(PRE_2006)} />
+          <span className={styles.seasonCheckLabel}>Before 2005‑06 <span style={{ color: 'var(--white-40)', fontWeight: 400 }}>· legends</span></span>
+        </label>
+        {ALL_SEASONS.map(s => (
+          <label key={s} className={styles.seasonCheckRow}>
+            <input type="checkbox" className={styles.seasonCheckbox} checked={draft.includes(s)} onChange={() => toggle(s)} />
+            <span className={styles.seasonCheckLabel}>{s}</span>
+          </label>
+        ))}
+      </div>
+      <div className={styles.modalActions}>
+        <button className={styles.btnPrimary} onClick={() => { onSave(draft.length ? draft : [...ALL_SEASONS]); onClose() }}>Apply</button>
+        <button className={styles.btnSecondary} onClick={onClose}>Cancel</button>
+      </div>
+    </Modal>
+  )
+}
+
 export default function NicknameSetupScreen({ onBack, onStart, savedGames, onDeleteGame }) {
   const { players, loading, createPlayer } = usePlayers()
   const [view, setView] = useState(null)
@@ -97,6 +200,15 @@ export default function NicknameSetupScreen({ onBack, onStart, savedGames, onDel
 
 
   const [rounds, setRounds] = useState(5)
+  const [minSeasons, setMinSeasons] = useState(1)
+  const [seasons, setSeasons] = useState([...ALL_SEASONS])
+  const [showSeasons, setShowSeasons] = useState(false)
+
+  const modernCount = seasons.filter(s => s !== PRE_2006).length
+  const hasPre = seasons.includes(PRE_2006)
+  const seasonLabel = modernCount === ALL_SEASONS.length
+    ? (hasPre ? 'All-time' : 'All seasons')
+    : `${seasons.length} selected`
 
   useEffect(() => {
     if (!loading && players.length > 0) {
@@ -164,6 +276,8 @@ export default function NicknameSetupScreen({ onBack, onStart, savedGames, onDel
         </div>
 
         <div className={styles.section}>
+          <span className={styles.sectionLabel}>Options</span>
+
           <div className={styles.optionRow}>
             <div className={styles.optionLabel}>
               <span className={styles.optionTitle}>Rounds</span>
@@ -175,6 +289,29 @@ export default function NicknameSetupScreen({ onBack, onStart, savedGames, onDel
               <button className={styles.stepBtn} onClick={() => setRounds(r => Math.min(50, r + 1))} disabled={rounds >= 50}>+</button>
             </div>
           </div>
+
+          <div className={styles.optionRow}>
+            <div className={styles.optionLabel}>
+              <span className={styles.optionTitle}>Min seasons played</span>
+              <span className={styles.optionDesc}>Career length to be eligible</span>
+            </div>
+            <div className={styles.stepper}>
+              <button className={styles.stepBtn} onClick={() => setMinSeasons(s => Math.max(1, s - 1))} disabled={minSeasons <= 1}>−</button>
+              <span className={styles.stepValue}>{minSeasons}</span>
+              <button className={styles.stepBtn} onClick={() => setMinSeasons(s => Math.min(20, s + 1))} disabled={minSeasons >= 20}>+</button>
+            </div>
+          </div>
+
+          <div className={styles.optionRow}>
+            <div className={styles.optionLabel}>
+              <span className={styles.optionTitle}>Seasons</span>
+              <span className={styles.optionDesc}>Played in any selected season</span>
+            </div>
+            <button className={styles.seasonTrigger} style={{ width: 'auto', gap: '10px', flexShrink: 0 }} onClick={() => setShowSeasons(true)}>
+              <span className={styles.seasonTriggerLabel}>{seasonLabel}</span>
+              <span className={styles.seasonTriggerCaret}>▾</span>
+            </button>
+          </div>
         </div>
 
       </div>
@@ -182,7 +319,7 @@ export default function NicknameSetupScreen({ onBack, onStart, savedGames, onDel
       <button
         className={styles.startBtn}
         disabled={!canStart}
-        onClick={() => onStart({ players: activePlayers, rounds })}
+        onClick={() => onStart({ players: activePlayers, rounds, minSeasons, seasons })}
       >
         Start Game
       </button>
@@ -195,6 +332,10 @@ export default function NicknameSetupScreen({ onBack, onStart, savedGames, onDel
           onClose={() => setAddingSlot(null)}
           onCreate={createPlayer}
         />
+      )}
+
+      {showSeasons && (
+        <SeasonsModal selected={seasons} onSave={setSeasons} onClose={() => setShowSeasons(false)} />
       )}
 
       {view === 'stats' && (
