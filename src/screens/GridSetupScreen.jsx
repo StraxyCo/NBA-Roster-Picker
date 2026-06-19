@@ -2,6 +2,8 @@ import React, { useState } from 'react'
 import { usePlayers } from '../hooks/useProfiles.js'
 import { ALL_SEASONS } from '../data/seasons.js'
 import styles from './StatsOverUnderSetupScreen.module.css'   // reuse identical CSS
+import { useGameDefaults } from '../hooks/useGameDefaults.js'
+import SaveDefaultButton from '../components/SaveDefaultButton.jsx'
 
 function Modal({ onClose, children }) {
   return (
@@ -110,14 +112,22 @@ function GamesView({ games, onDelete, onClose }) {
 
 const GRID_SIZES = [3, 4, 5]
 
-export default function GridSetupScreen({ onBack, onStart, savedGames, onDeleteGame }) {
+export default function GridSetupScreen(props) {
+  const { initial, loaded, save, saving } = useGameDefaults('grid')
+  if (!loaded) return null
+  return <GridSetupInner {...props} savedDefault={initial} onSaveDefault={save} savingDefault={saving} />
+}
+
+function GridSetupInner({ onBack, onStart, savedGames, onDeleteGame, savedDefault, onSaveDefault, savingDefault }) {
+  const d = savedDefault || {}
   const { players, createPlayer } = usePlayers()
   const MAX_SLOTS = 6
   const [selectedPlayers, setSelectedPlayers] = useState(Array(MAX_SLOTS).fill(null))
   const [addingSlot, setAddingSlot] = useState(null)
   const [view, setView] = useState(null)
-  const [gridSize, setGridSize] = useState(4)
-  const [seasons, setSeasons] = useState(ALL_SEASONS)
+  const [gridSize, setGridSize] = useState(d.gridSize ?? 4)
+  const [seasons, setSeasons] = useState(d.seasons ?? ALL_SEASONS)
+  const buildDefaultConfig = () => ({ gridSize, seasons })
   const [showSeasons, setShowSeasons] = useState(false)
 
   function clearSlot(idx) { setSelectedPlayers(prev => { const n = [...prev]; n[idx] = null; return n }) }
@@ -185,6 +195,7 @@ export default function GridSetupScreen({ onBack, onStart, savedGames, onDeleteG
         </div>
       </div>
 
+      <SaveDefaultButton onSave={() => onSaveDefault(buildDefaultConfig())} saving={savingDefault} />
       <button className={styles.startBtn} disabled={!canStart}
         onClick={() => onStart({ players: activePlayers, gridSize, seasons })}>
         Start Game

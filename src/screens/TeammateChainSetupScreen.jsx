@@ -2,6 +2,8 @@ import React, { useState } from 'react'
 import { usePlayers } from '../hooks/useProfiles.js'
 import { ALL_SEASONS } from '../data/seasons.js'
 import styles from './StatsOverUnderSetupScreen.module.css'
+import { useGameDefaults } from '../hooks/useGameDefaults.js'
+import SaveDefaultButton from '../components/SaveDefaultButton.jsx'
 
 function Modal({ onClose, children }) {
   return (
@@ -89,14 +91,22 @@ function GamesView({ games, onDelete, onClose }) {
   )
 }
 
-export default function TeammateChainSetupScreen({ onBack, onStart, savedGames, onDeleteGame }) {
+export default function TeammateChainSetupScreen(props) {
+  const { initial, loaded, save, saving } = useGameDefaults('teammateChain')
+  if (!loaded) return null
+  return <TeammateChainSetupInner {...props} savedDefault={initial} onSaveDefault={save} savingDefault={saving} />
+}
+
+function TeammateChainSetupInner({ onBack, onStart, savedGames, onDeleteGame, savedDefault, onSaveDefault, savingDefault }) {
+  const d = savedDefault || {}
   const { players, createPlayer } = usePlayers()
   const MAX_SLOTS = 6
   const [selectedPlayers, setSelectedPlayers] = useState(Array(MAX_SLOTS).fill(null))
   const [addingSlot, setAddingSlot] = useState(null)
   const [view, setView] = useState(null)
-  const [rounds, setRounds] = useState(5)
-  const [noSameTeam, setNoSameTeam] = useState(true)
+  const [rounds, setRounds] = useState(d.rounds ?? 5)
+  const [noSameTeam, setNoSameTeam] = useState(d.noSameTeam ?? true)
+  const buildDefaultConfig = () => ({ rounds, noSameTeam })
 
   function clearSlot(idx) { setSelectedPlayers(prev => { const n = [...prev]; n[idx] = null; return n }) }
   function handleAddPlayer(player) {
@@ -163,6 +173,7 @@ export default function TeammateChainSetupScreen({ onBack, onStart, savedGames, 
         </div>
       </div>
 
+      <SaveDefaultButton onSave={() => onSaveDefault(buildDefaultConfig())} saving={savingDefault} />
       <button className={styles.startBtn} disabled={!canStart}
         onClick={() => onStart({ players: activePlayers, rounds, noSameTeam })}>
         Start Game

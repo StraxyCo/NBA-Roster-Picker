@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { usePlayers } from '../hooks/useProfiles.js'
 import { ALL_SEASONS } from '../data/seasons.js'
 import styles from './TeamLeadersSetupScreen.module.css'
+import { useGameDefaults } from '../hooks/useGameDefaults.js'
+import SaveDefaultButton from '../components/SaveDefaultButton.jsx'
 
 // ── Shared modal shell ──────────────────────────────────────────────────────
 function Modal({ onClose, children }) {
@@ -187,7 +189,14 @@ function SeasonsModal({ selected, onSave, onClose }) {
 }
 
 // ── Main export ─────────────────────────────────────────────────────────────
-export default function TeamLeadersSetupScreen({ onBack, onStart, savedGames, onDeleteGame }) {
+export default function TeamLeadersSetupScreen(props) {
+  const { initial, loaded, save, saving } = useGameDefaults('teamLeaders')
+  if (!loaded) return null
+  return <TeamLeadersSetupInner {...props} savedDefault={initial} onSaveDefault={save} savingDefault={saving} />
+}
+
+function TeamLeadersSetupInner({ onBack, onStart, savedGames, onDeleteGame, savedDefault, onSaveDefault, savingDefault }) {
+  const d = savedDefault || {}
   const { players, loading, createPlayer } = usePlayers()
 
   const MAX_SLOTS = 4
@@ -207,11 +216,12 @@ export default function TeamLeadersSetupScreen({ onBack, onStart, savedGames, on
     }
   }, [loading, players])
 
-  const [rounds, setRounds]                     = useState(5)
-  const [seasons, setSeasons]                   = useState(ALL_SEASONS)
-  const [selectedStats, setSelectedStats]       = useState(['pts', 'reb', 'ast'])
-  const [eliminateTeams, setEliminateTeams]     = useState(true)
-  const [eliminateFranchises, setElimFranch]    = useState(true)
+  const [rounds, setRounds]                     = useState(d.rounds ?? 5)
+  const [seasons, setSeasons]                   = useState(d.seasons ?? ALL_SEASONS)
+  const [selectedStats, setSelectedStats]       = useState(d.selectedStats ?? ['pts', 'reb', 'ast'])
+  const [eliminateTeams, setEliminateTeams]     = useState(d.eliminateTeams ?? true)
+  const [eliminateFranchises, setElimFranch]    = useState(d.eliminateFranchises ?? true)
+  const buildDefaultConfig = () => ({ rounds, seasons, selectedStats, eliminateTeams, eliminateFranchises })
   const [showSeasons, setShowSeasons]           = useState(false)
 
   function toggleStat(key) {
@@ -337,6 +347,7 @@ export default function TeamLeadersSetupScreen({ onBack, onStart, savedGames, on
         </div>
       </div>
 
+      <SaveDefaultButton onSave={() => onSaveDefault(buildDefaultConfig())} saving={savingDefault} />
       <button className={styles.startBtn} disabled={!canStart} onClick={() => onStart({ players: activePlayers, rounds, seasons, selectedStats, eliminateTeams, eliminateFranchises })}>
         Start Game
       </button>

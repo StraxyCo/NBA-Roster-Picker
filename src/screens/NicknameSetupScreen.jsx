@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import styles from './NicknameSetupScreen.module.css'
 import { usePlayers } from '../hooks/useProfiles.js'
+import { useGameDefaults } from '../hooks/useGameDefaults.js'
+import SaveDefaultButton from '../components/SaveDefaultButton.jsx'
 import { ALL_SEASONS, PRE_2006 } from '../data/seasons.js'
 
 function Modal({ onClose, children }) {
@@ -191,18 +193,27 @@ function SeasonsModal({ selected, onSave, onClose }) {
   )
 }
 
-export default function NicknameSetupScreen({ onBack, onStart, savedGames, onDeleteGame }) {
+export default function NicknameSetupScreen(props) {
+  const { initial, loaded, save, saving } = useGameDefaults('nickname')
+  if (!loaded) return null
+  return <NicknameSetupInner {...props} savedDefault={initial} onSaveDefault={save} savingDefault={saving} />
+}
+
+function NicknameSetupInner({ onBack, onStart, savedGames, onDeleteGame, savedDefault, onSaveDefault, savingDefault }) {
   const { players, loading, createPlayer } = usePlayers()
   const [view, setView] = useState(null)
+  const d = savedDefault || {}
 
   const [selectedPlayers, setSelectedPlayers] = useState([null, null, null, null])
   const [addingSlot, setAddingSlot] = useState(null)
 
 
-  const [rounds, setRounds] = useState(5)
-  const [minSeasons, setMinSeasons] = useState(1)
-  const [seasons, setSeasons] = useState([...ALL_SEASONS])
+  const [rounds, setRounds] = useState(d.rounds ?? 5)
+  const [minSeasons, setMinSeasons] = useState(d.minSeasons ?? 1)
+  const [seasons, setSeasons] = useState(d.seasons ?? [...ALL_SEASONS])
   const [showSeasons, setShowSeasons] = useState(false)
+
+  const buildDefaultConfig = () => ({ rounds, minSeasons, seasons })
 
   const modernCount = seasons.filter(s => s !== PRE_2006).length
   const hasPre = seasons.includes(PRE_2006)
@@ -316,6 +327,7 @@ export default function NicknameSetupScreen({ onBack, onStart, savedGames, onDel
 
       </div>
 
+      <SaveDefaultButton onSave={() => onSaveDefault(buildDefaultConfig())} saving={savingDefault} />
       <button
         className={styles.startBtn}
         disabled={!canStart}
