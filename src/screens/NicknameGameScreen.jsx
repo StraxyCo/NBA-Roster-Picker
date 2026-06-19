@@ -21,7 +21,19 @@ function buildSequence(keys, totalTurns) {
   return seq
 }
 
-export default function NicknameGameScreen({ players, rounds, onBack, onSaveGame }) {
+// A nickname's player passes the season filters when, per career data (via the
+// crosswalk -> nickname-meta.json), they played >= minSeasons and appeared in any
+// selected season. Players we have NO career data for (pre-2005 legends) are always
+// included — the filters narrow only among data-backed players.
+function playerPasses(p, meta, seasons, minSeasons) {
+  const m = meta && meta[p.player_id]
+  if (!m) return true
+  if (m.n < (minSeasons || 1)) return false
+  if (!seasons || !seasons.length) return true
+  return m.seasons.some(s => seasons.includes(s))
+}
+
+export default function NicknameGameScreen({ players, rounds, minSeasons = 1, seasons = null, onBack, onSaveGame }) {
   const [nicknames, setNicknames] = useState(null)
   const [sequence, setSequence] = useState([])
 
@@ -42,13 +54,20 @@ export default function NicknameGameScreen({ players, rounds, onBack, onSaveGame
   const currentNickname = sequence[turn]
 
   useEffect(() => {
-    loadNicknames().then(data => {
+    Promise.all([
+      loadNicknames(),
+      fetch('/nickname-meta.json').then(r => (r.ok ? r.json() : {})).catch(() => ({})),
+    ]).then(([data, meta]) => {
       setNicknames(data)
-      // Only use actual nicknames — exclude keys that are the player's own real name
-      const nicknameKeys = Object.keys(data).filter(
-        key => !data[key].some(p => p.player_name === key)
+      // Real nicknames only (exclude keys that are a player's own name), then apply
+      // the season / min-seasons filters (a key is eligible if any of its players passes).
+      const isRealNickname = key => !data[key].some(p => p.player_name === key)
+      const eligible = Object.keys(data).filter(
+        key => isRealNickname(key) && data[key].some(p => playerPasses(p, meta, seasons, minSeasons)),
       )
-      setSequence(buildSequence(nicknameKeys, totalTurns))
+      // never leave an empty pool — fall back to all real nicknames if filters exclude everything
+      const keys = eligible.length ? eligible : Object.keys(data).filter(isRealNickname)
+      setSequence(buildSequence(keys, totalTurns))
       setPhase('guessing')
     })
   }, [])

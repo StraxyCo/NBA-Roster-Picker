@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import styles from './NicknameSetupScreen.module.css'
 import { usePlayers } from '../hooks/useProfiles.js'
+import { ALL_SEASONS } from '../data/seasons.js'
 
 function Modal({ onClose, children }) {
   return (
@@ -88,6 +89,33 @@ function AddPlayerModal({ players, slotsUsed, onSelect, onClose, onCreate }) {
 }
 
 
+function SeasonsModal({ selected, onSave, onClose }) {
+  const [draft, setDraft] = useState(selected)
+  function toggle(s) { setDraft(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]) }
+  return (
+    <Modal onClose={onClose}>
+      <h3 className={styles.modalTitle}>Seasons</h3>
+      <div className={styles.seasonModalLinks}>
+        <button className={styles.textBtn} onClick={() => setDraft([...ALL_SEASONS])}>Select all</button>
+        <span className={styles.textBtnSep}>·</span>
+        <button className={styles.textBtn} onClick={() => setDraft([])}>Clear</button>
+      </div>
+      <div className={styles.seasonCheckList}>
+        {ALL_SEASONS.map(s => (
+          <label key={s} className={styles.seasonCheckRow}>
+            <input type="checkbox" className={styles.seasonCheckbox} checked={draft.includes(s)} onChange={() => toggle(s)} />
+            <span className={styles.seasonCheckLabel}>{s}</span>
+          </label>
+        ))}
+      </div>
+      <div className={styles.modalActions}>
+        <button className={styles.btnPrimary} onClick={() => { onSave(draft.length ? draft : [...ALL_SEASONS]); onClose() }}>Apply</button>
+        <button className={styles.btnSecondary} onClick={onClose}>Cancel</button>
+      </div>
+    </Modal>
+  )
+}
+
 export default function NicknameSetupScreen({ onBack, onStart, savedGames, onDeleteGame }) {
   const { players, loading, createPlayer } = usePlayers()
   const [view, setView] = useState(null)
@@ -97,6 +125,13 @@ export default function NicknameSetupScreen({ onBack, onStart, savedGames, onDel
 
 
   const [rounds, setRounds] = useState(5)
+  const [minSeasons, setMinSeasons] = useState(1)
+  const [seasons, setSeasons] = useState([...ALL_SEASONS])
+  const [showSeasons, setShowSeasons] = useState(false)
+
+  const seasonLabel = seasons.length === ALL_SEASONS.length
+    ? 'All seasons'
+    : seasons.length === 1 ? seasons[0] : `${seasons.length} seasons`
 
   useEffect(() => {
     if (!loading && players.length > 0) {
@@ -164,6 +199,8 @@ export default function NicknameSetupScreen({ onBack, onStart, savedGames, onDel
         </div>
 
         <div className={styles.section}>
+          <span className={styles.sectionLabel}>Options</span>
+
           <div className={styles.optionRow}>
             <div className={styles.optionLabel}>
               <span className={styles.optionTitle}>Rounds</span>
@@ -175,6 +212,29 @@ export default function NicknameSetupScreen({ onBack, onStart, savedGames, onDel
               <button className={styles.stepBtn} onClick={() => setRounds(r => Math.min(50, r + 1))} disabled={rounds >= 50}>+</button>
             </div>
           </div>
+
+          <div className={styles.optionRow}>
+            <div className={styles.optionLabel}>
+              <span className={styles.optionTitle}>Min seasons played</span>
+              <span className={styles.optionDesc}>Career length to be eligible</span>
+            </div>
+            <div className={styles.stepper}>
+              <button className={styles.stepBtn} onClick={() => setMinSeasons(s => Math.max(1, s - 1))} disabled={minSeasons <= 1}>−</button>
+              <span className={styles.stepValue}>{minSeasons}</span>
+              <button className={styles.stepBtn} onClick={() => setMinSeasons(s => Math.min(20, s + 1))} disabled={minSeasons >= 20}>+</button>
+            </div>
+          </div>
+
+          <div className={styles.optionRow}>
+            <div className={styles.optionLabel}>
+              <span className={styles.optionTitle}>Seasons</span>
+              <span className={styles.optionDesc}>Played in any selected season</span>
+            </div>
+            <button className={styles.seasonTrigger} style={{ width: 'auto', gap: '10px', flexShrink: 0 }} onClick={() => setShowSeasons(true)}>
+              <span className={styles.seasonTriggerLabel}>{seasonLabel}</span>
+              <span className={styles.seasonTriggerCaret}>▾</span>
+            </button>
+          </div>
         </div>
 
       </div>
@@ -182,7 +242,7 @@ export default function NicknameSetupScreen({ onBack, onStart, savedGames, onDel
       <button
         className={styles.startBtn}
         disabled={!canStart}
-        onClick={() => onStart({ players: activePlayers, rounds })}
+        onClick={() => onStart({ players: activePlayers, rounds, minSeasons, seasons })}
       >
         Start Game
       </button>
@@ -195,6 +255,10 @@ export default function NicknameSetupScreen({ onBack, onStart, savedGames, onDel
           onClose={() => setAddingSlot(null)}
           onCreate={createPlayer}
         />
+      )}
+
+      {showSeasons && (
+        <SeasonsModal selected={seasons} onSave={setSeasons} onClose={() => setShowSeasons(false)} />
       )}
 
       {view === 'stats' && (
