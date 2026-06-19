@@ -176,9 +176,12 @@ export function gradeRoster(picks, shardsBySeason, config = GRADING_CONFIG) {
 
   const pg = picks.map(p => gradePlayer(p, shardsBySeason[p.season], cfg, z, squash))
 
-  // availability discount toward neutral 50 (design §1b/§4), then slot-weighted aggregation
-  const effOff = pg.map(p => 50 + p.availability * (p.offense - 50))
-  const effDef = pg.map(p => 50 + p.availability * (p.defense - 50))
+  // availability discount (design §1b/§4): regress the *upside* of limited play toward 50
+  // (a half-season star counts a bit less), but never LIFT a below-average score — being
+  // unavailable doesn't make a liability better, and must not reward deep-bench scrubs.
+  const avail = (score, a) => (score > 50 ? 50 + a * (score - 50) : score)
+  const effOff = pg.map(p => avail(p.offense, p.availability))
+  const effDef = pg.map(p => avail(p.defense, p.availability))
   const roster_offense = effOff.reduce((s, v, i) => s + slotW[i] * v, 0)
   const roster_defense = effDef.reduce((s, v, i) => s + slotW[i] * v, 0)
 
@@ -190,13 +193,16 @@ export function gradeRoster(picks, shardsBySeason, config = GRADING_CONFIG) {
   const twoWayPen = Math.min(O.KAPPA * Math.abs(roster_offense - roster_defense), O.TWP_CAP)
   const overall = clip(overallRaw - twoWayPen, 0, 100)
 
+  // presentation stretch (averaging compresses elite scores). Only lifts >50 so it makes
+  // strong rosters feel strong without crushing weak ones below their floor. Monotonic.
+  const gain = x => (x > 50 ? clip(50 + (O.OUTPUT_GAIN ?? 1) * (x - 50), 0, 100) : x)
   const round = x => Math.round(x * 10) / 10
   return {
-    overall: round(overall),
+    overall: round(gain(overall)),
     components: {
-      offense: { score: round(roster_offense), subcomponents: avgSubs(pg.map(p => p.offSubs), slotW, round) },
-      defense: { score: round(roster_defense), subcomponents: avgSubs(pg.map(p => p.defSubs), slotW, round) },
-      complementarity: { score: round(comp.score), subcomponents: mapRound(comp.subcomponents, round) },
+      offense: { score: round(gain(roster_offense)), subcomponents: avgSubs(pg.map(p => p.offSubs), slotW, round) },
+      defense: { score: round(gain(roster_defense)), subcomponents: avgSubs(pg.map(p => p.defSubs), slotW, round) },
+      complementarity: { score: round(gain(comp.score)), subcomponents: mapRound(comp.subcomponents, round) },
     },
     two_way_balance_adjustment: round(-twoWayPen),
     players: picks.map((p, i) => ({

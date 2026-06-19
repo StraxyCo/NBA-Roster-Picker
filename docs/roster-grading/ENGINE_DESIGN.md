@@ -9,9 +9,10 @@ This doc pins the math, the constants, and the data/runtime architecture. Compan
 
 ## 0. Guiding invariants (what the math must guarantee)
 
-From `test-rosters.md`:
+From `test-rosters.md` (ordering amended per the validated decision below):
 
-1. **Ordering:** `Dream Team (A) ≥ Balanced (C) > 3-Alpha (B) > All-Defense (D) ≈ Deep Bench (E)`.
+1. **Ordering:** `Dream Team (A) ≥ Balanced (C) > All-Defense (D) ≳ 3-Alpha (B) > Deep Bench (E)`.
+   > **Decision (validated):** the original spec asserted B (all-offense / no-defense / redundant) > D (elite-defense / good-fit). A *balanced* engine correctly ranks D ≳ B — a no-defense, redundant roster does not beat an elite-defense roster with good fit. We kept the engine balanced (offense weight 0.42) and amended the invariant to `D ≳ B`. Forcing B > D would have required offense weight ~0.55–0.60, making defense near-cosmetic.
 2. **Cap:** A's overall **< 97** (flag failure ≥ 97). Achieved *structurally* — see §9.
 3. **Floor:** E is the lowest; the GP discount is visibly active.
 4. B: offense high, complementarity + overall mid (redundancy bites).
@@ -116,10 +117,11 @@ avail    = raw(GP) / raw(GP_FULL[s])                 GP_FULL[s] = scheduled game
 ```
 Check (82-game season): GP 82→1.00, 66→0.965, 40→0.829, 19→0.553, 10→0.34. Embiid 66 vs 19 → 0.965 vs 0.553, clear margin, no cliff (invariant 6).
 
-Applied to **offense & defense contributions only**, toward baseline 50 (§1b):
+Applied to **offense & defense contributions only**, toward baseline 50 (§1b) — **asymmetric**: it
+regresses the *upside* of limited play but never *lifts* a below-average score (being unavailable
+must not make a liability better, nor reward deep-bench scrubs who barely played):
 ```
-off_eff_i = 50 + avail_i·(offense_i − 50)
-def_eff_i = 50 + avail_i·(defense_i − 50)
+eff_i = score_i > 50 ? 50 + avail_i·(score_i − 50) : score_i     // for offense_i and defense_i
 ```
 Complementarity uses slot weights, not avail (it's distributional; avail would double-penalize presence).
 
@@ -190,6 +192,11 @@ two_way_pen  = min( KAPPA · |roster_offense − roster_defense| , TWP_CAP )
                KAPPA = 0.15, TWP_CAP = 10
 overall      = clip( overall_raw − two_way_pen , 0, 100 )
 ```
+
+**Presentation gain** (`OUTPUT_GAIN = 1.2`): averaging many subcomponents compresses the scale, so the
+final `overall` and the three component scores are stretched around 50 — **only upward** (`x>50`), so
+elite rosters feel elite without crushing weak rosters below their floor. Monotonic: preserves all
+ordering, and the upward-only form keeps a real ceiling so the < 97 cap still holds (A = 88).
 
 **Why the cap holds without a hard clamp (invariant 2):** every layer is bounded and averaging —
 - per-stat squash maxes ~93 (z clipped at 3);

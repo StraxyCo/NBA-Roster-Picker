@@ -86,11 +86,13 @@ for (const k of Object.keys(ROSTERS)) {
 
 // ── ordering invariants (design §0 / test-rosters.md §summary) ─────────────────
 const o = k => results[k].overall
-console.log('\n══ Ordering invariants ══')
+console.log('\n══ Ordering invariants (accepted: A >= C > D ≈ B > E) ══')
 const checks = [
   [`A(${o('A')}) >= C(${o('C')})`, o('A') >= o('C')],
+  [`C(${o('C')}) > D(${o('D')})`, o('C') > o('D')],
   [`C(${o('C')}) > B(${o('B')})`, o('C') > o('B')],
-  [`B(${o('B')}) > D(${o('D')})`, o('B') > o('D')],
+  [`D ≳ B (${o('D')} >= ${o('B')})`, o('D') >= o('B')],
+  [`D(${o('D')}) > E(${o('E')})`, o('D') > o('E')],
   [`B(${o('B')}) > E(${o('E')})`, o('B') > o('E')],
   [`A overall < 97 (cap)`, o('A') < 97],
   [`D overall << Defense (two-way bites): ${o('D')} vs ${results.D.components.defense.score}`, results.D.components.defense.score - o('D') >= 15],

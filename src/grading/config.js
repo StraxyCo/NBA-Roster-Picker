@@ -33,7 +33,8 @@ export const GRADING_CONFIG = {
     SAME_POS_PEN: 10,
   },
 
-  overall: { W_OFF: 0.42, W_DEF: 0.28, W_COMP: 0.30, KAPPA: 0.15, TWP_CAP: 10 },
+  overall: { W_OFF: 0.42, W_DEF: 0.28, W_COMP: 0.30, KAPPA: 0.15, TWP_CAP: 10,
+    OUTPUT_GAIN: 1.2 }, // presentation stretch around 50 (averaging compresses; keeps cap < 97)
 }
 
 // Stats that get a positional benchmark for the (capped) position nudge (design §5).
