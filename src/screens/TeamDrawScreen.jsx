@@ -26,6 +26,7 @@ export default function TeamDrawScreen({
   const [chosenEntry, setChosen]   = useState(null)
   const [error, setError]       = useState(null)
   const rafRef = useRef(null)
+  const startedRef = useRef(false)
 
   useEffect(() => { preloadLogos() }, [])
 
@@ -93,6 +94,15 @@ export default function TeamDrawScreen({
     tick()
   }
 
+  // Auto-launch the draw on mount so the recap screen's "Draw team"
+  // button goes straight into the reel (no extra click on this screen).
+  useEffect(() => {
+    if (startedRef.current) return
+    startedRef.current = true
+    startSpin()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   useEffect(() => () => clearTimeout(rafRef.current), [])
 
   const displayTeam = displayEntry?.team || NBA_TEAMS[0]
@@ -140,9 +150,6 @@ export default function TeamDrawScreen({
             )}
             {phase === 'done' && (
               <div className={styles.successMsg}>Roster loaded ✓</div>
-            )}
-            {phase === 'ready' && (
-              <button className={styles.spinBtn} onClick={startSpin}>Draw Team</button>
             )}
             {phase === 'spinning' && displayEntry && (
               <div className={styles.spinningName}>
