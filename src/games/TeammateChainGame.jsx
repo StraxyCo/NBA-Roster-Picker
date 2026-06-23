@@ -2,11 +2,12 @@ import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import TeammateChainSetupScreen from '../screens/TeammateChainSetupScreen.jsx'
 import TeammateChainGameScreen from '../screens/TeammateChainGameScreen.jsx'
+import OrderDrawScreen from '../screens/OrderDrawScreen.jsx'
 import { useTeammateChainGames } from '../hooks/useProfiles.js'
-import { validatePick, pickStartingPlayer, getAllPlayers, excludedConnections, hasAvailableOutside } from '../utils/teammateChain.js'
+import { validatePick, pickStartingPlayer, getAllPlayers, excludedConnections, hasAvailableOutside, allStarIds } from '../utils/teammateChain.js'
 import styles from './WhosThatGuyGame.module.css'
 
-const PHASES = { SETUP: 'setup', PLAYING: 'playing', FINAL: 'final' }
+const PHASES = { SETUP: 'setup', ORDER_DRAW: 'order_draw', PLAYING: 'playing', FINAL: 'final' }
 
 function FinalScreen({ winner, history, onFinish }) {
   return (
@@ -49,6 +50,7 @@ export default function TeammateChainGame() {
   const [config, setConfig]     = useState(null)
   const [careers, setCareers]   = useState(null)
   const [rosters, setRosters]   = useState(null)
+  const [allstars, setAllstars] = useState(null)
 
   const [players, setPlayers]           = useState([])      // {id, name}[] — human players
   const [currentPlayerIdx, setCurrentPlayerIdx] = useState(0) // index in players array
@@ -62,20 +64,33 @@ export default function TeammateChainGame() {
     Promise.all([
       fetch('/careers.json').then(r => r.json()),
       fetch('/rosters.json').then(r => r.json()),
-    ]).then(([c, r]) => { setCareers(c); setRosters(r) })
+      fetch('/allstars.json').then(r => r.json()),
+    ]).then(([c, r, a]) => { setCareers(c); setRosters(r); setAllstars(a) })
       .catch(e => console.error('data load', e))
   }, [])
 
   const allPlayers = useMemo(() => careers ? getAllPlayers(careers) : [], [careers])
-  const dataLoaded = careers !== null && rosters !== null
+  const allStarIdSet = useMemo(() => allStarIds(allstars), [allstars])
+  const dataLoaded = careers !== null && rosters !== null && allstars !== null
 
   function handleStart(cfg) {
     setConfig(cfg)
-    setPlayers(cfg.players)
-    setScores(Object.fromEntries(cfg.players.map(p => [p.name, 0])))
+    setPhase(PHASES.ORDER_DRAW)
+  }
+
+  function handleOrderDrawn(order) {
+    // Map the drawn name order back to player objects, consuming each name once
+    // so duplicate first names still map 1:1.
+    const pool = [...config.players]
+    const ordered = order
+      .map(name => { const i = pool.findIndex(p => p.name === name); return i >= 0 ? pool.splice(i, 1)[0] : null })
+      .filter(Boolean)
+
+    setPlayers(ordered)
+    setScores(Object.fromEntries(ordered.map(p => [p.name, 0])))
     setCurrentPlayerIdx(0)
 
-    const start = pickStartingPlayer(careers, rosters)
+    const start = pickStartingPlayer(careers, rosters, allStarIdSet)
     setChainPlayer(start)
     setExcludedKeys(new Set())
     setLastConnections([])
@@ -144,6 +159,12 @@ export default function TeammateChainGame() {
           onStart={handleStart}
           savedGames={games}
           onDeleteGame={deleteGame}
+        />
+      )}
+      {phase === PHASES.ORDER_DRAW && config && (
+        <OrderDrawScreen
+          players={config.players.map(p => p.name)}
+          onOrderDrawn={handleOrderDrawn}
         />
       )}
       {phase === PHASES.PLAYING && chainPlayer && (

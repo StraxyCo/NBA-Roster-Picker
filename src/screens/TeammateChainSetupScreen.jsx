@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { usePlayers } from '../hooks/useProfiles.js'
 import { ALL_SEASONS } from '../data/seasons.js'
 import styles from './StatsOverUnderSetupScreen.module.css'
@@ -99,10 +99,22 @@ export default function TeammateChainSetupScreen(props) {
 
 function TeammateChainSetupInner({ onBack, onStart, savedGames, onDeleteGame, savedDefault, onSaveDefault, savingDefault }) {
   const d = savedDefault || {}
-  const { players, createPlayer } = usePlayers()
+  const { players, loading, createPlayer } = usePlayers()
   const MAX_SLOTS = 6
   const [selectedPlayers, setSelectedPlayers] = useState(Array(MAX_SLOTS).fill(null))
   const [addingSlot, setAddingSlot] = useState(null)
+
+  useEffect(() => {
+    if (!loading && players.length > 0) {
+      const top = players.slice(0, 2)
+      setSelectedPlayers(prev => {
+        const next = [...prev]
+        if (!next[0] && top[0]) next[0] = top[0]
+        if (!next[1] && top[1]) next[1] = top[1]
+        return next
+      })
+    }
+  }, [loading, players])
   const [view, setView] = useState(null)
   const [rounds, setRounds] = useState(d.rounds ?? 5)
   const [noSameTeam, setNoSameTeam] = useState(d.noSameTeam ?? true)
