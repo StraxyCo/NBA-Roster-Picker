@@ -86,13 +86,27 @@ export function validatePick(chainPlayerId, candidateId, careers, excludedKeys =
   return { connections: validShared, exceptionApplied: false }
 }
 
+/** Distinct ids of players who have been an All-Star at least once. */
+export function allStarIds(allstars) {
+  const ids = new Set()
+  if (!allstars) return ids
+  for (const season of Object.values(allstars)) {
+    for (const p of [...(season.east || []), ...(season.west || [])]) ids.add(String(p.id))
+  }
+  return ids
+}
+
 /**
  * Pick a random starting player from careers.json.
  * Prefers players with seasons in the available rosters (post-2005).
+ * When `allowedIds` is a non-empty set, only those players are eligible
+ * (used to start the chain on a former All-Star).
  */
-export function pickStartingPlayer(careers, rosters) {
+export function pickStartingPlayer(careers, rosters, allowedIds = null) {
   const rosterSeasons = new Set(Object.keys(rosters))
-  const eligible = Object.entries(careers).filter(([, d]) =>
+  const restrict = allowedIds && allowedIds.size > 0
+  const eligible = Object.entries(careers).filter(([id, d]) =>
+    (!restrict || allowedIds.has(String(id))) &&
     d.seasons.some(s => rosterSeasons.has(s.season) && s.teamAbbr !== 'TOT')
   )
   if (!eligible.length) return null
