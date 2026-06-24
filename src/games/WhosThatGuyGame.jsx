@@ -23,8 +23,10 @@ function shuffle(arr) {
   return a
 }
 
-function pickMysteryPlayer(careers, selectedSeasons, minSeasons) {
-  const eligible = Object.entries(careers).filter(([, data]) => {
+function pickMysteryPlayer(careers, selectedSeasons, minSeasons, excludeIds = []) {
+  const exclude = new Set(excludeIds)
+  const eligible = Object.entries(careers).filter(([id, data]) => {
+    if (exclude.has(id)) return false
     const uniqueSeasons = new Set(data.seasons.map(s => s.season)).size
     if (uniqueSeasons < minSeasons) return false
     return data.seasons.some(s => selectedSeasons.includes(s.season))
@@ -129,6 +131,7 @@ export default function WhosThatGuyGame() {
   const [scores, setScores]               = useState({})
   const [currentMystery, setCurrentMystery] = useState(null)
   const [history, setHistory]             = useState([])
+  const [usedIds, setUsedIds]             = useState([])  // mystery players already drawn this game
 
   useEffect(() => {
     fetch('/careers.json').then(r => r.json())
@@ -158,12 +161,18 @@ export default function WhosThatGuyGame() {
     setTurnIndex(0)
     setScores(Object.fromEntries(order.map(n => [n, 0])))
     setHistory([])
+    setUsedIds([])
     setPhase(PHASES.BETWEEN_TURNS)
   }
 
   function handleDraw() {
-    const mystery = pickMysteryPlayer(careers, config.seasons, config.minSeasons)
-    if (!mystery) return
+    const mystery = pickMysteryPlayer(careers, config.seasons, config.minSeasons, usedIds)
+    if (!mystery) {
+      // No un-drawn eligible players left — end the game rather than repeat one.
+      setPhase(PHASES.FINAL)
+      return
+    }
+    setUsedIds(prev => [...prev, mystery.id])
     setCurrentMystery(mystery)
     setPhase(PHASES.QUESTIONING)
   }
