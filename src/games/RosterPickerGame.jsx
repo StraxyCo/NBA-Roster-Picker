@@ -85,7 +85,7 @@ export default function RosterPickerGame() {
   const [pendingRosters, setPendingRosters]  = useState(null)
   const [lastGameConfig, setLastGameConfig]  = useState(null)
   const [bans, setBans]                      = useState(0)
-  const [bannedPlayers, setBannedPlayers]    = useState({}) // { playerId: true }
+  const [bannedPlayers, setBannedPlayers]    = useState({}) // { bannerName: { playerId: true } } — a ban blocks everyone except the banner
   const [bonuses, setBonuses]                = useState(EMPTY_BONUSES)
   const [jokersLeft, setJokersLeft]          = useState({}) // { [playerName]: { year, team, all } }
   const [redrawPool, setRedrawPool]          = useState(null)   // [{ team, season }] for REDRAW_TEAM
