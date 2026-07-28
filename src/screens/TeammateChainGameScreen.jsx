@@ -9,7 +9,11 @@ export default function TeammateChainGameScreen({
   noSameTeam,
   allPlayers,
   currentPlayer,      // human player guessing now
-  nextPlayer,         // human player waiting
+  roster,             // [{ id, name }] — all human players, in turn order
+  lives,              // { [playerId]: livesLeft }
+  maxLives,
+  currentPlayerId,
+  lastOutcome,        // result of the previous guess (banner), or null
   onSubmit,           // ({ guessPlayer }) => void
   onBack,
 }) {
@@ -30,12 +34,34 @@ export default function TeammateChainGameScreen({
       <div className={styles.topBar}>
         {onBack && <button className={styles.backArrow} onClick={onBack}>←</button>}
         <div className={styles.players}>
-          <span className={styles.playerActive}>{currentPlayer}</span>
-          <span className={styles.playerWaiting}>{nextPlayer}</span>
+          {(roster || []).map(p => {
+            const left = lives?.[p.id] ?? 0
+            const out = left === 0
+            return (
+              <div key={p.id} className={`${styles.playerChip} ${p.id === currentPlayerId ? styles.playerActive : ''} ${out ? styles.playerOut : ''}`}>
+                <span className={styles.playerName}>{p.name}</span>
+                <span className={styles.playerLives}>
+                  {Array.from({ length: maxLives }, (_, i) => (
+                    <span key={i} className={i < left ? styles.lifeFull : styles.lifeLost}>♥</span>
+                  ))}
+                </span>
+              </div>
+            )
+          })}
         </div>
       </div>
 
       <div className={styles.content}>
+        {lastOutcome && (
+          <div className={`${styles.outcome} ${lastOutcome.correct ? styles.outcomeCorrect : styles.outcomeWrong}`}>
+            {lastOutcome.correct ? (
+              <>✓ {lastOutcome.guessedPlayer} played with {lastOutcome.prevPlayer} — {lastOutcome.connection.teamName} {lastOutcome.connection.season}</>
+            ) : (
+              <>✗ {lastOutcome.guessedPlayer} doesn't link to {lastOutcome.prevPlayer} — {lastOutcome.guesser} {lastOutcome.livesLeft === 0 ? 'is out' : `has ${lastOutcome.livesLeft} ${lastOutcome.livesLeft === 1 ? 'life' : 'lives'} left`}</>
+            )}
+          </div>
+        )}
+
         {/* Chain player card */}
         <div className={styles.eyebrow}>{currentPlayer}'s turn</div>
         <div className={styles.chainCard}>
