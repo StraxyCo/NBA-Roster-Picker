@@ -160,8 +160,8 @@ export default function TeammateChainGame() {
       return
     }
 
-    // Wrong guess — the guesser loses a life. The chain player (and its
-    // exclusions) stay put, so the next player faces the same link.
+    // Wrong guess — the guesser loses a life but keeps the turn, retrying the
+    // same link until they land it or run out of lives.
     const livesLeft = Math.max(0, (lives[currentPlayer.id] || 0) - 1)
     const newLives = { ...lives, [currentPlayer.id]: livesLeft }
     setLives(newLives)
@@ -182,6 +182,9 @@ export default function TeammateChainGame() {
       livesLeft,
     })
 
+    // Still alive — same player, same link, try again.
+    if (livesLeft > 0) return
+
     const survivors = players.filter(p => (newLives[p.id] || 0) > 0)
     if (survivors.length <= 1) {
       // Last one standing wins. In a solo game nobody survives — the lone
@@ -190,6 +193,7 @@ export default function TeammateChainGame() {
       setPhase(PHASES.FINAL)
       return
     }
+    // Eliminated — the link passes to the next player still in it.
     setCurrentPlayerIdx(nextAliveIdx(currentPlayerIdx, newLives))
   }
 
