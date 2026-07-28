@@ -57,7 +57,7 @@ export default function TeammateChainGameScreen({
             {lastOutcome.correct ? (
               <>✓ {lastOutcome.guessedPlayer} played with {lastOutcome.prevPlayer} — {lastOutcome.connection.teamName} {lastOutcome.connection.season}</>
             ) : (
-              <>✗ {lastOutcome.guessedPlayer} doesn't link to {lastOutcome.prevPlayer} — {lastOutcome.guesser} {lastOutcome.livesLeft === 0 ? 'is out' : `has ${lastOutcome.livesLeft} ${lastOutcome.livesLeft === 1 ? 'life' : 'lives'} left`}</>
+              <>✗ {lastOutcome.guessedPlayer} doesn't link to {lastOutcome.prevPlayer} — {lastOutcome.livesLeft === 0 ? `${lastOutcome.guesser} is out` : `${lastOutcome.livesLeft} ${lastOutcome.livesLeft === 1 ? 'life' : 'lives'} left, try again`}</>
             )}
           </div>
         )}
