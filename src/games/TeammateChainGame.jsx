@@ -9,13 +9,13 @@ import styles from './WhosThatGuyGame.module.css'
 
 const PHASES = { SETUP: 'setup', ORDER_DRAW: 'order_draw', PLAYING: 'playing', FINAL: 'final' }
 
-function FinalScreen({ winner, history, onFinish }) {
+function FinalScreen({ winner, soloOut, history, onFinish }) {
   return (
     <div className={styles.finalScreen}>
       <div className={styles.finalContent}>
         <div className={styles.eyebrow}>Game Over</div>
-        <h2 className={styles.winnerName}>{winner} wins!</h2>
-        <p className={styles.winnerSub}>The chain broke.</p>
+        <h2 className={styles.winnerName}>{soloOut ? 'Out of lives' : `${winner} wins!`}</h2>
+        <p className={styles.winnerSub}>{soloOut ? `${winner}'s chain ended.` : 'Last one standing.'}</p>
 
         {/* Chain history */}
         <div className={styles.chainHistory}>
@@ -25,9 +25,13 @@ function FinalScreen({ winner, history, onFinish }) {
               <span className={styles.historyNum}>{i + 1}.</span>
               <div className={styles.historyBody}>
                 <span className={styles.historyLink}>{h.prevPlayer} → {h.guesser}: {h.guessedPlayer}</span>
-                {h.correct && (
+                {h.correct ? (
                   <span style={{ color: 'var(--white-40)', fontSize: '0.75rem' }}>
                     via {h.connection.teamName} ({h.connection.season})
+                  </span>
+                ) : (
+                  <span style={{ color: 'var(--white-40)', fontSize: '0.75rem' }}>
+                    −1 life · {h.livesLeft} left{h.livesLeft === 0 ? ' — eliminated' : ''}
                   </span>
                 )}
               </div>
@@ -58,7 +62,9 @@ export default function TeammateChainGame() {
   const [excludedKeys, setExcludedKeys] = useState(new Set()) // team-season keys consumed by the last link
   const [lastConnections, setLastConnections] = useState([]) // the last link's team-seasons (display/history)
   const [history, setHistory]           = useState([])      // chain of guesses
-  const [scores, setScores]             = useState({})      // player -> wins
+  const [lives, setLives]               = useState({})      // player id -> lives left
+  const [winner, setWinner]             = useState(null)    // {id, name} — last one standing
+  const [lastOutcome, setLastOutcome]   = useState(null)    // feedback banner for the previous guess
 
   useEffect(() => {
     Promise.all([
@@ -72,6 +78,7 @@ export default function TeammateChainGame() {
   const allPlayers = useMemo(() => careers ? getAllPlayers(careers) : [], [careers])
   const allStarIdSet = useMemo(() => allStarIds(allstars), [allstars])
   const dataLoaded = careers !== null && rosters !== null && allstars !== null
+  const maxLives = config?.lives ?? 3
 
   function handleStart(cfg) {
     setConfig(cfg)
@@ -87,7 +94,7 @@ export default function TeammateChainGame() {
       .filter(Boolean)
 
     setPlayers(ordered)
-    setScores(Object.fromEntries(ordered.map(p => [p.name, 0])))
+    setLives(Object.fromEntries(ordered.map(p => [p.id, maxLives])))
     setCurrentPlayerIdx(0)
 
     const start = pickStartingPlayer(careers, rosters, allStarIdSet)
@@ -95,12 +102,23 @@ export default function TeammateChainGame() {
     setExcludedKeys(new Set())
     setLastConnections([])
     setHistory([])
+    setWinner(null)
+    setLastOutcome(null)
     setPhase(PHASES.PLAYING)
   }
 
-  const currentPlayerName = players[currentPlayerIdx]?.name || ''
-  const nextPlayerIdx = (currentPlayerIdx + 1) % players.length
-  const nextPlayerName = players[nextPlayerIdx]?.name || ''
+  // Next player still holding at least one life, wrapping around. Returns the
+  // current index when they are the only survivor, -1 when nobody is left.
+  function nextAliveIdx(fromIdx, livesMap) {
+    for (let step = 1; step <= players.length; step++) {
+      const i = (fromIdx + step) % players.length
+      if ((livesMap[players[i].id] || 0) > 0) return i
+    }
+    return -1
+  }
+
+  const currentPlayer = players[currentPlayerIdx] || null
+  const currentPlayerName = currentPlayer?.name || ''
 
   const noSameTeam = !!config?.noSameTeam
   const curExcluded = noSameTeam && chainPlayer && careers
@@ -118,30 +136,64 @@ export default function TeammateChainGame() {
     )
     const correct = result !== null
 
-    // Record the guess
-    setHistory(prev => [...prev, {
-      prevPlayer: chainPlayer.name,
-      guesser: currentPlayerName,
-      guessedPlayer: guessPlayer.name,
-      correct,
-      connection: correct ? result.connections[0] : null,
-    }])
-
     if (correct) {
+      setHistory(prev => [...prev, {
+        prevPlayer: chainPlayer.name,
+        guesser: currentPlayerName,
+        guessedPlayer: guessPlayer.name,
+        correct: true,
+        connection: result.connections[0],
+      }])
+      setLastOutcome({
+        correct: true,
+        guesser: currentPlayerName,
+        prevPlayer: chainPlayer.name,
+        guessedPlayer: guessPlayer.name,
+        connection: result.connections[0],
+      })
+
       // Chain continues — the team-seasons of this link are now excluded for the next pick.
       setChainPlayer(guessPlayer)
       setExcludedKeys(config.noSameTeam ? new Set(result.connections.map(c => c.key)) : new Set())
       setLastConnections(result.connections)
-      setCurrentPlayerIdx(nextPlayerIdx)
-    } else {
-      // Chain breaks — next player wins
-      setScores(prev => ({ ...prev, [nextPlayerName]: (prev[nextPlayerName] || 0) + 1 }))
-      setPhase(PHASES.FINAL)
+      setCurrentPlayerIdx(nextAliveIdx(currentPlayerIdx, lives))
+      return
     }
+
+    // Wrong guess — the guesser loses a life. The chain player (and its
+    // exclusions) stay put, so the next player faces the same link.
+    const livesLeft = Math.max(0, (lives[currentPlayer.id] || 0) - 1)
+    const newLives = { ...lives, [currentPlayer.id]: livesLeft }
+    setLives(newLives)
+
+    setHistory(prev => [...prev, {
+      prevPlayer: chainPlayer.name,
+      guesser: currentPlayerName,
+      guessedPlayer: guessPlayer.name,
+      correct: false,
+      connection: null,
+      livesLeft,
+    }])
+    setLastOutcome({
+      correct: false,
+      guesser: currentPlayerName,
+      prevPlayer: chainPlayer.name,
+      guessedPlayer: guessPlayer.name,
+      livesLeft,
+    })
+
+    const survivors = players.filter(p => (newLives[p.id] || 0) > 0)
+    if (survivors.length <= 1) {
+      // Last one standing wins. In a solo game nobody survives — the lone
+      // player is still the one whose game we record.
+      setWinner(survivors[0] || currentPlayer)
+      setPhase(PHASES.FINAL)
+      return
+    }
+    setCurrentPlayerIdx(nextAliveIdx(currentPlayerIdx, newLives))
   }
 
   async function handleFinish() {
-    const winner = players[nextPlayerIdx]
     await saveGame({
       playerIds: players.map(p => p.id),
       playerNames: players.map(p => p.name),
@@ -175,14 +227,19 @@ export default function TeammateChainGame() {
           noSameTeam={noSameTeam}
           allPlayers={allPlayers}
           currentPlayer={currentPlayerName}
-          nextPlayer={nextPlayerName}
+          roster={players}
+          lives={lives}
+          maxLives={maxLives}
+          currentPlayerId={currentPlayer?.id}
+          lastOutcome={lastOutcome}
           onSubmit={handleSubmit}
           onBack={() => setPhase(PHASES.SETUP)}
         />
       )}
       {phase === PHASES.FINAL && (
         <FinalScreen
-          winner={nextPlayerName}
+          winner={winner?.name || ''}
+          soloOut={players.length === 1}
           history={history}
           onFinish={handleFinish}
         />

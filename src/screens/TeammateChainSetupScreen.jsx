@@ -117,8 +117,9 @@ function TeammateChainSetupInner({ onBack, onStart, savedGames, onDeleteGame, sa
   }, [loading, players])
   const [view, setView] = useState(null)
   const [rounds, setRounds] = useState(d.rounds ?? 5)
+  const [lives, setLives] = useState(d.lives ?? 3)
   const [noSameTeam, setNoSameTeam] = useState(d.noSameTeam ?? true)
-  const buildDefaultConfig = () => ({ rounds, noSameTeam })
+  const buildDefaultConfig = () => ({ rounds, lives, noSameTeam })
 
   function clearSlot(idx) { setSelectedPlayers(prev => { const n = [...prev]; n[idx] = null; return n }) }
   function handleAddPlayer(player) {
@@ -175,6 +176,18 @@ function TeammateChainSetupInner({ onBack, onStart, savedGames, onDeleteGame, sa
 
           <div className={styles.optionRow}>
             <div className={styles.optionLabel}>
+              <span className={styles.optionTitle}>Lives</span>
+              <span className={styles.optionDesc}>Wrong answers each player can afford</span>
+            </div>
+            <div className={styles.stepper}>
+              <button className={styles.stepBtn} onClick={() => setLives(l => Math.max(1, l - 1))} disabled={lives <= 1}>−</button>
+              <span className={styles.stepValue}>{lives}</span>
+              <button className={styles.stepBtn} onClick={() => setLives(l => Math.min(5, l + 1))} disabled={lives >= 5}>+</button>
+            </div>
+          </div>
+
+          <div className={styles.optionRow}>
+            <div className={styles.optionLabel}>
               <span className={styles.optionTitle}>No same team twice</span>
               <span className={styles.optionDesc}>Can't use the same franchise two links in a row</span>
             </div>
@@ -187,7 +200,7 @@ function TeammateChainSetupInner({ onBack, onStart, savedGames, onDeleteGame, sa
 
       <SaveDefaultButton onSave={() => onSaveDefault(buildDefaultConfig())} saving={savingDefault} />
       <button className={styles.startBtn} disabled={!canStart}
-        onClick={() => onStart({ players: activePlayers, rounds, noSameTeam })}>
+        onClick={() => onStart({ players: activePlayers, rounds, lives, noSameTeam })}>
         Start Game
       </button>
 
