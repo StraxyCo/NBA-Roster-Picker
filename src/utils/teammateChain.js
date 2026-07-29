@@ -86,6 +86,39 @@ export function validatePick(chainPlayerId, candidateId, careers, excludedKeys =
   return { connections: validShared, exceptionApplied: false }
 }
 
+/**
+ * Every season covered by careers.json, oldest first, as a continuous run of
+ * years (seasons with no recorded player still get a column so the axis is
+ * evenly spaced). → [{ season: '1997-98', label: '98', year: 1997 }]
+ */
+export function seasonAxis(careers) {
+  let min = Infinity
+  let max = -Infinity
+  for (const c of Object.values(careers)) {
+    for (const s of c.seasons) {
+      const y = Number(s.season.slice(0, 4))
+      if (y < min) min = y
+      if (y > max) max = y
+    }
+  }
+  if (!Number.isFinite(min)) return []
+  const axis = []
+  for (let y = min; y <= max; y++) {
+    const end = String((y + 1) % 100).padStart(2, '0')
+    axis.push({ season: `${y}-${end}`, label: end, year: y })
+  }
+  return axis
+}
+
+/** The seasons a player appeared in, as a Set of season strings. */
+export function playerSeasons(playerId, careers) {
+  const c = careers[String(playerId)]
+  const out = new Set()
+  if (!c) return out
+  for (const s of c.seasons) out.add(s.season)
+  return out
+}
+
 /** Distinct ids of players who have been an All-Star at least once. */
 export function allStarIds(allstars) {
   const ids = new Set()

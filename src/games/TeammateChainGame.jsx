@@ -3,19 +3,22 @@ import { useNavigate } from 'react-router-dom'
 import TeammateChainSetupScreen from '../screens/TeammateChainSetupScreen.jsx'
 import TeammateChainGameScreen from '../screens/TeammateChainGameScreen.jsx'
 import OrderDrawScreen from '../screens/OrderDrawScreen.jsx'
+import ChainTimeline from '../components/ChainTimeline.jsx'
 import { useTeammateChainGames } from '../hooks/useProfiles.js'
 import { validatePick, pickStartingPlayer, getAllPlayers, excludedConnections, hasAvailableOutside, allStarIds } from '../utils/teammateChain.js'
 import styles from './WhosThatGuyGame.module.css'
 
 const PHASES = { SETUP: 'setup', ORDER_DRAW: 'order_draw', PLAYING: 'playing', FINAL: 'final' }
 
-function FinalScreen({ winner, soloOut, history, onFinish }) {
+function FinalScreen({ winner, soloOut, history, chain, careers, onFinish }) {
   return (
     <div className={styles.finalScreen}>
       <div className={styles.finalContent}>
         <div className={styles.eyebrow}>Game Over</div>
         <h2 className={styles.winnerName}>{soloOut ? 'Out of lives' : `${winner} wins!`}</h2>
         <p className={styles.winnerSub}>{soloOut ? `${winner}'s chain ended.` : 'Last one standing.'}</p>
+
+        <ChainTimeline chain={chain} careers={careers} />
 
         {/* Chain history */}
         <div className={styles.chainHistory}>
@@ -62,6 +65,7 @@ export default function TeammateChainGame() {
   const [excludedKeys, setExcludedKeys] = useState(new Set()) // team-season keys consumed by the last link
   const [lastConnections, setLastConnections] = useState([]) // the last link's team-seasons (display/history)
   const [history, setHistory]           = useState([])      // chain of guesses
+  const [chain, setChain]               = useState([])      // [{id, name, linkSeasons}] — timeline rows
   const [lives, setLives]               = useState({})      // player id -> lives left
   const [winner, setWinner]             = useState(null)    // {id, name} — last one standing
   const [lastOutcome, setLastOutcome]   = useState(null)    // feedback banner for the previous guess
@@ -99,6 +103,7 @@ export default function TeammateChainGame() {
 
     const start = pickStartingPlayer(careers, rosters, allStarIdSet)
     setChainPlayer(start)
+    setChain(start ? [{ id: start.id, name: start.name, linkSeasons: [] }] : [])
     setExcludedKeys(new Set())
     setLastConnections([])
     setHistory([])
@@ -151,6 +156,12 @@ export default function TeammateChainGame() {
         guessedPlayer: guessPlayer.name,
         connection: result.connections[0],
       })
+
+      setChain(prev => [...prev, {
+        id: guessPlayer.id,
+        name: guessPlayer.name,
+        linkSeasons: result.connections.map(c => c.season),
+      }])
 
       // Chain continues — the team-seasons of this link are now excluded for the next pick.
       setChainPlayer(guessPlayer)
@@ -235,6 +246,8 @@ export default function TeammateChainGame() {
           lives={lives}
           maxLives={maxLives}
           currentPlayerId={currentPlayer?.id}
+          chain={chain}
+          careers={careers}
           lastOutcome={lastOutcome}
           onSubmit={handleSubmit}
           onBack={() => setPhase(PHASES.SETUP)}
@@ -245,6 +258,8 @@ export default function TeammateChainGame() {
           winner={winner?.name || ''}
           soloOut={players.length === 1}
           history={history}
+          chain={chain}
+          careers={careers}
           onFinish={handleFinish}
         />
       )}

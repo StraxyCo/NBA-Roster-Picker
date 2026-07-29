@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
 import { filterPlayers } from '../utils/teammateChain.js'
+import ChainTimeline from '../components/ChainTimeline.jsx'
 import styles from './TeammateChainGameScreen.module.css'
 
 export default function TeammateChainGameScreen({
@@ -13,6 +14,8 @@ export default function TeammateChainGameScreen({
   lives,              // { [playerId]: livesLeft }
   maxLives,
   currentPlayerId,
+  chain,              // [{ id, name, linkSeasons }] — every link so far, for the timeline
+  careers,
   lastOutcome,        // result of the previous guess (banner), or null
   onSubmit,           // ({ guessPlayer }) => void
   onBack,
@@ -115,6 +118,10 @@ export default function TeammateChainGameScreen({
             </button>
           )}
         </div>
+      </div>
+
+      <div className={styles.timeline}>
+        <ChainTimeline chain={chain} careers={careers} />
       </div>
     </div>
   )
