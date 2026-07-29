@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { usePlayers } from '../hooks/useProfiles.js'
 import { ALL_SEASONS } from '../data/seasons.js'
+import { NBA_TEAMS } from '../data/teams.js'
 import styles from './TeamLeadersSetupScreen.module.css'
 import { useGameDefaults } from '../hooks/useGameDefaults.js'
 import SaveDefaultButton from '../components/SaveDefaultButton.jsx'
@@ -219,9 +220,7 @@ function TeamLeadersSetupInner({ onBack, onStart, savedGames, onDeleteGame, save
   const [rounds, setRounds]                     = useState(d.rounds ?? 5)
   const [seasons, setSeasons]                   = useState(d.seasons ?? ALL_SEASONS)
   const [selectedStats, setSelectedStats]       = useState(d.selectedStats ?? ['pts', 'reb', 'ast'])
-  const [eliminateTeams, setEliminateTeams]     = useState(d.eliminateTeams ?? true)
-  const [eliminateFranchises, setElimFranch]    = useState(d.eliminateFranchises ?? true)
-  const buildDefaultConfig = () => ({ rounds, seasons, selectedStats, eliminateTeams, eliminateFranchises })
+  const buildDefaultConfig = () => ({ rounds, seasons, selectedStats })
   const [showSeasons, setShowSeasons]           = useState(false)
 
   function toggleStat(key) {
@@ -241,6 +240,11 @@ function TeamLeadersSetupInner({ onBack, onStart, savedGames, onDeleteGame, save
   const slotsUsedIds  = selectedPlayers.filter(Boolean).map(p => p.id)
   const activePlayers = selectedPlayers.filter(Boolean)
   const canStart      = activePlayers.length >= 1
+
+  // No franchise is drawn twice in a game, so the 30 teams have to cover
+  // every player's every round.
+  const maxRounds       = Math.min(10, Math.floor(NBA_TEAMS.length / Math.max(1, activePlayers.length)))
+  const effectiveRounds = Math.min(rounds, maxRounds)
 
   const seasonLabel = seasons.length === ALL_SEASONS.length
     ? 'All seasons'
@@ -295,9 +299,9 @@ function TeamLeadersSetupInner({ onBack, onStart, savedGames, onDeleteGame, save
               <span className={styles.optionDesc}>Teams drawn per player</span>
             </div>
             <div className={styles.stepper}>
-              <button className={styles.stepBtn} onClick={() => setRounds(r => Math.max(1, r - 1))} disabled={rounds <= 1}>−</button>
-              <span className={styles.stepValue}>{rounds}</span>
-              <button className={styles.stepBtn} onClick={() => setRounds(r => Math.min(10, r + 1))} disabled={rounds >= 10}>+</button>
+              <button className={styles.stepBtn} onClick={() => setRounds(Math.max(1, effectiveRounds - 1))} disabled={effectiveRounds <= 1}>−</button>
+              <span className={styles.stepValue}>{effectiveRounds}</span>
+              <button className={styles.stepBtn} onClick={() => setRounds(Math.min(maxRounds, effectiveRounds + 1))} disabled={effectiveRounds >= maxRounds}>+</button>
             </div>
           </div>
 
@@ -307,26 +311,6 @@ function TeamLeadersSetupInner({ onBack, onStart, savedGames, onDeleteGame, save
               <span className={styles.optionDesc}>{seasonLabel}</span>
             </div>
             <button className={styles.optionBtn} onClick={() => setShowSeasons(true)}>Change</button>
-          </div>
-
-          <div className={styles.optionRow}>
-            <div className={styles.optionLabel}>
-              <span className={styles.optionTitle}>Eliminate drawn teams</span>
-              <span className={styles.optionDesc}>No duplicate team + season</span>
-            </div>
-            <button className={`${styles.toggle} ${eliminateTeams ? styles.toggleOn : ''}`} onClick={() => setEliminateTeams(v => !v)}>
-              <span className={styles.toggleKnob} />
-            </button>
-          </div>
-
-          <div className={styles.optionRow}>
-            <div className={styles.optionLabel}>
-              <span className={styles.optionTitle}>Eliminate drawn franchises</span>
-              <span className={styles.optionDesc}>No same franchise across seasons</span>
-            </div>
-            <button className={`${styles.toggle} ${eliminateFranchises ? styles.toggleOn : ''}`} onClick={() => setElimFranch(v => !v)}>
-              <span className={styles.toggleKnob} />
-            </button>
           </div>
         </div>
 
@@ -348,7 +332,7 @@ function TeamLeadersSetupInner({ onBack, onStart, savedGames, onDeleteGame, save
       </div>
 
       <SaveDefaultButton onSave={() => onSaveDefault(buildDefaultConfig())} saving={savingDefault} />
-      <button className={styles.startBtn} disabled={!canStart} onClick={() => onStart({ players: activePlayers, rounds, seasons, selectedStats, eliminateTeams, eliminateFranchises })}>
+      <button className={styles.startBtn} disabled={!canStart} onClick={() => onStart({ players: activePlayers, rounds: effectiveRounds, seasons, selectedStats })}>
         Start Game
       </button>
 

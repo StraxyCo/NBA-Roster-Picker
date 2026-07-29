@@ -164,7 +164,6 @@ export default function TeamLeadersGame() {
 
   function handleSeasonDrawn(season) {
     setRoundSeason(season)
-    setDrawnEntries([])   // reset eliminate pool for each new round
     setPhase(PHASES.BETWEEN_TURNS)
   }
 
@@ -172,9 +171,9 @@ export default function TeamLeadersGame() {
     setCurrentTeam(team)
     setCurrentSeason(season)
     setCurrentRoster(roster)
-    if (config.eliminateTeams) {
-      setDrawnEntries(prev => [...prev, { teamId: team.id, season }])
-    }
+    // A franchise is never drawn twice in a game, so the pool must persist
+    // across rounds and record every draw.
+    setDrawnEntries(prev => [...prev, { teamId: team.id, season }])
     setPhase(PHASES.GUESSING)
   }
 
@@ -271,8 +270,8 @@ export default function TeamLeadersGame() {
       {phase === PHASES.TEAM_DRAW && (
         <TeamDrawScreen
           drawnEntries={drawnEntries}
-          eliminateTeams={config.eliminateTeams}
-          eliminateFranchises={config.eliminateFranchises}
+          eliminateTeams
+          eliminateFranchises
           seasons={roundSeason ? [roundSeason] : config.seasons}
           onTeamDrawn={handleTeamDrawn}
         />
