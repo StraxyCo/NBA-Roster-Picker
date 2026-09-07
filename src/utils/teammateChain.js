@@ -54,14 +54,18 @@ export function excludedConnections(excludedKeys, careers, chainPlayerId) {
  * Validate `candidate` as the next teammate of `chainPlayer`.
  *
  * Rule: the team-season(s) that justified the PREVIOUS link (`excludedKeys`) are
- * consumed — the new link must use a different team-season, and a candidate who was
- * a teammate within any excluded team-season is banned (they're "the same team+seasons
- * as the previous link"). Exception: if every team-season of the chain player is in the
- * excluded set (excluding it would leave no way to continue), the exclusion is lifted.
+ * consumed — the new link must use a different team-season. On top of that, the
+ * STRICT variant (`allowSharedSeasons === false`) also bans any candidate who played
+ * in an excluded team-season at all, even when the new link would run through a
+ * different one. With `allowSharedSeasons === true` only the link itself has to be
+ * fresh, so e.g. Vucevic → Fournier stays legal after an Orlando link: they share
+ * seven Magic seasons and the new link just uses one of the unconsumed ones.
+ * Exception: if every team-season of the chain player is in the excluded set
+ * (excluding it would leave no way to continue), the exclusion is lifted.
  *
  * Returns { connections:[{teamId,season,teamName,key}], exceptionApplied } or null.
  */
-export function validatePick(chainPlayerId, candidateId, careers, excludedKeys = new Set(), applyConstraint = true) {
+export function validatePick(chainPlayerId, candidateId, careers, excludedKeys = new Set(), applyConstraint = true, allowSharedSeasons = false) {
   const shared = sharedTeamSeasons(chainPlayerId, candidateId, careers)
   if (shared.size === 0) return null // never teammates
 
@@ -79,9 +83,12 @@ export function validatePick(chainPlayerId, candidateId, careers, excludedKeys =
   const validShared = [...shared.values()].filter(v => !excludedKeys.has(v.key))
   if (validShared.length === 0) return null
 
-  // …and the candidate must not have played on ANY excluded team-season.
-  const candidateTS = teamSeasons(candidateId, careers)
-  for (const k of excludedKeys) if (candidateTS.has(k)) return null
+  // …and, in the strict variant, the candidate must not have played on ANY excluded
+  // team-season (this is what the "allow shared seasons" option relaxes).
+  if (!allowSharedSeasons) {
+    const candidateTS = teamSeasons(candidateId, careers)
+    for (const k of excludedKeys) if (candidateTS.has(k)) return null
+  }
 
   return { connections: validShared, exceptionApplied: false }
 }

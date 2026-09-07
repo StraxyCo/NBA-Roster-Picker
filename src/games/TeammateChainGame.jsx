@@ -126,6 +126,7 @@ export default function TeammateChainGame() {
   const currentPlayerName = currentPlayer?.name || ''
 
   const noSameTeam = !!config?.noSameTeam
+  const allowSharedSeasons = !!config?.allowSharedSeasons
   const curExcluded = noSameTeam && chainPlayer && careers
     ? excludedConnections(excludedKeys, careers, chainPlayer.id) : []
   const exceptionActive = noSameTeam && chainPlayer && careers && excludedKeys.size > 0
@@ -138,6 +139,7 @@ export default function TeammateChainGame() {
       careers,
       config.noSameTeam ? excludedKeys : new Set(),
       config.noSameTeam,
+      !!config.allowSharedSeasons,
     )
     const correct = result !== null
 
@@ -240,6 +242,7 @@ export default function TeammateChainGame() {
           excluded={curExcluded}
           exceptionActive={exceptionActive}
           noSameTeam={noSameTeam}
+          allowSharedSeasons={allowSharedSeasons}
           allPlayers={allPlayers}
           currentPlayer={currentPlayerName}
           roster={players}
