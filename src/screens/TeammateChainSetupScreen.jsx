@@ -118,7 +118,8 @@ function TeammateChainSetupInner({ onBack, onStart, savedGames, onDeleteGame, sa
   const [view, setView] = useState(null)
   const [lives, setLives] = useState(d.lives ?? 3)
   const [noSameTeam, setNoSameTeam] = useState(d.noSameTeam ?? true)
-  const buildDefaultConfig = () => ({ lives, noSameTeam })
+  const [allowSharedSeasons, setAllowSharedSeasons] = useState(d.allowSharedSeasons ?? true)
+  const buildDefaultConfig = () => ({ lives, noSameTeam, allowSharedSeasons })
 
   function clearSlot(idx) { setSelectedPlayers(prev => { const n = [...prev]; n[idx] = null; return n }) }
   function handleAddPlayer(player) {
@@ -182,12 +183,24 @@ function TeammateChainSetupInner({ onBack, onStart, savedGames, onDeleteGame, sa
               <span className={styles.toggleKnob} />
             </button>
           </div>
+
+          {noSameTeam && (
+            <div className={styles.optionRow}>
+              <div className={styles.optionLabel}>
+                <span className={styles.optionTitle}>Allow shared seasons</span>
+                <span className={styles.optionDesc}>The next pick may have played the used team-season too, as long as the new link runs through a different one</span>
+              </div>
+              <button className={`${styles.toggle} ${allowSharedSeasons ? styles.toggleOn : ''}`} onClick={() => setAllowSharedSeasons(v => !v)}>
+                <span className={styles.toggleKnob} />
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
       <SaveDefaultButton onSave={() => onSaveDefault(buildDefaultConfig())} saving={savingDefault} />
       <button className={styles.startBtn} disabled={!canStart}
-        onClick={() => onStart({ players: activePlayers, lives, noSameTeam })}>
+        onClick={() => onStart({ players: activePlayers, lives, noSameTeam, allowSharedSeasons })}>
         Start Game
       </button>
 

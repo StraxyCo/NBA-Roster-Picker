@@ -8,6 +8,7 @@ export default function TeammateChainGameScreen({
   excluded,           // [{ teamName, season }] — team-seasons consumed by the last link
   exceptionActive,    // bool — exclusion lifted (chain player only played the excluded team-seasons)
   noSameTeam,
+  allowSharedSeasons, // bool — a candidate may share the excluded team-season, the link may not
   allPlayers,
   currentPlayer,      // human player guessing now
   roster,             // [{ id, name }] — all human players, in turn order
@@ -78,6 +79,7 @@ export default function TeammateChainGameScreen({
           {noSameTeam && !exceptionActive && excluded && excluded.length > 0 && (
             <div className={styles.chainConstraint}>
               Can't reuse: {excluded.map(c => `${c.teamName} ${c.season}`).join(' · ')}
+              {!allowSharedSeasons && ' — and no one who played there'}
             </div>
           )}
         </div>
