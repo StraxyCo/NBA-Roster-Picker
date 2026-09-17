@@ -1,0 +1,19 @@
+/* Only what the shared Teammate Chain play-screen sheet does not already cover:
+   the drawn team's logo + record, and the round's list of named players. */
+
+.logo { width: 76px; height: 76px; object-fit: contain; filter: drop-shadow(0 4px 14px rgba(0,0,0,0.45)); }
+
+.seasonRow { display: flex; align-items: center; gap: 10px; }
+.season { font-family: var(--font-display); font-size: 0.8rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--white-50); }
+.record { font-family: var(--font-display); font-size: 0.8rem; font-weight: 800; letter-spacing: 0.08em; color: var(--gold); border: 1px solid rgba(245,197,24,0.3); border-radius: 99px; padding: 3px 10px; }
+
+.answers { display: flex; flex-direction: column; gap: 6px; }
+.answersLabel { font-family: var(--font-display); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--white-30); }
+.answerRow { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: var(--radius); border: 1px solid var(--white-10); background: var(--navy-3); }
+.answerCorrect { border-color: rgba(34,197,94,0.35); background: rgba(34,197,94,0.08); }
+.answerWrong { border-color: rgba(239,68,68,0.35); background: rgba(239,68,68,0.08); }
+.answerIcon { font-size: 0.9rem; font-weight: 800; }
+.answerCorrect .answerIcon, .answerCorrect .answerName { color: #22c55e; }
+.answerWrong .answerIcon, .answerWrong .answerName { color: #ef4444; }
+.answerName { flex: 1; font-family: var(--font-body); font-size: 0.9rem; font-weight: 700; }
+.answerGuesser { font-family: var(--font-display); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--white-40); }

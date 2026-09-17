@@ -9,6 +9,7 @@ const GAME_TYPES = [
   { key: 'statsOverUnder', label: 'Stats Over/Under' },
   { key: 'allStars',      label: 'All Stars' },
   { key: 'whosThatGuy',   label: "Who's That Guy?" },
+  { key: 'whoDidTheyHave', label: 'Who did they have?' },
 ]
 
 function getPlayerStats(player, gameFilter) {
