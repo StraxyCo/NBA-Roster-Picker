@@ -1,5 +1,6 @@
 // Playerdle — pool filtering, mystery pick, and per-attribute guess comparison.
 // Profiles come from public/playerdle.json (see scripts/build-playerdle.mjs).
+import { normalizeName, nameIncludes } from './normalizeName.js'
 
 export const ATTRIBUTES = [
   { key: 'position',      label: 'Position' },
@@ -105,7 +106,7 @@ export function getAllNames(profiles) {
 }
 
 export function filterNames(allNames, query) {
-  const q = query.trim().toLowerCase()
+  const q = normalizeName(query)
   if (q.length < 2) return []
-  return allNames.filter(p => p.name.toLowerCase().includes(q)).slice(0, 12)
+  return allNames.filter(p => nameIncludes(p.name, q)).slice(0, 12)
 }

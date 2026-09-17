@@ -1,13 +1,14 @@
 import { teamSeasonKeys } from './teammateChain.js'
+import { normalizeName, nameIncludes } from './normalizeName.js'
 
 // The autocomplete only filters once this many letters have been typed.
 export const MIN_QUERY = 3
 
 /** Player search over the whole careers list — same shape as Teammate Chain's. */
 export function searchPlayers(allPlayers, query) {
-  const q = query.trim().toLowerCase()
+  const q = normalizeName(query)
   if (q.length < MIN_QUERY) return []
-  return allPlayers.filter(p => p.name.toLowerCase().includes(q)).slice(0, 20)
+  return allPlayers.filter(p => nameIncludes(p.name, q)).slice(0, 20)
 }
 
 /**

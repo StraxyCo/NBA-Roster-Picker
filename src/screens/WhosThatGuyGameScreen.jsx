@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react'
 import CountdownTimer from '../components/CountdownTimer.jsx'
+import { normalizeName, nameIncludes } from '../utils/normalizeName.js'
 import styles from './WhosThatGuyGameScreen.module.css'
 
 function fmtSeason(s) { return s.slice(2) }
@@ -21,9 +22,9 @@ export default function WhosThatGuyGameScreen({ mysteryPlayer, allPlayers, showT
   }, [mysteryPlayer])
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase()
+    const q = normalizeName(query)
     if (q.length < 2) return []
-    return allPlayers.filter(p => p.name.toLowerCase().includes(q))
+    return allPlayers.filter(p => nameIncludes(p.name, q))
   }, [allPlayers, query])
 
   function handlePickPlayer(p) {

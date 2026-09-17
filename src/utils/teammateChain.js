@@ -1,4 +1,5 @@
 import { NBA_TEAMS } from '../data/teams.js'
+import { normalizeName, nameIncludes } from './normalizeName.js'
 
 // Map team abbreviations (as they appear in careers.json) to NBA_TEAMS franchise id
 // strings. Relocations collapse to the current franchise so a team-season is stable.
@@ -162,9 +163,9 @@ export function getAllPlayers(careers) {
 }
 
 export function filterPlayers(allPlayers, query) {
-  const q = query.trim().toLowerCase()
+  const q = normalizeName(query)
   if (q.length < 2) return []
-  return allPlayers.filter(p => p.name.toLowerCase().includes(q)).slice(0, 20)
+  return allPlayers.filter(p => nameIncludes(p.name, q)).slice(0, 20)
 }
 
 /** Every "<franchiseId>:<season>" a player appeared in, as a Set of keys. */
