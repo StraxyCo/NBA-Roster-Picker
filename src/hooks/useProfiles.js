@@ -411,3 +411,25 @@ export function useTeammateChainGames() {
   }
   return { games, loading, reload: load, saveGame, deleteGame }
 }
+
+export function useWhoDidTheyHaveGames() {
+  const [games, setGames] = useState([])
+  const [loading, setLoading] = useState(true)
+  const load = useCallback(async () => {
+    try { const res = await fetch('/api/players?scope=games&game=whoDidTheyHave'); const data = await res.json(); setGames(Array.isArray(data) ? data : []) }
+    catch (e) { console.error('useWhoDidTheyHaveGames load error', e) }
+    finally { setLoading(false) }
+  }, [])
+  useEffect(() => { load() }, [load])
+  async function saveGame({ playerIds, playerNames, winnerId, winnerName }) {
+    const res = await fetch('/api/players?scope=games&game=whoDidTheyHave', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ game: 'whoDidTheyHave', playerIds, playerNames, winnerId, winnerName }) })
+    if (!res.ok) throw new Error('Failed to save who-did-they-have game')
+    const game = await res.json(); setGames(prev => [game, ...prev]); return game
+  }
+  async function deleteGame(id) {
+    const res = await fetch(`/api/players?scope=games&game=whoDidTheyHave&id=${id}`, { method: 'DELETE' })
+    if (!res.ok) throw new Error('Failed to delete who-did-they-have game')
+    setGames(prev => prev.filter(g => g.id !== id))
+  }
+  return { games, loading, reload: load, saveGame, deleteGame }
+}
