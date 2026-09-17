@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { loadNicknames } from '../hooks/useNicknames.js'
+import { normalizeName, nameIncludes, namesMatch } from '../utils/normalizeName.js'
 import { ALL_SEASONS, PRE_2006, FIRST_SEASON } from '../data/seasons.js'
 import styles from './NicknameGameScreen.module.css'
 
@@ -96,16 +97,16 @@ export default function NicknameGameScreen({ players, rounds, minSeasons = 1, se
   }, [nicknames])
 
   const suggestions = useMemo(() => {
-    if (guess.length < 2) return []
-    const lower = guess.toLowerCase()
-    return allPlayerNames.filter(n => n.toLowerCase().includes(lower)).slice(0, 8)
+    const lower = normalizeName(guess)
+    if (lower.length < 2) return []
+    return allPlayerNames.filter(n => nameIncludes(n, lower)).slice(0, 8)
   }, [guess, allPlayerNames])
 
   function handleSubmit(playerName) {
     const trimmed = playerName.trim()
     if (!trimmed || !currentNickname || !nicknames) return
     const correctPlayers = nicknames[currentNickname] || []
-    const correct = correctPlayers.some(p => p.player_name.toLowerCase() === trimmed.toLowerCase())
+    const correct = correctPlayers.some(p => namesMatch(p.player_name, trimmed))
     setLastCorrect(correct)
     setGuess(trimmed)
     setShowSuggestions(false)

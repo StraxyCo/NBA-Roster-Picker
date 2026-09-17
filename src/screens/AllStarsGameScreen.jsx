@@ -1,4 +1,5 @@
 import { useState, useRef, useMemo } from 'react'
+import { normalizeName, nameIncludes } from '../utils/normalizeName.js'
 import styles from './AllStarsGameScreen.module.css'
 
 export default function AllStarsGameScreen({
@@ -47,10 +48,10 @@ export default function AllStarsGameScreen({
   }, [eastPicks, westPicks])
 
   const suggestions = useMemo(() => {
-    if (guess.length < 2) return []
-    const lower = guess.toLowerCase()
+    const lower = normalizeName(guess)
+    if (lower.length < 2) return []
     return allSeasonPlayers
-      .filter(p => !pickedIds.has(String(p.id)) && p.name.toLowerCase().includes(lower))
+      .filter(p => !pickedIds.has(String(p.id)) && nameIncludes(p.name, lower))
       .slice(0, 8)
   }, [guess, allSeasonPlayers, pickedIds])
 

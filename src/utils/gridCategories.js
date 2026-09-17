@@ -1,4 +1,5 @@
 import { NBA_TEAMS } from '../data/teams.js'
+import { normalizeName, nameIncludes } from './normalizeName.js'
 
 // Historical team abbreviation aliases in careers.json
 const FRANCHISE_ABBRS = {
@@ -216,9 +217,9 @@ export function getAllPlayers(careers) {
 }
 
 export function filterPlayers(allPlayers, query) {
-  const q = query.trim().toLowerCase()
+  const q = normalizeName(query)
   if (q.length < 2) return []
-  return allPlayers.filter(p => p.name.toLowerCase().includes(q)).slice(0, 20)
+  return allPlayers.filter(p => nameIncludes(p.name, q)).slice(0, 20)
 }
 
 // ── Validation ────────────────────────────────────────────────────────────────
