@@ -167,3 +167,8 @@ export function filterPlayers(allPlayers, query) {
   if (q.length < 2) return []
   return allPlayers.filter(p => nameIncludes(p.name, q)).slice(0, 20)
 }
+
+/** Every "<franchiseId>:<season>" a player appeared in, as a Set of keys. */
+export function teamSeasonKeys(playerId, careers) {
+  return new Set(teamSeasons(playerId, careers).keys())
+}

@@ -73,6 +73,12 @@ const GAMES = [
     desc: 'Guess the mystery player from colour clues.',
     active: true,
   },
+  {
+    path: '/who-did-they-have',
+    name: 'Who did they have?',
+    desc: 'Take turns naming players from a drawn team-season.',
+    active: true,
+  },
 ]
 
 export default function HomeScreen() {

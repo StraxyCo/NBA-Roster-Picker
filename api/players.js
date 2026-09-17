@@ -34,6 +34,26 @@ async function hdel(key, field) {
   })
 }
 
+async function redisGet(key) {
+  const res = await fetch(`${BASE}/get/${encodeURIComponent(key)}`, {
+    headers: { Authorization: `Bearer ${TOKEN}` },
+  })
+  return (await res.json()).result
+}
+
+async function redisSet(key, value) {
+  await fetch(`${BASE}/set/${encodeURIComponent(key)}/${encodeURIComponent(value)}`, {
+    headers: { Authorization: `Bearer ${TOKEN}` },
+  })
+}
+
+// Game-record stores for games added after Vercel's 12-function limit was reached
+// (folded in here, like gameDefaults, instead of a new serverless function).
+// Keyed by the player-stats key the game uses → the Redis list key.
+const GAME_RECORD_KEYS = {
+  whoDidTheyHave: 'who-did-they-have-games',
+}
+
 // Migrate flat schema → nested stats on read (backward compatible)
 function normalizePlayer(raw) {
   const p = typeof raw === 'string' ? JSON.parse(raw) : { ...raw }
@@ -69,6 +89,62 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') { res.status(200).end(); return }
 
   try {
+    // Game records for games folded in here (see GAME_RECORD_KEYS): same contract
+    // as the dedicated /api/<game>-games endpoints, addressed by
+    // ?scope=games&game=<statsKey>.
+    if (req.query.scope === 'games') {
+      const game = req.method === 'POST' ? req.body?.game : req.query.game
+      const storeKey = GAME_RECORD_KEYS[game]
+      if (!storeKey) return res.status(400).json({ error: 'unknown game' })
+
+      const raw = await redisGet(storeKey)
+      let games = raw ? (typeof raw === 'string' ? JSON.parse(raw) : raw) : []
+
+      if (req.method === 'GET') {
+        games.sort((a, b) => b.date - a.date)
+        return res.status(200).json(games)
+      }
+
+      if (req.method === 'POST') {
+        const { playerIds, playerNames, winnerId, winnerName } = req.body || {}
+        if (!playerIds?.length) return res.status(400).json({ error: 'playerIds required' })
+        const newGame = { id: Date.now().toString(), date: Date.now(), playerIds, playerNames, winnerId, winnerName }
+        games.push(newGame)
+        await redisSet(storeKey, JSON.stringify(games))
+        for (const pid of playerIds) {
+          const pRaw = await hget('players', pid)
+          if (!pRaw) continue
+          const player = normalizePlayer(pRaw)
+          if (!player.stats[game]) player.stats[game] = { played: 0, wins: 0 }
+          player.stats[game].played++
+          if (pid === winnerId) player.stats[game].wins++
+          await hset('players', pid, JSON.stringify(player))
+        }
+        return res.status(201).json(newGame)
+      }
+
+      if (req.method === 'DELETE') {
+        const { id } = req.query
+        if (!id) return res.status(400).json({ error: 'id required' })
+        const record = games.find(g => g.id === id)
+        if (!record) return res.status(404).json({ error: 'Game not found' })
+        for (const pid of (record.playerIds || [])) {
+          const pRaw = await hget('players', pid)
+          if (!pRaw) continue
+          const player = normalizePlayer(pRaw)
+          if (!player.stats[game]) player.stats[game] = { played: 0, wins: 0 }
+          player.stats[game].played = Math.max(0, player.stats[game].played - 1)
+          if (pid === record.winnerId) player.stats[game].wins = Math.max(0, player.stats[game].wins - 1)
+          await hset('players', pid, JSON.stringify(player))
+        }
+        games = games.filter(g => g.id !== id)
+        await redisSet(storeKey, JSON.stringify(games))
+        return res.status(200).json({ ok: true })
+      }
+
+      return res.status(405).json({ error: 'Method not allowed' })
+    }
+
     // Per-game default settings live in the `gameDefaults` hash (folded in here to
     // stay under Vercel's 12-function limit). GET ?scope=defaults&game=X / POST {game,config}.
     if (req.query.scope === 'defaults') {
