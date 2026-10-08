@@ -155,6 +155,22 @@ export function pickStartingPlayer(careers, rosters, allowedIds = null) {
   return { id, name: data.name }
 }
 
+/**
+ * Group excluded team-seasons by team for display: [{ teamName, seasons: [...] }],
+ * teams in first-seen order, seasons sorted.
+ */
+export function groupExclusionsByTeam(excluded) {
+  const byTeam = new Map()
+  for (const c of excluded || []) {
+    if (!byTeam.has(c.teamName)) byTeam.set(c.teamName, [])
+    byTeam.get(c.teamName).push(c.season)
+  }
+  return [...byTeam.entries()].map(([teamName, seasons]) => ({
+    teamName,
+    seasons: [...seasons].sort(),
+  }))
+}
+
 /** Player search — same pattern as Who's That Guy */
 export function getAllPlayers(careers) {
   return Object.entries(careers)
