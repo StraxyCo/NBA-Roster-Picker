@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { filterPlayers } from '../utils/teammateChain.js'
+import { filterPlayers, groupExclusionsByTeam } from '../utils/teammateChain.js'
 import ChainTimeline from '../components/ChainTimeline.jsx'
 import styles from './TeammateChainGameScreen.module.css'
 
@@ -77,9 +77,17 @@ export default function TeammateChainGameScreen({
             </div>
           )}
           {noSameTeam && !exceptionActive && excluded && excluded.length > 0 && (
-            <div className={styles.chainConstraint}>
-              Can't reuse: {excluded.map(c => `${c.teamName} ${c.season}`).join(' · ')}
-              {!allowSharedSeasons && ' — and no one who played there'}
+            <div className={styles.constraintBox}>
+              <span className={styles.constraintLabel}>Can't reuse these team-seasons</span>
+              <ul className={styles.constraintList}>
+                {groupExclusionsByTeam(excluded).map(g => (
+                  <li key={g.teamName} className={styles.constraintItem}>
+                    <span className={styles.constraintTeam}>{g.teamName}</span>
+                    <span className={styles.constraintSeasons}>{g.seasons.join(', ')}</span>
+                  </li>
+                ))}
+              </ul>
+              {!allowSharedSeasons && <span className={styles.constraintNote}>And no one who played there</span>}
             </div>
           )}
         </div>
