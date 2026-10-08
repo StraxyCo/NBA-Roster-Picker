@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
 import { getLogoUrl } from '../data/teams.js'
+import CountdownTimer from '../components/CountdownTimer.jsx'
 import { searchPlayers, MIN_QUERY } from '../utils/whoDidTheyHave.js'
 // Play-screen chrome (top bar with lives, outcome banner, player picker) is the
 // same sheet as Teammate Chain; only the team card + answer list are local.
@@ -40,6 +41,9 @@ export default function WhoDidTheyHaveRoundScreen({
 
   return (
     <div className={styles.screen}>
+      {/* One 45s countdown per turn: each submitted answer starts the next turn. */}
+      <CountdownTimer seconds={45} resetKey={answers.length} flashOnExpire />
+
       <div className={styles.topBar}>
         {onBack && <button className={styles.backArrow} onClick={onBack}>←</button>}
         <div className={styles.players}>
