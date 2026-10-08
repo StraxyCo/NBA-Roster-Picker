@@ -45,7 +45,7 @@ export default function WhosThatGuyGameScreen({ mysteryPlayer, allPlayers, showT
   return (
     <div className={styles.screen}>
       {phase === 'picking' && (
-        <CountdownTimer seconds={45} running={phase === 'picking'} resetKey={mysteryPlayer.id} />
+        <CountdownTimer seconds={45} running={phase === 'picking'} resetKey={mysteryPlayer.id} flashOnExpire />
       )}
 
       <div className={styles.topBar}>
