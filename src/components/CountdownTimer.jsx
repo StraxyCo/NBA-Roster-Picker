@@ -44,7 +44,7 @@ export default function CountdownTimer({ seconds = 45, running = true, resetKey,
       </div>
       {showLabel && (
         <div className={styles.labelRow}>
-          <span className={`${styles.label} ${warn ? styles.labelWarn : ''}`}>{fmt}</span>
+          <span className={`${styles.label} ${warn ? styles.warn : ''}`}>{fmt}</span>
         </div>
       )}
     </div>
