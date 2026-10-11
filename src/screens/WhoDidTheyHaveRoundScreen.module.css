@@ -17,3 +17,15 @@
 .answerWrong .answerIcon, .answerWrong .answerName { color: #ef4444; }
 .answerName { flex: 1; font-family: var(--font-body); font-size: 0.9rem; font-weight: 700; }
 .answerGuesser { font-family: var(--font-display); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--white-40); }
+
+/* Layout: one column on mobile (play column, then the named list); split screen on desktop
+   with the team card + search on the left and the named roster on the right. */
+.playColumn { display: flex; flex-direction: column; gap: 24px; }
+.answersHint { margin: 0; font-family: var(--font-body); font-size: 0.85rem; color: var(--white-30); }
+.answersEmpty { display: none; }
+
+@media (min-width: 900px) {
+  .split { max-width: 1040px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; align-items: start; }
+  .answersEmpty { display: flex; }
+  .playColumn { position: sticky; top: 32px; }
+}

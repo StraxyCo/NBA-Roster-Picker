@@ -64,90 +64,93 @@ export default function WhoDidTheyHaveRoundScreen({
         </div>
       </div>
 
-      <div className={styles.content}>
-        {lastOutcome && (
-          <div className={`${styles.outcome} ${lastOutcome.correct ? styles.outcomeCorrect : styles.outcomeWrong}`}>
-            {lastOutcome.correct ? (
-              <>✓ {lastOutcome.name} played for the {lastOutcome.teamName} in {lastOutcome.season}</>
-            ) : (
-              <>✗ {lastOutcome.name} never played for the {lastOutcome.teamName} in {lastOutcome.season} — {lastOutcome.livesLeft === 0 ? `${lastOutcome.guesserName} is out` : `${lastOutcome.guesserName} has ${lastOutcome.livesLeft} ${lastOutcome.livesLeft === 1 ? 'life' : 'lives'} left`}</>
-            )}
-          </div>
-        )}
-
-        <div className={styles.eyebrow}>Round {round} / {totalRounds} · {currentPlayerName}&apos;s turn</div>
-
-        <div className={styles.chainCard}>
-          <img
-            className={local.logo}
-            src={getLogoUrl(team.slug)}
-            alt={team.name}
-            onError={e => { e.target.style.opacity = '0.3' }}
-          />
-          <div className={styles.chainLabel}>Name a player from</div>
-          <h2 className={styles.chainName}>{team.name}</h2>
-          <div className={local.seasonRow}>
-            <span className={local.season}>{season}</span>
-            <span className={local.record}>{record ? `${record.w}–${record.l}` : '—'}</span>
-          </div>
-        </div>
-
-        <div className={styles.pickerPanel}>
-          <div className={`${styles.slot} ${picked ? styles.slotFilled : styles.slotEmpty}`}>
-            {picked
-              ? <><span className={styles.slotName}>{picked.name}</span><button className={styles.slotClear} onClick={() => { setPicked(null); setQuery('') }}>✕</button></>
-              : <span className={styles.slotPlaceholder}>Search and select a player</span>
-            }
-          </div>
-
-          <input
-            className={styles.searchInput}
-            autoFocus
-            placeholder={`Search player… (${MIN_QUERY} letters)`}
-            value={query}
-            onChange={e => { setQuery(e.target.value); setPicked(null) }}
-            onKeyDown={e => {
-              // Enter takes the top match, so a full name can be played without the mouse.
-              if (e.key !== 'Enter' || !filtered.length || picked) return
-              setPicked(filtered[0])
-              setQuery('')
-            }}
-          />
-
-          {filtered.length > 0 && !picked && (
-            <div className={styles.searchList}>
-              {filtered.map(p => (
-                <button key={p.id} className={styles.searchItem} onClick={() => { setPicked(p); setQuery('') }}>
-                  {p.name}
-                </button>
-              ))}
+      {/* Desktop: split screen, team + search on the left, named roster on the right.
+          Same DOM order as mobile (play column first), so tab order is unchanged. */}
+      <div className={`${styles.content} ${local.split}`}>
+        <div className={local.playColumn}>
+          {lastOutcome && (
+            <div className={`${styles.outcome} ${lastOutcome.correct ? styles.outcomeCorrect : styles.outcomeWrong}`}>
+              {lastOutcome.correct ? (
+                <>✓ {lastOutcome.name} played for the {lastOutcome.teamName} in {lastOutcome.season}</>
+              ) : (
+                <>✗ {lastOutcome.name} never played for the {lastOutcome.teamName} in {lastOutcome.season} — {lastOutcome.livesLeft === 0 ? `${lastOutcome.guesserName} is out` : `${lastOutcome.guesserName} has ${lastOutcome.livesLeft} ${lastOutcome.livesLeft === 1 ? 'life' : 'lives'} left`}</>
+              )}
             </div>
           )}
-          {query.trim().length >= MIN_QUERY && filtered.length === 0 && (
-            <p className={styles.hint}>No players match &quot;{query}&quot;</p>
-          )}
 
-          {alreadyNamed && <p className={styles.hint}>{picked.name} has already been named this round.</p>}
+          <div className={styles.eyebrow}>Round {round} / {totalRounds} · {currentPlayerName}&apos;s turn</div>
 
-          {picked && (
-            <button className={styles.validateBtn} onClick={handleValidate} disabled={alreadyNamed}>
-              Submit →
-            </button>
-          )}
+          <div className={styles.chainCard}>
+            <img
+              className={local.logo}
+              src={getLogoUrl(team.slug)}
+              alt={team.name}
+              onError={e => { e.target.style.opacity = '0.3' }}
+            />
+            <div className={styles.chainLabel}>Name a player from</div>
+            <h2 className={styles.chainName}>{team.name}</h2>
+            <div className={local.seasonRow}>
+              <span className={local.season}>{season}</span>
+              <span className={local.record}>{record ? `${record.w}–${record.l}` : '—'}</span>
+            </div>
+          </div>
+
+          <div className={styles.pickerPanel}>
+            <div className={`${styles.slot} ${picked ? styles.slotFilled : styles.slotEmpty}`}>
+              {picked
+                ? <><span className={styles.slotName}>{picked.name}</span><button className={styles.slotClear} onClick={() => { setPicked(null); setQuery('') }}>✕</button></>
+                : <span className={styles.slotPlaceholder}>Search and select a player</span>
+              }
+            </div>
+
+            <input
+              className={styles.searchInput}
+              autoFocus
+              placeholder={`Search player… (${MIN_QUERY} letters)`}
+              value={query}
+              onChange={e => { setQuery(e.target.value); setPicked(null) }}
+              onKeyDown={e => {
+                // Enter takes the top match, so a full name can be played without the mouse.
+                if (e.key !== 'Enter' || !filtered.length || picked) return
+                setPicked(filtered[0])
+                setQuery('')
+              }}
+            />
+
+            {filtered.length > 0 && !picked && (
+              <div className={styles.searchList}>
+                {filtered.map(p => (
+                  <button key={p.id} className={styles.searchItem} onClick={() => { setPicked(p); setQuery('') }}>
+                    {p.name}
+                  </button>
+                ))}
+              </div>
+            )}
+            {query.trim().length >= MIN_QUERY && filtered.length === 0 && (
+              <p className={styles.hint}>No players match &quot;{query}&quot;</p>
+            )}
+
+            {alreadyNamed && <p className={styles.hint}>{picked.name} has already been named this round.</p>}
+
+            {picked && (
+              <button className={styles.validateBtn} onClick={handleValidate} disabled={alreadyNamed}>
+                Submit →
+              </button>
+            )}
+          </div>
         </div>
 
-        {answers.length > 0 && (
-          <div className={local.answers}>
-            <div className={local.answersLabel}>Named this round · {answers.filter(a => a.correct).length}/{roster.length} on the roster</div>
-            {answers.map((a, i) => (
-              <div key={i} className={`${local.answerRow} ${a.correct ? local.answerCorrect : local.answerWrong}`}>
-                <span className={local.answerIcon}>{a.correct ? '✓' : '✗'}</span>
-                <span className={local.answerName}>{a.name}</span>
-                <span className={local.answerGuesser}>{a.guesserName}</span>
-              </div>
-            ))}
-          </div>
-        )}
+        <div className={`${local.answers} ${answers.length === 0 ? local.answersEmpty : ''}`}>
+          <div className={local.answersLabel}>Named this round · {answers.filter(a => a.correct).length}/{roster.length} on the roster</div>
+          {answers.length === 0 && <p className={local.answersHint}>No one named yet</p>}
+          {answers.map((a, i) => (
+            <div key={i} className={`${local.answerRow} ${a.correct ? local.answerCorrect : local.answerWrong}`}>
+              <span className={local.answerIcon}>{a.correct ? '✓' : '✗'}</span>
+              <span className={local.answerName}>{a.name}</span>
+              <span className={local.answerGuesser}>{a.guesserName}</span>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   )
