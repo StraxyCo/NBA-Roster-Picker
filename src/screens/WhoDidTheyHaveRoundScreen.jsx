@@ -64,8 +64,8 @@ export default function WhoDidTheyHaveRoundScreen({
         </div>
       </div>
 
-      {/* Desktop: split screen, named roster on the left, team + search on the right.
-          The play column comes first in the DOM so mobile order and tab order are unchanged. */}
+      {/* Desktop: split screen, team + search on the left, named roster on the right.
+          Same DOM order as mobile (play column first), so tab order is unchanged. */}
       <div className={`${styles.content} ${local.split}`}>
         <div className={local.playColumn}>
           {lastOutcome && (
