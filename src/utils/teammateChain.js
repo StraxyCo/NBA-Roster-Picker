@@ -94,6 +94,28 @@ export function validatePick(chainPlayerId, candidateId, careers, excludedKeys =
   return { connections: validShared, exceptionApplied: false }
 }
 
+/** Did two players ever share a team-season? */
+export function wereTeammates(aId, bId, careers) {
+  return sharedTeamSeasons(aId, bId, careers).size > 0
+}
+
+/**
+ * Why a pick that `validatePick` rejected was rejected. Same arguments as
+ * `validatePick`, and only meaningful when it returned null:
+ *   'not_teammates'   — the two never shared a team-season (a plain wrong guess)
+ *   'link_reused'     — teammates, but only through an excluded team-season
+ *   'played_excluded' — teammates through a fresh team-season, but the candidate
+ *                       also played an excluded one (strict variant only)
+ * Returns null when the pick is actually legal.
+ */
+export function rejectionReason(chainPlayerId, candidateId, careers, excludedKeys = new Set(), applyConstraint = true, allowSharedSeasons = false) {
+  const shared = sharedTeamSeasons(chainPlayerId, candidateId, careers)
+  if (shared.size === 0) return 'not_teammates'
+  if (validatePick(chainPlayerId, candidateId, careers, excludedKeys, applyConstraint, allowSharedSeasons)) return null
+  const validShared = [...shared.values()].filter(v => !excludedKeys.has(v.key))
+  return validShared.length === 0 ? 'link_reused' : 'played_excluded'
+}
+
 /**
  * Every season covered by careers.json, oldest first, as a continuous run of
  * years (seasons with no recorded player still get a column so the axis is

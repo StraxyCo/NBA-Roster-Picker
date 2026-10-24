@@ -5,7 +5,7 @@ import TeammateChainGameScreen from '../screens/TeammateChainGameScreen.jsx'
 import OrderDrawScreen from '../screens/OrderDrawScreen.jsx'
 import ChainTimeline from '../components/ChainTimeline.jsx'
 import { useTeammateChainGames } from '../hooks/useProfiles.js'
-import { validatePick, pickStartingPlayer, getAllPlayers, excludedConnections, hasAvailableOutside, allStarIds } from '../utils/teammateChain.js'
+import { validatePick, rejectionReason, pickStartingPlayer, getAllPlayers, excludedConnections, hasAvailableOutside, allStarIds } from '../utils/teammateChain.js'
 import styles from './WhosThatGuyGame.module.css'
 
 const PHASES = { SETUP: 'setup', ORDER_DRAW: 'order_draw', PLAYING: 'playing', FINAL: 'final' }
@@ -170,6 +170,27 @@ export default function TeammateChainGame() {
       setExcludedKeys(config.noSameTeam ? new Set(result.connections.map(c => c.key)) : new Set())
       setLastConnections(result.connections)
       setCurrentPlayerIdx(nextAliveIdx(currentPlayerIdx, lives))
+      return
+    }
+
+    // A real teammate the "can't reuse" rule blocks is not a wrong guess: no
+    // life lost, no history entry — the same guesser just picks someone else.
+    const reason = rejectionReason(
+      chainPlayer.id,
+      guessPlayer.id,
+      careers,
+      config.noSameTeam ? excludedKeys : new Set(),
+      config.noSameTeam,
+      !!config.allowSharedSeasons,
+    )
+    if (reason === 'link_reused' || reason === 'played_excluded') {
+      setLastOutcome({
+        blocked: true,
+        reason,
+        guesser: currentPlayerName,
+        prevPlayer: chainPlayer.name,
+        guessedPlayer: guessPlayer.name,
+      })
       return
     }
 
