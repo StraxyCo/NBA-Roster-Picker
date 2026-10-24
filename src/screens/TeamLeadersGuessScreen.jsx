@@ -20,9 +20,10 @@ export default function TeamLeadersGuessScreen({ team, season, roster, categorie
   const [selectedNbaPlayer, setSelectedNbaPlayer] = useState(null)
   const [picks, setPicks] = useState(() => Object.fromEntries(categories.map(c => [c.key, null])))
 
-  // Only players who met the games-played minimum can lead a category, so the
+  // Only players who cleared the workload bar can lead a category, so the
   // answers always come from the same pool the drafter is allowed to pick from.
-  const { minGames, eligible, eligibleIds } = useMemo(() => getEligibility(roster), [roster])
+  // Qualifying is a minutes bar, not a games bar — see leaderEligibility.js.
+  const { minMinutes, eligible, eligibleIds, totalMinutes } = useMemo(() => getEligibility(roster), [roster])
 
   const leaders = useMemo(
     () => Object.fromEntries(categories.map(c => [c.stat, getLeader(eligible, c.stat)])),
@@ -142,7 +143,7 @@ export default function TeamLeadersGuessScreen({ team, season, roster, categorie
           <div className={styles.rosterPanel}>
             <div className={styles.panelLabel}>
               Roster
-              <span className={styles.panelLabelNote}>{minGames}+ games to qualify</span>
+              <span className={styles.panelLabelNote}>{minMinutes.toLocaleString()}+ minutes to qualify</span>
             </div>
             <div className={styles.rosterList}>
               {sortedRoster.map(player => {
@@ -153,11 +154,11 @@ export default function TeamLeadersGuessScreen({ team, season, roster, categorie
                     className={`${styles.rosterRow} ${selectedNbaPlayer?.id === player.id ? styles.rosterRowSelected : ''} ${isEligible ? '' : styles.rosterRowIneligible}`}
                     onClick={() => handleRosterPlayerClick(player)}
                     disabled={!isEligible}
-                    title={isEligible ? undefined : `Played ${player.gp ?? 0} games — needs ${minGames} to qualify`}
+                    title={`${player.gp ?? 0} games · ${player.min ?? 0} mpg · ${Math.round(totalMinutes(player)).toLocaleString()} total minutes${isEligible ? '' : ` — needs ${minMinutes.toLocaleString()} to qualify`}`}
                   >
                     <span className={styles.rosterNum}>#{player.number}</span>
                     <span className={styles.rosterName}>{player.name}</span>
-                    <span className={styles.rosterGames}>{player.gp ?? 0} GP</span>
+                    <span className={styles.rosterMinutes}>{Math.round(totalMinutes(player)).toLocaleString()}′</span>
                     <span className={styles.rosterPos}>{player.position}</span>
                   </button>
                 )
