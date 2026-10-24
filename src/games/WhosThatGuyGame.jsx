@@ -4,6 +4,7 @@ import WhosThatGuySetupScreen from '../screens/WhosThatGuySetupScreen.jsx'
 import OrderDrawScreen from '../screens/OrderDrawScreen.jsx'
 import WhosThatGuyGameScreen from '../screens/WhosThatGuyGameScreen.jsx'
 import { useWhosThatGuyGames } from '../hooks/useProfiles.js'
+import { loadCareers } from '../hooks/useCareers.js'
 import styles from './WhosThatGuyGame.module.css'
 
 const PHASES = {
@@ -134,7 +135,7 @@ export default function WhosThatGuyGame() {
   const [usedIds, setUsedIds]             = useState([])  // mystery players already drawn this game
 
   useEffect(() => {
-    fetch('/careers.json').then(r => r.json())
+    loadCareers()
       .then(c => setCareers(c))
       .catch(e => console.error('data load error', e))
   }, [])
