@@ -1,17 +1,16 @@
 // Who counts as a "team leader" candidate.
 //
-// A player has to have played half his team's games. The NBA's own per-game
-// leaderboard bar is stricter (58 of 82, ~70%), but that is built for a
-// league-wide leaderboard: applied to a single team it greys out any star who
-// missed a third of the season, and those are exactly the players you would
-// guess. Half a season keeps them in while still cutting the two-way and
-// 10-day signings.
+// A player needs 30 games. The point is only to throw out the tiny samples —
+// the 8-game call-up whose 14 rebounds a night would otherwise make him the
+// team leader — not to demand availability. Anything stricter (the NBA's own
+// per-game leaderboard bar is 58 of 82) greys out the stars who missed a third
+// of the season, and those are exactly the players you would guess.
 //
-// The bar scales with the schedule length, taken from the roster slice itself,
-// so lockout and bubble seasons — and the season currently in progress — are
-// judged on the games that actually exist.
+// 30 is deliberately low enough to keep mid-season trades in: once stats are
+// split per team, a player dealt at the deadline still has a real sample on
+// both sides of the move.
 
-export const MIN_GAMES_SHARE = 0.5
+export const MIN_GAMES = 30
 
 const FULL_SEASON_GAMES = 82
 
@@ -25,7 +24,9 @@ export function seasonGameCount(roster) {
 }
 
 export function minGamesForLeaders(roster) {
-  return Math.ceil(seasonGameCount(roster) * MIN_GAMES_SHARE)
+  // Every completed season is long enough for the flat bar; a season still in
+  // progress is not, so fall back to half of what has been played.
+  return Math.min(MIN_GAMES, Math.ceil(seasonGameCount(roster) / 2))
 }
 
 export function getEligibility(roster) {
