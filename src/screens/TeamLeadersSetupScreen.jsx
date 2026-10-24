@@ -158,7 +158,7 @@ export const ALL_TEAM_STATS = [
   { key: 'ast',  label: 'Assists',  stat: 'ast',  unit: 'APG' },
   { key: 'stl',  label: 'Steals',   stat: 'stl',  unit: 'SPG' },
   { key: 'blk',  label: 'Blocks',   stat: 'blk',  unit: 'BPG' },
-  { key: 'fg3m', label: '3PM',      stat: 'fg3m', unit: '3PM' },
+  { key: 'fg3m', label: '3PM',      stat: 'fg3mpg', unit: '3PM/G' },
 ]
 
 // ── Seasons picker ──────────────────────────────────────────────────────────

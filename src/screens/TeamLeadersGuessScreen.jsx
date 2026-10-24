@@ -7,6 +7,12 @@ function getLeader(roster, stat) {
   return roster.reduce((best, p) => (!best || (p[stat] ?? 0) > (best[stat] ?? 0)) ? p : best, null)
 }
 
+// Every category is a per-game rate, and the derived ones (3PM/G) are raw
+// quotients, so they all get the same one decimal.
+function fmtStat(value) {
+  return Number(value ?? 0).toFixed(1)
+}
+
 function computeScore(picks, leaders, categories) {
   let correct = 0
   for (const { key, stat } of categories) {
@@ -95,14 +101,14 @@ export default function TeamLeadersGuessScreen({ team, season, roster, categorie
                     <span className={styles.recapResult}>{isRight ? '✓' : '✗'}</span>
                     <div className={styles.recapPickInfo}>
                       <span className={styles.recapPickName}>{pick?.name ?? '—'}</span>
-                      <span className={styles.recapPickStat}>{pick ? `${pick[stat]} ${unit}` : ''}</span>
+                      <span className={styles.recapPickStat}>{pick ? `${fmtStat(pick[stat])} ${unit}` : ''}</span>
                     </div>
                   </div>
                   {!isRight && correct && (
                     <div className={styles.recapAnswer}>
                       <span className={styles.recapAnswerLabel}>Correct:</span>
                       <span className={styles.recapAnswerName}>{correct.name}</span>
-                      <span className={styles.recapAnswerStat}>{correct[stat]} {unit}</span>
+                      <span className={styles.recapAnswerStat}>{fmtStat(correct[stat])} {unit}</span>
                     </div>
                   )}
                 </div>
