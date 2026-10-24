@@ -57,9 +57,11 @@ export default function TeammateChainGameScreen({
 
       <div className={styles.content}>
         {lastOutcome && (
-          <div className={`${styles.outcome} ${lastOutcome.correct ? styles.outcomeCorrect : styles.outcomeWrong}`}>
+          <div className={`${styles.outcome} ${lastOutcome.correct ? styles.outcomeCorrect : lastOutcome.blocked ? styles.outcomeBlocked : styles.outcomeWrong}`}>
             {lastOutcome.correct ? (
               <>✓ {lastOutcome.guessedPlayer} played with {lastOutcome.prevPlayer} — {lastOutcome.connection.teamName} {lastOutcome.connection.season}</>
+            ) : lastOutcome.blocked ? (
+              <>⤺ {lastOutcome.guessedPlayer} was a teammate, but {lastOutcome.reason === 'link_reused' ? 'only through a team-season that’s already used' : 'they played one of the excluded team-seasons'} — no life lost, pick someone else</>
             ) : (
               <>✗ {lastOutcome.guessedPlayer} doesn't link to {lastOutcome.prevPlayer} — {lastOutcome.livesLeft === 0 ? `${lastOutcome.guesser} is out` : `${lastOutcome.livesLeft} ${lastOutcome.livesLeft === 1 ? 'life' : 'lives'} left, try again`}</>
             )}
