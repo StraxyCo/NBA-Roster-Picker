@@ -4,6 +4,7 @@ import AllStarsSetupScreen from '../screens/AllStarsSetupScreen.jsx'
 import OrderDrawScreen from '../screens/OrderDrawScreen.jsx'
 import AllStarsGameScreen from '../screens/AllStarsGameScreen.jsx'
 import { useAllStarsGames } from '../hooks/useProfiles.js'
+import { loadRosters } from '../hooks/useRoster.js'
 import styles from './AllStarsGame.module.css'
 
 const PHASES = {
@@ -249,7 +250,7 @@ export default function AllStarsGame() {
     Promise.all([
       fetch('/allstars.json').then(r => r.json()),
       fetch('/careers.json').then(r => r.json()),
-      fetch('/rosters.json').then(r => r.json()),
+      loadRosters(),
     ]).then(([a, c, r]) => { setAllstars(a); setCareers(c); setRosters(r) })
       .catch(e => console.error('data load error', e))
   }, [])

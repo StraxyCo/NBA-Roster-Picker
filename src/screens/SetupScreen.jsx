@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import styles from './SetupScreen.module.css'
 import { getAvailableSeasons } from '../hooks/useRoster.js'
+import { CURRENT_SEASON } from '../data/seasons.js'
 import { usePlayers } from '../hooks/useProfiles.js'
 import { useGameDefaults } from '../hooks/useGameDefaults.js'
 import SaveDefaultButton from '../components/SaveDefaultButton.jsx'
@@ -296,9 +297,9 @@ function SetupScreenInner({ onStart, savedGames, onDeleteGame, onBack, initialCo
   const [slots, setSlots] = useState([null, null, null, null])
 
   // Season state
-  const [allSeasons, setAllSeasons]    = useState(['2025-26'])
+  const [allSeasons, setAllSeasons]    = useState([CURRENT_SEASON])
   const [selectedSeasons, setSelected] = useState(
-    initialConfig ? new Set(initialConfig.seasons) : new Set(['2025-26'])
+    initialConfig ? new Set(initialConfig.seasons) : new Set([CURRENT_SEASON])
   )
   const [showSeasonModal, setShowSeasonModal] = useState(false)
 

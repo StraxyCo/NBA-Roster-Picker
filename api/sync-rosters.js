@@ -1,104 +1,153 @@
 import { Redis } from '@upstash/redis';
+import { TEAMS, NBA_ID_TO_TEAM_ID, getCurrentSeason, fetchResultSet } from './_nba.js';
+
 const kv = new Redis({
   url: process.env.UPSTASH_REDIS_REST_URL,
   token: process.env.UPSTASH_REDIS_REST_TOKEN,
 });
 
-// Map our internal team IDs → NBA.com team IDs
-const TEAMS = {
-  1:  { nbaId: '1610612737', name: 'Atlanta Hawks' },
-  2:  { nbaId: '1610612738', name: 'Boston Celtics' },
-  4:  { nbaId: '1610612751', name: 'Brooklyn Nets' },
-  5:  { nbaId: '1610612766', name: 'Charlotte Hornets' },
-  6:  { nbaId: '1610612741', name: 'Chicago Bulls' },
-  7:  { nbaId: '1610612739', name: 'Cleveland Cavaliers' },
-  8:  { nbaId: '1610612742', name: 'Dallas Mavericks' },
-  9:  { nbaId: '1610612743', name: 'Denver Nuggets' },
-  10: { nbaId: '1610612765', name: 'Detroit Pistons' },
-  11: { nbaId: '1610612744', name: 'Golden State Warriors' },
-  14: { nbaId: '1610612745', name: 'Houston Rockets' },
-  15: { nbaId: '1610612754', name: 'Indiana Pacers' },
-  16: { nbaId: '1610612746', name: 'LA Clippers' },
-  17: { nbaId: '1610612747', name: 'Los Angeles Lakers' },
-  19: { nbaId: '1610612763', name: 'Memphis Grizzlies' },
-  20: { nbaId: '1610612748', name: 'Miami Heat' },
-  21: { nbaId: '1610612749', name: 'Milwaukee Bucks' },
-  22: { nbaId: '1610612750', name: 'Minnesota Timberwolves' },
-  23: { nbaId: '1610612740', name: 'New Orleans Pelicans' },
-  24: { nbaId: '1610612752', name: 'New York Knicks' },
-  25: { nbaId: '1610612760', name: 'Oklahoma City Thunder' },
-  26: { nbaId: '1610612753', name: 'Orlando Magic' },
-  27: { nbaId: '1610612755', name: 'Philadelphia 76ers' },
-  28: { nbaId: '1610612756', name: 'Phoenix Suns' },
-  29: { nbaId: '1610612757', name: 'Portland Trail Blazers' },
-  30: { nbaId: '1610612758', name: 'Sacramento Kings' },
-  31: { nbaId: '1610612759', name: 'San Antonio Spurs' },
-  38: { nbaId: '1610612761', name: 'Toronto Raptors' },
-  40: { nbaId: '1610612762', name: 'Utah Jazz' },
-  41: { nbaId: '1610612764', name: 'Washington Wizards' },
-};
+const STATS = 'https://stats.nba.com/stats';
 
-const NBA_HEADERS = {
-  'Accept': 'application/json, text/plain, */*',
-  'Accept-Language': 'en-US,en;q=0.9',
-  'Origin': 'https://www.nba.com',
-  'Referer': 'https://www.nba.com/',
-  'x-nba-stats-origin': 'stats',
-  'x-nba-stats-token': 'true',
-  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-};
+// Every roster is built from four league-wide calls rather than one call per team:
+// 30 sequential team requests do not fit inside a serverless function's time budget.
 
-async function fetchTeamRoster(nbaId) {
-  const url = `https://stats.nba.com/stats/commonteamroster?TeamID=${nbaId}&Season=2025-26`;
-  const res = await fetch(url, { headers: NBA_HEADERS });
-  if (!res.ok) throw new Error(`NBA API ${res.status} for team ${nbaId}`);
+// All players under contract this season, including ones who have not played a game yet.
+async function fetchLeagueRosters(season) {
+  const { rows, has, get } = await fetchResultSet(
+    `${STATS}/playerindex?LeagueID=00&Season=${season}&Historical=0`,
+    'PlayerIndex'
+  );
+  if (!has('PERSON_ID', 'TEAM_ID')) throw new Error('playerindex: missing PERSON_ID/TEAM_ID');
 
-  const data = await res.json();
-  const rosterSet = data.resultSets?.find(s => s.name === 'CommonTeamRoster');
-  if (!rosterSet) throw new Error('Unexpected response shape');
+  const byTeam = {};
+  for (const row of rows) {
+    const teamId = NBA_ID_TO_TEAM_ID[String(get(row, 'TEAM_ID', ''))];
+    if (!teamId) continue; // free agents and non-NBA teams
 
-  const h = rosterSet.headers;
-  const nameIdx = h.indexOf('PLAYER');
-  const posIdx  = h.indexOf('POSITION');
-  const numIdx  = h.indexOf('NUM');
-  const idIdx   = h.indexOf('PLAYER_ID');
-
-  return rosterSet.rowSet.map((row, i) => ({
-    id:       row[idIdx] ?? i,
-    name:     row[nameIdx] ?? '—',
-    position: row[posIdx] ?? '—',
-    number:   row[numIdx] ?? '',
-  }));
+    const first = get(row, 'PLAYER_FIRST_NAME', '');
+    const last  = get(row, 'PLAYER_LAST_NAME', '');
+    (byTeam[teamId] ||= []).push({
+      id:       get(row, 'PERSON_ID'),
+      name:     `${first} ${last}`.trim() || '—',
+      position: get(row, 'POSITION', '—') || '—',
+      number:   String(get(row, 'JERSEY_NUMBER', '') ?? ''),
+    });
+  }
+  return byTeam;
 }
 
-// Protect the endpoint with a secret so only Vercel cron (or you) can trigger it
+// Per-game averages, keyed by player id. Same endpoint and fields as scripts/fetch-rosters.mjs.
+async function fetchPerGameStats(season) {
+  const { rows, get } = await fetchResultSet(
+    `${STATS}/leaguedashplayerstats?Season=${season}&SeasonType=Regular+Season&PerMode=PerGame`
+    + `&MeasureType=Base&LastNGames=0&Month=0&OpponentTeamID=0&PaceAdjust=N&PlusMinus=N&Rank=N`
+    + `&Period=0&LeagueID=00&TwoWay=0`
+  );
+  const map = new Map();
+  for (const row of rows) {
+    map.set(get(row, 'PLAYER_ID'), {
+      pts: +Number(get(row, 'PTS', 0)).toFixed(1),
+      reb: +Number(get(row, 'REB', 0)).toFixed(1),
+      ast: +Number(get(row, 'AST', 0)).toFixed(1),
+      stl: +Number(get(row, 'STL', 0)).toFixed(1),
+      blk: +Number(get(row, 'BLK', 0)).toFixed(1),
+      min: +Number(get(row, 'MIN', 0)).toFixed(1),
+      gp:  Number(get(row, 'GP', 0)),
+    });
+  }
+  return map;
+}
+
+// Season 3PM totals (the per-game call only carries the average).
+async function fetch3pmTotals(season) {
+  const { rows, get } = await fetchResultSet(
+    `${STATS}/leaguedashplayerstats?Season=${season}&SeasonType=Regular+Season&PerMode=Totals`
+    + `&MeasureType=Base&LastNGames=0&Month=0&OpponentTeamID=0&PaceAdjust=N&PlusMinus=N&Rank=N`
+    + `&Period=0&LeagueID=00&TwoWay=0`
+  );
+  const map = new Map();
+  for (const row of rows) map.set(get(row, 'PLAYER_ID'), Number(get(row, 'FG3M', 0)));
+  return map;
+}
+
+async function fetchStandings(season) {
+  const { rows, get } = await fetchResultSet(
+    `${STATS}/leaguestandings?Season=${season}&SeasonType=Regular+Season&LeagueID=00`
+  );
+  const byTeam = {};
+  for (const row of rows) {
+    const teamId = NBA_ID_TO_TEAM_ID[String(get(row, 'TeamID', ''))];
+    if (!teamId) continue;
+    byTeam[teamId] = {
+      w: Number(get(row, 'WINS', get(row, 'W', 0))),
+      l: Number(get(row, 'LOSSES', get(row, 'L', 0))),
+    };
+  }
+  return byTeam;
+}
+
+// Vercel cron sends `Authorization: Bearer $CRON_SECRET`; the header/query forms are
+// kept so the endpoint can still be triggered by hand.
+function isAuthorized(req) {
+  const secret = process.env.CRON_SECRET;
+  if (!secret) return false;
+  const bearer = (req.headers.authorization || '').replace(/^Bearer\s+/i, '');
+  return bearer === secret
+    || req.headers['x-cron-secret'] === secret
+    || req.query?.secret === secret;
+}
+
 export default async function handler(req, res) {
-  const secret = req.headers['x-cron-secret'] || req.query.secret;
-  if (secret !== process.env.CRON_SECRET) {
+  if (!process.env.CRON_SECRET) {
+    return res.status(500).json({ error: 'CRON_SECRET is not configured' });
+  }
+  if (!isAuthorized(req)) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  const results = { success: [], failed: [] };
+  const season = req.query?.season || getCurrentSeason();
 
-  for (const [teamId, team] of Object.entries(TEAMS)) {
-    try {
-      // Small delay between requests to avoid NBA.com rate limiting
-      await new Promise(r => setTimeout(r, 400));
-      const players = await fetchTeamRoster(team.nbaId);
-      await kv.set(`roster:${teamId}`, players);
-      results.success.push(team.name);
-      console.log(`✓ ${team.name}: ${players.length} players`);
-    } catch (err) {
-      results.failed.push({ team: team.name, error: err.message });
-      console.error(`✗ ${team.name}:`, err.message);
+  try {
+    const [teams, perGame, totals, standings] = await Promise.all([
+      fetchLeagueRosters(season),
+      fetchPerGameStats(season),
+      fetch3pmTotals(season),
+      fetchStandings(season),
+    ]);
+
+    let playerCount = 0;
+    for (const [teamId, players] of Object.entries(teams)) {
+      teams[teamId] = players
+        .map(p => ({ ...p, ...(perGame.get(p.id) || {}), fg3m: totals.get(p.id) ?? 0 }))
+        .sort((a, b) => a.name.localeCompare(b.name));
+      playerCount += teams[teamId].length;
     }
+
+    const missing = Object.keys(TEAMS).filter(id => !teams[id]?.length);
+    if (missing.length > 10) {
+      throw new Error(`Only ${30 - missing.length}/30 teams had players — refusing to publish`);
+    }
+
+    const syncedAt = new Date().toISOString();
+    await Promise.all([
+      kv.set('rosters:current', { season, teams }),
+      kv.set('standings:current', { season, teams: standings }),
+      kv.set('rosters:sync_status', {
+        ok: true, season, syncedAt, playerCount,
+        teamCount: 30 - missing.length,
+        missingTeams: missing,
+        error: null,
+      }),
+    ]);
+
+    console.log(`✓ ${season}: ${playerCount} players across ${30 - missing.length} teams`);
+    return res.status(200).json({ ok: true, season, syncedAt, playerCount, missingTeams: missing });
+  } catch (err) {
+    console.error('sync-rosters failed:', err);
+    // Record the failure but leave the last good slice in place.
+    await kv.set('rosters:sync_status', {
+      ok: false, season, syncedAt: new Date().toISOString(), error: err.message,
+    }).catch(() => {});
+    return res.status(502).json({ ok: false, season, error: err.message });
   }
-
-  await kv.set('rosters:last_synced', new Date().toISOString());
-
-  return res.status(200).json({
-    synced: results.success.length,
-    failed: results.failed.length,
-    details: results,
-  });
 }
