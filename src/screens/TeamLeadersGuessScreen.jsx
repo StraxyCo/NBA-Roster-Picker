@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
 import { getLogoUrl } from '../data/teams.js'
+import { getEligibility } from '../utils/leaderEligibility.js'
 import styles from './TeamLeadersGuessScreen.module.css'
 
 function getLeader(roster, stat) {
@@ -19,15 +20,20 @@ export default function TeamLeadersGuessScreen({ team, season, roster, categorie
   const [selectedNbaPlayer, setSelectedNbaPlayer] = useState(null)
   const [picks, setPicks] = useState(() => Object.fromEntries(categories.map(c => [c.key, null])))
 
+  // Only players who met the games-played minimum can lead a category, so the
+  // answers always come from the same pool the drafter is allowed to pick from.
+  const { minGames, eligible, eligibleIds } = useMemo(() => getEligibility(roster), [roster])
+
   const leaders = useMemo(
-    () => Object.fromEntries(categories.map(c => [c.stat, getLeader(roster, c.stat)])),
-    [roster, categories]
+    () => Object.fromEntries(categories.map(c => [c.stat, getLeader(eligible, c.stat)])),
+    [eligible, categories]
   )
 
   const allSlotsFilled = categories.every(c => picks[c.key] !== null)
 
   function handleRosterPlayerClick(player) {
     if (phase !== 'guessing') return
+    if (!eligibleIds.has(player.id)) return
     setSelectedNbaPlayer(prev => prev?.id === player.id ? null : player)
   }
 
@@ -134,19 +140,28 @@ export default function TeamLeadersGuessScreen({ team, season, roster, categorie
         <div className={styles.gameLayout}>
           {/* Roster list */}
           <div className={styles.rosterPanel}>
-            <div className={styles.panelLabel}>Roster</div>
+            <div className={styles.panelLabel}>
+              Roster
+              <span className={styles.panelLabelNote}>{minGames}+ games to qualify</span>
+            </div>
             <div className={styles.rosterList}>
-              {sortedRoster.map(player => (
-                <button
-                  key={player.id}
-                  className={`${styles.rosterRow} ${selectedNbaPlayer?.id === player.id ? styles.rosterRowSelected : ''}`}
-                  onClick={() => handleRosterPlayerClick(player)}
-                >
-                  <span className={styles.rosterNum}>#{player.number}</span>
-                  <span className={styles.rosterName}>{player.name}</span>
-                  <span className={styles.rosterPos}>{player.position}</span>
-                </button>
-              ))}
+              {sortedRoster.map(player => {
+                const isEligible = eligibleIds.has(player.id)
+                return (
+                  <button
+                    key={player.id}
+                    className={`${styles.rosterRow} ${selectedNbaPlayer?.id === player.id ? styles.rosterRowSelected : ''} ${isEligible ? '' : styles.rosterRowIneligible}`}
+                    onClick={() => handleRosterPlayerClick(player)}
+                    disabled={!isEligible}
+                    title={isEligible ? undefined : `Played ${player.gp ?? 0} games — needs ${minGames} to qualify`}
+                  >
+                    <span className={styles.rosterNum}>#{player.number}</span>
+                    <span className={styles.rosterName}>{player.name}</span>
+                    <span className={styles.rosterGames}>{player.gp ?? 0} GP</span>
+                    <span className={styles.rosterPos}>{player.position}</span>
+                  </button>
+                )
+              })}
             </div>
           </div>
 
