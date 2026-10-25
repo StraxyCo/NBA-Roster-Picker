@@ -69,6 +69,8 @@ The static files are the **historical base and the offline fallback**; the weekl
 
 Players with no games yet (`gp: 0`) have their `min`/`gp` carried over from their most recent prior season during the overlay merge: `weightedShuffle()` in [`src/utils/playerSelection.js`](src/utils/playerSelection.js) drops zero-weight entries, so without this the draw pools would be empty before opening night.
 
+The merge also carries **hand-added fields** across. The sync publishes a fixed set of keys (`id`, `name`, `position`, `number` and the stats); any other key on a player in `rosters.json` — a backfilled headshot, say — is indexed by player id, newest season wins, and merged underneath the live data, so a live slice never drops it and never overwrites a field the sync does publish. Add such a field to `rosters.json` and it survives the overlay, including for a season the static file does not have yet.
+
 Historical seasons still change only by running `npm run sync:rosters` and committing the result. `/public/careers.json`, `allstars.json`, `nicknames.json`, `playerdle.json` and `nickname-meta.json` have no automatic refresh at all — they are rebuilt by the scripts in `scripts/`.
 
 Team logo SVGs live in `/public/media/` named by team abbreviation (e.g. `LAL.svg`). Missing logos degrade gracefully.

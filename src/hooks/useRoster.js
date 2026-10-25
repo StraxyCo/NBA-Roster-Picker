@@ -16,6 +16,13 @@ let livePromise = null;
 
 const WEIGHT_FIELDS = ['pts', 'reb', 'ast', 'stl', 'blk', 'min', 'gp', 'fg3m'];
 
+// Everything api/sync-rosters.js publishes for a player. Any other key on a static entry
+// is data this project added by hand (a backfilled headshot, say); the overlay carries it
+// across so a live slice does not quietly drop it.
+const LIVE_FIELDS = new Set([
+  'id', 'name', 'position', 'number', ...WEIGHT_FIELDS,
+]);
+
 async function loadLive() {
   if (liveData !== null) return liveData;
   if (!livePromise) {
@@ -44,15 +51,51 @@ function buildStatHistory(staticRosters, upToSeason) {
   return history;
 }
 
+// Hand-added fields per player id, newest season wins. Keyed by id rather than by season
+// so a backfill committed against last season still applies when the player turns up in a
+// season the static file does not have yet.
+function buildCustomFields(staticRosters) {
+  const byId = new Map();
+  for (const season of Object.keys(staticRosters).sort()) {
+    for (const players of Object.values(staticRosters[season] || {})) {
+      for (const p of players || []) {
+        let extras = null;
+        for (const key of Object.keys(p)) {
+          if (!LIVE_FIELDS.has(key)) (extras ??= {})[key] = p[key];
+        }
+        if (extras) byId.set(p.id, { ...byId.get(p.id), ...extras });
+      }
+    }
+  }
+  return byId;
+}
+
+function indexSeasonById(seasonData) {
+  const byId = new Map();
+  for (const players of Object.values(seasonData || {})) {
+    for (const p of players || []) byId.set(p.id, p);
+  }
+  return byId;
+}
+
 function mergeLiveSeason(staticRosters, live) {
   const history = buildStatHistory(staticRosters, live.season);
+  const custom = buildCustomFields(staticRosters);
+  const committed = indexSeasonById(staticRosters[live.season]);
   const merged = {};
   for (const [teamId, players] of Object.entries(live.teams)) {
     merged[teamId] = (players || []).map(p => {
-      if ((p.gp ?? 0) > 0) return p;
-      const prior = history.get(p.id);
-      if (!prior) return p; // true rookie with no history — stays unweighted, as before
-      const carried = { ...p };
+      const extras = custom.get(p.id);
+      // Live fields always win; extras only fill in keys the sync does not publish.
+      const out = extras ? { ...extras, ...p } : p;
+      if ((p.gp ?? 0) > 0) return out;
+
+      // No games yet: weight from this season's committed stats if the static file
+      // already has them, otherwise from the player's most recent prior season.
+      const sameSeason = committed.get(p.id);
+      const prior = (sameSeason?.gp ?? 0) > 0 ? sameSeason : history.get(p.id);
+      if (!prior) return out; // true rookie with no history — stays unweighted, as before
+      const carried = { ...out };
       for (const f of WEIGHT_FIELDS) carried[f] = prior[f] ?? 0;
       return carried;
     });
