@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import styles from './WhoHasMoreGameScreen.module.css'
 import { pickNWeightedPlayers } from '../utils/playerSelection.js'
+import { getSeasonPlayers } from '../utils/seasonTotals.js'
 
 const REEL_DURATION = 2800
 const TICK_START    = 60
@@ -22,18 +23,6 @@ function getHeadshotUrl(id) {
 
 function formatSeason(s) {
   return s.replace('-', '/')
-}
-
-function getSeasonPlayers(rostersData, season) {
-  const seasonData = rostersData[season] || {}
-  const seen = new Set()
-  const all = []
-  for (const teamPlayers of Object.values(seasonData)) {
-    for (const p of teamPlayers) {
-      if (!seen.has(p.id)) { seen.add(p.id); all.push(p) }
-    }
-  }
-  return all
 }
 
 // ── Player card button ───────────────────────────────────────────────────────

@@ -142,7 +142,9 @@ export default function TeamLeadersGuessScreen({ team, season, roster, categorie
                   className={`${styles.rosterRow} ${selectedNbaPlayer?.id === player.id ? styles.rosterRowSelected : ''}`}
                   onClick={() => handleRosterPlayerClick(player)}
                 >
-                  <span className={styles.rosterNum}>#{player.number}</span>
+                  {/* A player his team traded away has no known jersey for that
+                      team, so the column stays blank rather than showing a bare #. */}
+                  <span className={styles.rosterNum}>{player.number ? `#${player.number}` : ''}</span>
                   <span className={styles.rosterName}>{player.name}</span>
                   <span className={styles.rosterPos}>{player.position}</span>
                 </button>
