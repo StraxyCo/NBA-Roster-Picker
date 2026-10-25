@@ -16,6 +16,7 @@
 .outcome { font-family: var(--font-body); font-size: 0.82rem; font-weight: 600; text-align: center; padding: 10px 14px; border-radius: var(--radius); border: 1px solid transparent; }
 .outcomeCorrect { color: #22c55e; background: rgba(34,197,94,0.08); border-color: rgba(34,197,94,0.25); }
 .outcomeWrong { color: #ef4444; background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.25); }
+.outcomeBlocked { color: var(--gold); background: rgba(245,197,24,0.1); border-color: rgba(245,197,24,0.3); }
 
 .content { width: 100%; max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; padding-top: 16px; }
 
