@@ -305,14 +305,13 @@ function FaceGuesserSetupInner({ onBack, onStart, savedGames, onDeleteGame, save
                   : 'Skip the warm-up — shorter, harsher match'}
               </span>
             </div>
-            <div className={styles.stepper}>
+            <div className={styles.tierToggle} role="group" aria-label="Starting tier">
               {START_TIERS.map(t => (
                 <button
                   key={t.key}
-                  className={styles.stepBtn}
+                  className={`${styles.tierBtn} ${startTier === t.key ? styles.tierBtnActive : ''}`}
                   onClick={() => setStartTier(t.key)}
-                  disabled={startTier === t.key}
-                  style={startTier === t.key ? { opacity: 1, fontWeight: 700 } : undefined}
+                  aria-pressed={startTier === t.key}
                 >
                   {t.label}
                 </button>

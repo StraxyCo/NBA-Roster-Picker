@@ -525,3 +525,38 @@
   background: #c0392b; color: var(--white); border: 1px solid #c0392b;
 }
 .btnDanger:hover { background: #e74c3c; border-color: #e74c3c; }
+
+/* Segmented control for the starting tier. The numeric stepper next door is built
+   around a fixed 30px cell, which crushes word labels into each other. */
+.tierToggle {
+  display: flex;
+  background: var(--navy-4);
+  border: 1px solid var(--white-10);
+  border-radius: var(--radius);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.tierBtn {
+  padding: 7px 14px;
+  background: transparent;
+  border: none;
+  border-left: 1px solid var(--white-10);
+  color: var(--white-50);
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+.tierBtn:first-child { border-left: none; }
+.tierBtn:hover:not(.tierBtnActive) { background: var(--white-05); color: var(--white-80); }
+
+.tierBtnActive {
+  background: var(--gold);
+  color: var(--navy);
+  font-weight: 700;
+  cursor: default;
+}
