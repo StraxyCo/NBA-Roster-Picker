@@ -23,9 +23,13 @@ const TIER_ORDER = TIERS.map(t => t.key)
 // stumped makes agreement *more* likely, not less — but it has to end somewhere.
 export const STALL_LIMIT = 3
 
-export function createMatch(playerIds) {
+// `startTier` skips part of the warm-up for a group that finds it trivial. Starting
+// below `icon` shortens the match, since the easy tiers are what keep a weak guesser
+// alive early.
+export function createMatch(playerIds, { startTier } = {}) {
+  const startIndex = startTier ? Math.max(0, TIER_ORDER.indexOf(startTier)) : 0
   return {
-    tierIndex: 0,
+    tierIndex: startIndex,
     roundsInTier: 0,
     missedInARow: 0,
     multipleChoice: false,
@@ -45,20 +49,48 @@ export function isMatchOver(match) {
   return match.winner !== null && match.winner !== undefined ? true : match.active.length === 0
 }
 
-/** Draw the next face: unused, from the current tier, falling back to harder ones. */
-export function drawPlayer(match, byTier) {
+/** One unused face from the current tier, falling back to harder ones if it is dry. */
+function drawOne(match, byTier, taken) {
   const order = [currentTier(match), ...TIER_ORDER.slice(match.tierIndex + 1)]
   for (const tier of order) {
-    const fresh = (byTier[tier] ?? []).filter(p => !match.usedPlayerIds.has(p.id))
+    const fresh = (byTier[tier] ?? []).filter(p => !match.usedPlayerIds.has(p.id) && !taken.has(p.id))
     if (fresh.length) return fresh[Math.floor(Math.random() * fresh.length)]
   }
   return null
 }
 
+// A round deals each player their OWN face, all from the same tier.
+//
+// Not one shared face: play passes round the same device, so the second player would
+// answer having just heard the first one's guess. Separate faces of equal standing
+// keep the comparison fair — a round still asks everyone the same question ("can you
+// name a face this famous?"), just not the same photo.
+export function drawRound(match, byTier, playerIds = match.active) {
+  const taken = new Set()
+  const faces = {}
+  for (const id of playerIds) {
+    const face = drawOne(match, byTier, taken)
+    if (!face) return null // pool exhausted; caller should end the match
+    taken.add(face.id)
+    faces[id] = face
+  }
+  return faces
+}
+
+/** Mark a round's faces used, so nobody sees them again this match. */
+export function markFacesUsed(match, faces) {
+  const usedPlayerIds = new Set(match.usedPlayerIds)
+  for (const face of Object.values(faces)) usedPlayerIds.add(face.id)
+  return { ...match, usedPlayerIds }
+}
+
 // Applies one round's results: `correctByPlayer` maps player id -> boolean.
 //
-// Missing a face somebody else got is elimination, immediately — there are no second
-// chances. A round everyone gets right means the tier is too easy and, once its
+// Missing your face in a round where somebody else named theirs is elimination,
+// immediately — there are no second chances. Everyone is answering a different photo
+// of the same standing, so what the round compares is the tier, not the picture.
+//
+// A round everyone gets right means the tier is too easy and, once its
 // minimum is served, the game moves down. A round everyone misses settles nothing, so
 // the tier repeats rather than descending further.
 export function resolveRound(match, correctByPlayer) {

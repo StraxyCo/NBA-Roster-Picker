@@ -433,3 +433,42 @@ export function useWhoDidTheyHaveGames() {
   }
   return { games, loading, reload: load, saveGame, deleteGame }
 }
+
+export function useFaceGuesserGames() {
+  const [games, setGames] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  const load = useCallback(async () => {
+    try {
+      const res = await fetch('/api/face-guesser-games')
+      const data = await res.json()
+      setGames(Array.isArray(data) ? data : [])
+    } catch (e) {
+      console.error('useFaceGuesserGames load error', e)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => { load() }, [load])
+
+  async function saveGame({ playerIds, playerNames, winnerId, winnerName }) {
+    const res = await fetch('/api/face-guesser-games', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ playerIds, playerNames, winnerId, winnerName }),
+    })
+    if (!res.ok) throw new Error('Failed to save face guesser game')
+    const game = await res.json()
+    setGames(prev => [game, ...prev])
+    return game
+  }
+
+  async function deleteGame(id) {
+    const res = await fetch(`/api/face-guesser-games?id=${id}`, { method: 'DELETE' })
+    if (!res.ok) throw new Error('Failed to delete face guesser game')
+    setGames(prev => prev.filter(g => g.id !== id))
+  }
+
+  return { games, loading, reload: load, saveGame, deleteGame }
+}
