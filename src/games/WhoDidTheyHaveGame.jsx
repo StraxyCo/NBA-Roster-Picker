@@ -6,6 +6,7 @@ import OrderDrawScreen from '../screens/OrderDrawScreen.jsx'
 import TeamDrawScreen from '../screens/TeamDrawScreen.jsx'
 import { useWhoDidTheyHaveGames } from '../hooks/useProfiles.js'
 import { fetchStandings } from '../hooks/useRoster.js'
+import { loadCareers } from '../hooks/useCareers.js'
 import { getAllPlayers } from '../utils/teammateChain.js'
 import { playedFor, teamSeasonRoster } from '../utils/whoDidTheyHave.js'
 // Interstitial / final screens share the Team Leaders sheet.
@@ -147,7 +148,7 @@ export default function WhoDidTheyHaveGame() {
   const [roundResults, setRoundResults] = useState([])
 
   useEffect(() => {
-    fetch('/careers.json').then(r => r.json()).then(setCareers).catch(e => console.error('careers load', e))
+    loadCareers().then(setCareers).catch(e => console.error('careers load', e))
   }, [])
 
   const allPlayers = useMemo(() => careers ? getAllPlayers(careers) : [], [careers])

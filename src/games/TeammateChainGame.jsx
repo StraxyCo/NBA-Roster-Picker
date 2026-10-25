@@ -5,6 +5,7 @@ import TeammateChainGameScreen from '../screens/TeammateChainGameScreen.jsx'
 import OrderDrawScreen from '../screens/OrderDrawScreen.jsx'
 import ChainTimeline from '../components/ChainTimeline.jsx'
 import { useTeammateChainGames } from '../hooks/useProfiles.js'
+import { loadCareers } from '../hooks/useCareers.js'
 import { loadRosters } from '../hooks/useRoster.js'
 import { validatePick, rejectionReason, pickStartingPlayer, getAllPlayers, excludedConnections, hasAvailableOutside, allStarIds } from '../utils/teammateChain.js'
 import styles from './WhosThatGuyGame.module.css'
@@ -73,7 +74,7 @@ export default function TeammateChainGame() {
 
   useEffect(() => {
     Promise.all([
-      fetch('/careers.json').then(r => r.json()),
+      loadCareers(),
       loadRosters(),
       fetch('/allstars.json').then(r => r.json()),
     ]).then(([c, r, a]) => { setCareers(c); setRosters(r); setAllstars(a) })

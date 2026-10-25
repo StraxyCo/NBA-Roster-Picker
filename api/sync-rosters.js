@@ -1,5 +1,6 @@
 import { Redis } from '@upstash/redis';
 import { TEAMS, NBA_ID_TO_TEAM_ID, getCurrentSeason, fetchResultSet } from './_nba.js';
+import { syncCareers } from './_careers.js';
 
 const kv = new Redis({
   url: process.env.UPSTASH_REDIS_REST_URL,
@@ -141,7 +142,13 @@ export default async function handler(req, res) {
     ]);
 
     console.log(`✓ ${season}: ${playerCount} players across ${30 - missing.length} teams`);
-    return res.status(200).json({ ok: true, season, syncedAt, playerCount, missingTeams: missing });
+
+    // The same weekly run refreshes the current season's slice of careers.json. It writes
+    // its own Redis keys and returns its result rather than throwing, so a careers failure
+    // cannot lose the rosters we just published.
+    const careers = await syncCareers(kv, season);
+
+    return res.status(200).json({ ok: true, season, syncedAt, playerCount, missingTeams: missing, careers });
   } catch (err) {
     console.error('sync-rosters failed:', err);
     // Record the failure but leave the last good slice in place.

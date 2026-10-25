@@ -4,6 +4,7 @@ import StatsOverUnderSetupScreen, { ALL_STATS } from '../screens/StatsOverUnderS
 import OrderDrawScreen from '../screens/OrderDrawScreen.jsx'
 import StatsOverUnderGameScreen from '../screens/StatsOverUnderGameScreen.jsx'
 import { useStatsOverUnderGames } from '../hooks/useProfiles.js'
+import { loadCareers } from '../hooks/useCareers.js'
 import { playerWeight, weightedPick } from '../utils/playerSelection.js'
 import styles from './StatsOverUnderGame.module.css'
 
@@ -122,8 +123,7 @@ export default function StatsOverUnderGame() {
   const [currentQuestions, setCurrentQuestions] = useState([])
 
   useEffect(() => {
-    fetch('/careers.json')
-      .then(r => r.json())
+    loadCareers()
       .then(d => setCareers(d))
       .catch(e => console.error('careers load error', e))
   }, [])

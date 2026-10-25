@@ -76,3 +76,17 @@ export async function fetchResultSet(url, setName) {
   };
   return { rows: set.rowSet, headers: set.headers, has, get };
 }
+
+// Team abbreviations as they appear in public/careers.json (and src/data/teams.js).
+// Kept here so api/_careers.js can turn an NBA.com team id into a careers abbr.
+export const TEAM_ABBR = {
+  1: 'ATL',  2: 'BOS',  4: 'BKN',  5: 'CHA',  6: 'CHI',  7: 'CLE',
+  8: 'DAL',  9: 'DEN', 10: 'DET', 11: 'GSW', 14: 'HOU', 15: 'IND',
+  16: 'LAC', 17: 'LAL', 19: 'MEM', 20: 'MIA', 21: 'MIL', 22: 'MIN',
+  23: 'NOP', 24: 'NYK', 25: 'OKC', 26: 'ORL', 27: 'PHI', 28: 'PHX',
+  29: 'POR', 30: 'SAC', 31: 'SAS', 38: 'TOR', 40: 'UTA', 41: 'WAS',
+};
+
+export const NBA_ID_TO_ABBR = Object.fromEntries(
+  Object.entries(TEAMS).map(([id, { nbaId }]) => [nbaId, TEAM_ABBR[id]])
+);
