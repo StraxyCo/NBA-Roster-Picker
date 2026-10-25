@@ -9,6 +9,9 @@
 // 30 is deliberately low enough to keep mid-season trades in: once stats are
 // split per team, a player dealt at the deadline still has a real sample on
 // both sides of the move.
+//
+// A team whose season has not reached 30 games yet is not drawn at all — see
+// hasEnoughGamesPlayed.
 
 export const MIN_GAMES = 30
 
@@ -23,14 +26,19 @@ export function seasonGameCount(roster) {
   return maxGp > 0 ? Math.min(maxGp, FULL_SEASON_GAMES) : FULL_SEASON_GAMES
 }
 
-export function minGamesForLeaders(roster) {
-  // Every completed season is long enough for the flat bar; a season still in
-  // progress is not, so fall back to half of what has been played.
-  return Math.min(MIN_GAMES, Math.ceil(seasonGameCount(roster) / 2))
+export function minGamesForLeaders() {
+  return MIN_GAMES
+}
+
+// A season in progress can't produce a 30-game sample for anyone, so the team
+// is left out of the draw entirely until it reaches the mark — rather than
+// softening the bar and asking players to guess leaders off twelve games.
+export function hasEnoughGamesPlayed(roster) {
+  return Array.isArray(roster) && seasonGameCount(roster) >= MIN_GAMES
 }
 
 export function getEligibility(roster) {
-  const minGames = minGamesForLeaders(roster)
+  const minGames = minGamesForLeaders()
   let eligible = roster.filter(p => (p.gp ?? 0) >= minGames)
 
   if (eligible.length < MIN_ELIGIBLE_PLAYERS) {

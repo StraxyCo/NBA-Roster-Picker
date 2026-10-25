@@ -269,6 +269,7 @@ export default function TeamLeadersGame() {
           eliminateTeams
           eliminateFranchises
           seasons={roundSeason ? [roundSeason] : config.seasons}
+          requireFullSample
           onTeamDrawn={handleTeamDrawn}
         />
       )}

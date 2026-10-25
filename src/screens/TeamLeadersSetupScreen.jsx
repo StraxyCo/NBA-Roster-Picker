@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { usePlayers } from '../hooks/useProfiles.js'
 import { ALL_SEASONS } from '../data/seasons.js'
+import { getSeasonsWithFullSample } from '../hooks/useRoster.js'
+import { MIN_GAMES } from '../utils/leaderEligibility.js'
 import { NBA_TEAMS } from '../data/teams.js'
 import styles from './TeamLeadersSetupScreen.module.css'
 import { useGameDefaults } from '../hooks/useGameDefaults.js'
@@ -162,7 +164,7 @@ export const ALL_TEAM_STATS = [
 ]
 
 // ── Seasons picker ──────────────────────────────────────────────────────────
-function SeasonsModal({ selected, onSave, onClose }) {
+function SeasonsModal({ selected, seasons, onSave, onClose }) {
   const [draft, setDraft] = useState(selected)
   function toggle(s) {
     setDraft(prev => prev.includes(s) ? (prev.length > 1 ? prev.filter(x => x !== s) : prev) : [...prev, s])
@@ -171,7 +173,7 @@ function SeasonsModal({ selected, onSave, onClose }) {
     <Modal onClose={onClose}>
       <h3 className={styles.modalTitle}>Select seasons</h3>
       <div className={styles.seasonsGrid}>
-        {ALL_SEASONS.map(s => (
+        {seasons.map(s => (
           <button
             key={s}
             className={`${styles.seasonTag} ${draft.includes(s) ? styles.seasonTagOn : ''}`}
@@ -219,6 +221,24 @@ function TeamLeadersSetupInner({ onBack, onStart, savedGames, onDeleteGame, save
 
   const [rounds, setRounds]                     = useState(d.rounds ?? 5)
   const [seasons, setSeasons]                   = useState(d.seasons ?? ALL_SEASONS)
+
+  // A season still in progress has nobody at the games bar, so it can't be
+  // played here — drop it from the picker and from any saved selection.
+  const [playableSeasons, setPlayableSeasons]   = useState(ALL_SEASONS)
+  useEffect(() => {
+    let cancelled = false
+    getSeasonsWithFullSample(MIN_GAMES).then(available => {
+      if (cancelled) return
+      const playable = ALL_SEASONS.filter(s => available.includes(s))
+      if (!playable.length) return
+      setPlayableSeasons(playable)
+      setSeasons(prev => {
+        const kept = prev.filter(s => playable.includes(s))
+        return kept.length ? kept : playable
+      })
+    })
+    return () => { cancelled = true }
+  }, [])
   const [selectedStats, setSelectedStats]       = useState(d.selectedStats ?? ['pts', 'reb', 'ast'])
   const buildDefaultConfig = () => ({ rounds, seasons, selectedStats })
   const [showSeasons, setShowSeasons]           = useState(false)
@@ -246,7 +266,7 @@ function TeamLeadersSetupInner({ onBack, onStart, savedGames, onDeleteGame, save
   const maxRounds       = Math.min(10, Math.floor(NBA_TEAMS.length / Math.max(1, activePlayers.length)))
   const effectiveRounds = Math.min(rounds, maxRounds)
 
-  const seasonLabel = seasons.length === ALL_SEASONS.length
+  const seasonLabel = seasons.length === playableSeasons.length
     ? 'All seasons'
     : seasons.length === 1
       ? seasons[0]
@@ -339,7 +359,7 @@ function TeamLeadersSetupInner({ onBack, onStart, savedGames, onDeleteGame, save
       {addingSlot !== null && (
         <AddPlayerModal players={players} slotsUsed={slotsUsedIds} onSelect={handleAddPlayer} onClose={() => setAddingSlot(null)} onCreate={createPlayer} />
       )}
-      {showSeasons && <SeasonsModal selected={seasons} onSave={setSeasons} onClose={() => setShowSeasons(false)} />}
+      {showSeasons && <SeasonsModal selected={seasons} seasons={playableSeasons} onSave={setSeasons} onClose={() => setShowSeasons(false)} />}
       {view === 'stats' && <StatsView players={players} onClose={() => setView(null)} />}
       {view === 'games' && <GamesView games={savedGames || []} onDelete={onDeleteGame} onClose={() => setView(null)} />}
     </div>
