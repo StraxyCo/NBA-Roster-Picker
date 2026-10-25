@@ -1,4 +1,5 @@
 import { Redis } from '@upstash/redis';
+import { syncCareers } from './_careers.js';
 const kv = new Redis({
   url: process.env.UPSTASH_REDIS_REST_URL,
   token: process.env.UPSTASH_REDIS_REST_TOKEN,
@@ -96,9 +97,14 @@ export default async function handler(req, res) {
 
   await kv.set('rosters:last_synced', new Date().toISOString());
 
+  // Same weekly run refreshes the current season's slice of careers.json. It publishes to
+  // its own Redis keys and never throws, so a careers failure cannot lose the rosters.
+  const careers = await syncCareers(kv);
+
   return res.status(200).json({
     synced: results.success.length,
     failed: results.failed.length,
     details: results,
+    careers,
   });
 }

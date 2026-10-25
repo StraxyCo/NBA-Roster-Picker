@@ -1,20 +1,18 @@
-import { Redis } from '@upstash/redis';
 import { NBA_ID_TO_ABBR, getCurrentSeason, fetchResultSet } from './_nba.js';
-
-const kv = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN,
-});
 
 const STATS = 'https://stats.nba.com/stats';
 
 // public/careers.json is per-player career history — scripts/fetch-careers.mjs rebuilds it
 // with one playercareerstats call per player (thousands of requests, ~500ms apart), which
-// cannot run inside a serverless function. So this endpoint only rebuilds the CURRENT
-// season's slice, from three league-wide calls, in the same row shape careers.json uses:
+// cannot run inside a serverless function. So we only rebuild the CURRENT season's slice,
+// from three league-wide calls, in the same row shape careers.json uses:
 //   { season, teamAbbr, gp, min, pts, reb, ast, stl, blk, fg3m }
 // The frontend overlays that slice on top of the static file (src/hooks/useCareers.js), so
 // every season before this one still comes from the committed file.
+//
+// This is a module, not a handler: api/sync-rosters.js calls syncCareers() on the weekly
+// cron, and the leading underscore keeps Vercel from counting it against the project's
+// serverless function budget.
 
 // Everyone under contract this season, with the team they are on right now. This is also
 // what gives us a row for a player who has not appeared in a game yet.
@@ -73,17 +71,6 @@ async function fetch3pmTotals(season) {
   return map;
 }
 
-// Vercel cron sends `Authorization: Bearer $CRON_SECRET`; the header/query forms are
-// kept so the endpoint can still be triggered by hand.
-function isAuthorized(req) {
-  const secret = process.env.CRON_SECRET;
-  if (!secret) return false;
-  const bearer = (req.headers.authorization || '').replace(/^Bearer\s+/i, '');
-  return bearer === secret
-    || req.headers['x-cron-secret'] === secret
-    || req.query?.secret === secret;
-}
-
 export function buildCareersSlice(season, league, perGame, totals) {
   const players = {};
   const teams = new Set();
@@ -98,16 +85,11 @@ export function buildCareersSlice(season, league, perGame, totals) {
   return { players, teamCount: teams.size };
 }
 
-export default async function handler(req, res) {
-  if (!process.env.CRON_SECRET) {
-    return res.status(500).json({ error: 'CRON_SECRET is not configured' });
-  }
-  if (!isAuthorized(req)) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
-  const season = req.query?.season || getCurrentSeason();
-
+/**
+ * Rebuild the current season's careers slice and publish it to `careers:current`.
+ * Never throws: the roster sync that calls this must not fail because careers did.
+ */
+export async function syncCareers(kv, season = getCurrentSeason()) {
   try {
     const [league, perGame, totals] = await Promise.all([
       fetchLeaguePlayers(season),
@@ -133,13 +115,13 @@ export default async function handler(req, res) {
     ]);
 
     console.log(`✓ careers ${season}: ${playerCount} players across ${teamCount} teams`);
-    return res.status(200).json({ ok: true, season, syncedAt, playerCount, teamCount });
+    return { ok: true, season, syncedAt, playerCount, teamCount };
   } catch (err) {
-    console.error('sync-careers failed:', err);
+    console.error('syncCareers failed:', err);
     // Record the failure but leave the last good slice in place.
     await kv.set('careers:sync_status', {
       ok: false, season, syncedAt: new Date().toISOString(), error: err.message,
     }).catch(() => {});
-    return res.status(502).json({ ok: false, season, error: err.message });
+    return { ok: false, season, error: err.message };
   }
 }
