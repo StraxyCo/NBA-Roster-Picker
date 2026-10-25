@@ -5,6 +5,7 @@ import OrderDrawScreen from '../screens/OrderDrawScreen.jsx'
 import GridGameScreen from '../screens/GridGameScreen.jsx'
 import { useGridGames } from '../hooks/useProfiles.js'
 import { loadCareers } from '../hooks/useCareers.js'
+import { loadRosters } from '../hooks/useRoster.js'
 import { generateCategories, buildRosterIndex, getAllPlayers } from '../utils/gridCategories.js'
 import styles from './WhosThatGuyGame.module.css'  // reuse between-turns + final CSS
 
@@ -71,7 +72,7 @@ export default function GridGame() {
   useEffect(() => {
     Promise.all([
       loadCareers(),
-      fetch('/rosters.json').then(r => r.json()),
+      loadRosters(),
       fetch('/allstars.json').then(r => r.json()),
     ]).then(([c, r, a]) => { setCareers(c); setRosters(r); setAllstars(a) })
       .catch(e => console.error('data load', e))

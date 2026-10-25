@@ -6,9 +6,12 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "sync:rosters": "node scripts/fetch-rosters.mjs",
+    "sync:rosters:stats": "node scripts/fetch-rosters.mjs --stats-only"
   },
   "dependencies": {
+    "@upstash/redis": "^1.34.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^7.15.0"

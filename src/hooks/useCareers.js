@@ -42,6 +42,11 @@ export function mergeCurrentSeason(staticCareers, live) {
     const base = staticCareers[id];
     const kept = (base?.seasons || []).filter(s => s.season !== live.season);
     staticCareers[id] = {
+      // Spreading the static entry first carries hand-added player-level fields across —
+      // the sync only ever publishes `name` and `seasons`, so a backfilled headshot or any
+      // other key someone put in careers.json survives the overlay. Same idea as the
+      // hand-added-field merge in useRoster.js.
+      ...base,
       // The static name wins where we have one: it carries the diacritics and the spelling
       // the rest of the data uses. The synced name is only for players new to the file.
       name: base?.name || entry.name,

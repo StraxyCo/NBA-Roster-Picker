@@ -78,7 +78,7 @@ export async function fetchResultSet(url, setName) {
 }
 
 // Team abbreviations as they appear in public/careers.json (and src/data/teams.js).
-// Kept here so api/sync-careers.js can turn an NBA.com team id into a careers abbr.
+// Kept here so api/_careers.js can turn an NBA.com team id into a careers abbr.
 export const TEAM_ABBR = {
   1: 'ATL',  2: 'BOS',  4: 'BKN',  5: 'CHA',  6: 'CHI',  7: 'CLE',
   8: 'DAL',  9: 'DEN', 10: 'DET', 11: 'GSW', 14: 'HOU', 15: 'IND',

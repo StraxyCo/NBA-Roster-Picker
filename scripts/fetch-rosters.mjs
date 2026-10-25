@@ -4,20 +4,20 @@
 // node scripts/fetch-rosters.mjs --stats-only --season 2012-13 → stats & standings for one season only
 
 import { writeFileSync, readFileSync, existsSync } from 'fs';
+import { TEAMS, NBA_ID_TO_TEAM_ID, NBA_HEADERS, getCurrentSeason } from '../api/_nba.js';
 
-const CURRENT_SEASON = '2025-26';
+const CURRENT_SEASON = getCurrentSeason();
 const STATS_ONLY = process.argv.includes('--stats-only');
 
 // Parse --season XXXX-XX argument
 const seasonArgIdx = process.argv.indexOf('--season');
 const TARGET_SEASON = seasonArgIdx !== -1 ? process.argv[seasonArgIdx + 1] : null;
 
-const ALL_SEASONS = [
-  '2005-06','2006-07','2007-08','2008-09','2009-10',
-  '2010-11','2011-12','2012-13','2013-14','2014-15',
-  '2015-16','2016-17','2017-18','2018-19','2019-20',
-  '2020-21','2021-22','2022-23','2023-24','2024-25','2025-26',
-];
+const FIRST_SEASON_YEAR = 2005;
+const ALL_SEASONS = [];
+for (let y = FIRST_SEASON_YEAR; y <= Number(CURRENT_SEASON.slice(0, 4)); y++) {
+  ALL_SEASONS.push(`${y}-${String((y + 1) % 100).padStart(2, '0')}`);
+}
 
 // When --season is used, only process that one season
 const SEASONS_TO_CONSIDER = TARGET_SEASON
@@ -25,53 +25,6 @@ const SEASONS_TO_CONSIDER = TARGET_SEASON
       ? [TARGET_SEASON]
       : (() => { console.error(`❌ Unknown season: "${TARGET_SEASON}". Valid: ${ALL_SEASONS.join(', ')}`); process.exit(1) })())
   : ALL_SEASONS;
-
-const TEAMS = {
-  1:  { nbaId: '1610612737', name: 'Atlanta Hawks' },
-  2:  { nbaId: '1610612738', name: 'Boston Celtics' },
-  4:  { nbaId: '1610612751', name: 'Brooklyn Nets' },
-  5:  { nbaId: '1610612766', name: 'Charlotte Hornets' },
-  6:  { nbaId: '1610612741', name: 'Chicago Bulls' },
-  7:  { nbaId: '1610612739', name: 'Cleveland Cavaliers' },
-  8:  { nbaId: '1610612742', name: 'Dallas Mavericks' },
-  9:  { nbaId: '1610612743', name: 'Denver Nuggets' },
-  10: { nbaId: '1610612765', name: 'Detroit Pistons' },
-  11: { nbaId: '1610612744', name: 'Golden State Warriors' },
-  14: { nbaId: '1610612745', name: 'Houston Rockets' },
-  15: { nbaId: '1610612754', name: 'Indiana Pacers' },
-  16: { nbaId: '1610612746', name: 'LA Clippers' },
-  17: { nbaId: '1610612747', name: 'Los Angeles Lakers' },
-  19: { nbaId: '1610612763', name: 'Memphis Grizzlies' },
-  20: { nbaId: '1610612748', name: 'Miami Heat' },
-  21: { nbaId: '1610612749', name: 'Milwaukee Bucks' },
-  22: { nbaId: '1610612750', name: 'Minnesota Timberwolves' },
-  23: { nbaId: '1610612740', name: 'New Orleans Pelicans' },
-  24: { nbaId: '1610612752', name: 'New York Knicks' },
-  25: { nbaId: '1610612760', name: 'Oklahoma City Thunder' },
-  26: { nbaId: '1610612753', name: 'Orlando Magic' },
-  27: { nbaId: '1610612755', name: 'Philadelphia 76ers' },
-  28: { nbaId: '1610612756', name: 'Phoenix Suns' },
-  29: { nbaId: '1610612757', name: 'Portland Trail Blazers' },
-  30: { nbaId: '1610612758', name: 'Sacramento Kings' },
-  31: { nbaId: '1610612759', name: 'San Antonio Spurs' },
-  38: { nbaId: '1610612761', name: 'Toronto Raptors' },
-  40: { nbaId: '1610612762', name: 'Utah Jazz' },
-  41: { nbaId: '1610612764', name: 'Washington Wizards' },
-};
-
-const NBA_ID_TO_TEAM_ID = Object.fromEntries(
-  Object.entries(TEAMS).map(([id, { nbaId }]) => [nbaId, id])
-);
-
-const NBA_HEADERS = {
-  'Accept': 'application/json, text/plain, */*',
-  'Accept-Language': 'en-US,en;q=0.9',
-  'Origin': 'https://www.nba.com',
-  'Referer': 'https://www.nba.com/',
-  'x-nba-stats-origin': 'stats',
-  'x-nba-stats-token': 'true',
-  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-};
 
 async function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
