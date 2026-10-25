@@ -101,6 +101,16 @@
   color: var(--gold);
 }
 
+.panelLabelNote {
+  margin-left: 8px;
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--white-40);
+}
+
 .panelLabelHint {
   font-size: 0.78rem;
   color: var(--white-70);
@@ -122,7 +132,7 @@
 
 .rosterRow {
   display: grid;
-  grid-template-columns: 36px 1fr auto;
+  grid-template-columns: 36px 1fr auto auto;
   align-items: center;
   gap: 8px;
   padding: 8px 10px;
@@ -137,6 +147,23 @@
 
 .rosterRow:hover { border-color: var(--gold); }
 .rosterRowSelected { border-color: var(--gold) !important; background: rgba(245,197,24,0.12) !important; }
+
+/* Below the games-played minimum — can't lead a category, can't be picked */
+.rosterRowIneligible {
+  opacity: 0.35;
+  cursor: not-allowed;
+  filter: grayscale(1);
+}
+
+.rosterRowIneligible:hover { border-color: transparent; }
+
+.rosterGames {
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--white-30);
+  white-space: nowrap;
+}
 
 .rosterNum {
   font-family: var(--font-display);
