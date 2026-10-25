@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { NBA_TEAMS, getLogoUrl } from '../data/teams.js'
 import { fetchRoster } from '../hooks/useRoster.js'
+import { hasEnoughGamesPlayed } from '../utils/leaderEligibility.js'
 import styles from './TeamDrawScreen.module.css'
 
 const REEL_DURATION = 2800
@@ -21,31 +22,52 @@ export default function TeamDrawScreen({
   seasons,             // string[] — selected seasons
   pool: explicitPool,  // optional [{ team, season }] — pre-filtered pool (joker redraws)
   showSeason,          // optional bool — show the season label on the reel
+  requireFullSample,   // optional bool — drop teams whose season is too young to judge
   onTeamDrawn,         // (team, season, players) => void
 }) {
   const [phase, setPhase]       = useState('ready')
   const [displayEntry, setDisplay] = useState(null)  // { team, season }
   const [chosenEntry, setChosen]   = useState(null)
   const [error, setError]       = useState(null)
+  const [pool, setPool]         = useState(null)
   const rafRef = useRef(null)
   const startedRef = useRef(false)
+  const sampleBlockedRef = useRef(false)
 
   useEffect(() => { preloadLogos() }, [])
 
-  // Use a pre-filtered pool when given (joker redraws), else build + filter the full pool.
-  let availablePool
-  if (explicitPool) {
-    availablePool = explicitPool
-  } else {
+  // Use a pre-filtered pool when given (joker redraws), else build + filter the
+  // full pool. Dropping teams by games played needs their rosters, so the pool
+  // resolves asynchronously and the spin waits for it.
+  useEffect(() => {
+    if (explicitPool) { setPool(explicitPool); return }
+
     const fullPool = []
     for (const season of seasons) for (const team of NBA_TEAMS) fullPool.push({ team, season })
     const drawnTeamIds = new Set(drawnEntries.map(e => e.teamId))
-    availablePool = fullPool.filter(entry => {
+    const remaining = fullPool.filter(entry => {
       if (eliminateFranchises && drawnTeamIds.has(entry.team.id)) return false
       if (eliminateTeams && drawnEntries.some(e => e.teamId === entry.team.id && e.season === entry.season)) return false
       return true
     })
-  }
+
+    if (!requireFullSample) { setPool(remaining); return }
+
+    let cancelled = false
+    ;(async () => {
+      // rosters.json is one cached blob, so these resolve from memory after
+      // the first read.
+      const checked = await Promise.all(remaining.map(async entry => {
+        const roster = await fetchRoster(entry.team.id, entry.season)
+        return hasEnoughGamesPlayed(roster) ? entry : null
+      }))
+      const playable = checked.filter(Boolean)
+      sampleBlockedRef.current = remaining.length > 0 && playable.length === 0
+      if (!cancelled) setPool(playable)
+    })()
+    return () => { cancelled = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const showSeasonLabel = showSeason ?? (seasons.length > 1)
 
@@ -53,9 +75,11 @@ export default function TeamDrawScreen({
     return arr[Math.floor(Math.random() * arr.length)]
   }
 
-  async function startSpin() {
+  async function startSpin(availablePool) {
     if (availablePool.length === 0) {
-      setError('All teams have been drawn!')
+      setError(sampleBlockedRef.current
+        ? 'No team has played enough games this season yet — pick another season.'
+        : 'All teams have been drawn!')
       return
     }
 
@@ -96,14 +120,14 @@ export default function TeamDrawScreen({
     tick()
   }
 
-  // Auto-launch the draw on mount so the recap screen's "Draw team"
-  // button goes straight into the reel (no extra click on this screen).
+  // Auto-launch the draw as soon as the pool is known, so the recap screen's
+  // "Draw team" button goes straight into the reel (no extra click here).
   useEffect(() => {
-    if (startedRef.current) return
+    if (pool === null || startedRef.current) return
     startedRef.current = true
-    startSpin()
+    startSpin(pool)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [pool])
 
   useEffect(() => () => clearTimeout(rafRef.current), [])
 

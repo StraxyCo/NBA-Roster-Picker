@@ -31,6 +31,17 @@ export async function getAvailableSeasons() {
   return Object.keys(rosters).sort((a, b) => b.localeCompare(a));
 }
 
+// Seasons with at least one team far enough along to judge stat leaders. A
+// season in progress has nobody near the games bar, so it is not offered.
+export async function getSeasonsWithFullSample(minGames) {
+  const rosters = await loadRosters();
+  return Object.keys(rosters).filter(season =>
+    Object.values(rosters[season] || {}).some(players =>
+      (players || []).some(p => (p.gp ?? 0) >= minGames)
+    )
+  );
+}
+
 const rosterCache = {};
 export async function fetchRoster(teamId, season) {
   const key = `${season}:${teamId}`;

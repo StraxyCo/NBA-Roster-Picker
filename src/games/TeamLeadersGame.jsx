@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import TeamLeadersSetupScreen from '../screens/TeamLeadersSetupScreen.jsx'
+import TeamLeadersSetupScreen, { ALL_TEAM_STATS } from '../screens/TeamLeadersSetupScreen.jsx'
 import OrderDrawScreen from '../screens/OrderDrawScreen.jsx'
 import SeasonDrawScreen from '../screens/SeasonDrawScreen.jsx'
 import TeamDrawScreen from '../screens/TeamDrawScreen.jsx'
@@ -8,15 +8,6 @@ import TeamLeadersGuessScreen from '../screens/TeamLeadersGuessScreen.jsx'
 import { useTeamLeadersGames } from '../hooks/useProfiles.js'
 import { getLogoUrl } from '../data/teams.js'
 import styles from './TeamLeadersGame.module.css'
-
-const ALL_TEAM_STATS = [
-  { key: 'pts',  label: 'Points',   stat: 'pts',  unit: 'PPG' },
-  { key: 'reb',  label: 'Rebounds', stat: 'reb',  unit: 'RPG' },
-  { key: 'ast',  label: 'Assists',  stat: 'ast',  unit: 'APG' },
-  { key: 'stl',  label: 'Steals',   stat: 'stl',  unit: 'SPG' },
-  { key: 'blk',  label: 'Blocks',   stat: 'blk',  unit: 'BPG' },
-  { key: 'fg3m', label: '3PM',      stat: 'fg3m', unit: '3PM' },
-]
 
 const PHASES = {
   SETUP: 'setup',
@@ -170,7 +161,12 @@ export default function TeamLeadersGame() {
   function handleTeamDrawn(team, season, roster) {
     setCurrentTeam(team)
     setCurrentSeason(season)
-    setCurrentRoster(roster)
+    // fg3m arrives as a season total; every category here is a per-game rate,
+    // so derive one and let the stat tables read it like any other.
+    setCurrentRoster(roster.map(p => ({
+      ...p,
+      fg3mpg: p.gp > 0 ? (p.fg3m ?? 0) / p.gp : 0,
+    })))
     // A franchise is never drawn twice in a game, so the pool must persist
     // across rounds and record every draw.
     setDrawnEntries(prev => [...prev, { teamId: team.id, season }])
@@ -273,6 +269,7 @@ export default function TeamLeadersGame() {
           eliminateTeams
           eliminateFranchises
           seasons={roundSeason ? [roundSeason] : config.seasons}
+          requireFullSample
           onTeamDrawn={handleTeamDrawn}
         />
       )}
