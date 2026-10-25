@@ -2,8 +2,8 @@
 // pts, reb, ast, stl, blk, fg3m }] } }, regular season only, oldest season first.
 //
 // The static file is the historical base and the offline fallback. On top of it we overlay
-// /api/current-careers, the current-season slice refreshed weekly by the cron in
-// api/sync-careers.js, so this season's rows stay fresh without a commit. Every consumer
+// /api/current-rosters?kind=careers, the current-season slice refreshed weekly by the cron in
+// api/_careers.js, so this season's rows stay fresh without a commit. Every consumer
 // must go through loadCareers() to get that overlay.
 
 let careersData = null;
@@ -15,7 +15,7 @@ let livePromise = null;
 async function loadLive() {
   if (liveData !== null) return liveData;
   if (!livePromise) {
-    livePromise = fetch('/api/current-careers')
+    livePromise = fetch('/api/current-rosters?kind=careers')
       .then(r => (r.ok ? r.json() : {}))
       .catch(err => { console.warn('Live careers overlay unavailable:', err.message); return {}; })
       .then(d => { liveData = d || {}; return liveData; });
