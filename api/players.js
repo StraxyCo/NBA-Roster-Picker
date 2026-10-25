@@ -52,6 +52,7 @@ async function redisSet(key, value) {
 // Keyed by the player-stats key the game uses → the Redis list key.
 const GAME_RECORD_KEYS = {
   whoDidTheyHave: 'who-did-they-have-games',
+  faceGuesser: 'face-guesser-games',
 }
 
 // Migrate flat schema → nested stats on read (backward compatible)
