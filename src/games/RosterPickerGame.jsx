@@ -10,6 +10,7 @@ import TeamModeDrawScreen from '../screens/TeamModeDrawScreen.jsx'
 import FinalScreen from '../screens/FinalScreen.jsx'
 import { useGames } from '../hooks/useProfiles.js'
 import { fetchRoster } from '../hooks/useRoster.js'
+import { CURRENT_SEASON } from '../data/seasons.js'
 import { NBA_TEAMS, getLogoUrl } from '../data/teams.js'
 import { prefetchShards } from '../grading/shards.js'
 
@@ -71,7 +72,7 @@ export default function RosterPickerGame() {
   const [rosterSize, setRosterSize]          = useState(6)
   const [eliminateTeams, setEliminate]       = useState(true)
   const [eliminateFranchises, setElimFranch] = useState(false)
-  const [seasons, setSeasons]                = useState(['2025-26'])
+  const [seasons, setSeasons]                = useState([CURRENT_SEASON])
 
   const [turnOrder, setTurnOrder]            = useState([])
   const [turnOrderFull, setTurnOrderFull]    = useState([])

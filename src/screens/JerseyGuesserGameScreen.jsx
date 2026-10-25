@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import styles from './JerseyGuesserGameScreen.module.css'
 import { playerWeight, weightedShuffle, weightedPick } from '../utils/playerSelection.js'
-
-const CURRENT_SEASON = '2025-26'
+import { loadRosters, getLatestSeason } from '../hooks/useRoster.js'
 
 function getHeadshotUrl(id) {
   return `https://cdn.nba.com/headshots/nba/latest/1040x760/${id}.png`
@@ -55,10 +54,9 @@ export default function JerseyGuesserGameScreen({ players, rounds, onBack, onSav
   const currentRound = Math.floor(turnIdx / activePlayers.length) + 1
 
   useEffect(() => {
-    fetch('/rosters.json')
-      .then(r => r.json())
-      .then(data => {
-        const seasonData = data[CURRENT_SEASON] || {}
+    Promise.all([loadRosters(), getLatestSeason()])
+      .then(([data, season]) => {
+        const seasonData = data[season] || {}
         const seen = new Set()
         const all = []
         for (const teamPlayers of Object.values(seasonData)) {
@@ -75,6 +73,7 @@ export default function JerseyGuesserGameScreen({ players, rounds, onBack, onSav
         playerQueue.current = weightedShuffle(all, weights)
         advanceTurn()
       })
+      .catch(e => console.error('rosters load', e))
   }, [])
 
   useEffect(() => {
