@@ -8,7 +8,7 @@ const kv = new Redis({
 
 const STATS = 'https://stats.nba.com/stats';
 
-// Every roster is built from four league-wide calls rather than one call per team:
+// Every roster is built from three league-wide calls rather than one call per team:
 // 30 sequential team requests do not fit inside a serverless function's time budget.
 
 // All players under contract this season, including ones who have not played a game yet.
@@ -36,37 +36,52 @@ async function fetchLeagueRosters(season) {
   return byTeam;
 }
 
-// Per-game averages, keyed by player id. Same endpoint and fields as scripts/fetch-rosters.mjs.
-async function fetchPerGameStats(season) {
-  const { rows, get } = await fetchResultSet(
-    `${STATS}/leaguedashplayerstats?Season=${season}&SeasonType=Regular+Season&PerMode=PerGame`
-    + `&MeasureType=Base&LastNGames=0&Month=0&OpponentTeamID=0&PaceAdjust=N&PlusMinus=N&Rank=N`
-    + `&Period=0&LeagueID=00&TwoWay=0`
+// Stats PER TEAM, keyed "<playerId>:<teamId>", so a player traded mid-season gets one
+// line per team holding only the games he played there — the same split that
+// scripts/fetch-rosters.mjs writes into rosters.json.
+//
+// This has to be the game logs rather than leaguedashplayerstats. That endpoint only
+// splits by team when it is called once PER team (30 calls, which do not fit the time
+// budget); called league-wide it collapses a traded player into a single row filed
+// under the team he finished with, carrying his full-season totals. The game logs are
+// one call for the whole league and aggregate to exactly the same per-team numbers.
+async function fetchPerTeamStats(season) {
+  const { rows, has, get } = await fetchResultSet(
+    `${STATS}/playergamelogs?Season=${season}&SeasonType=Regular+Season&LeagueID=00`
   );
-  const map = new Map();
+  if (!has('PLAYER_ID', 'TEAM_ID')) throw new Error('playergamelogs: missing PLAYER_ID/TEAM_ID');
+
+  const SUMMED = ['PTS', 'REB', 'AST', 'STL', 'BLK', 'MIN', 'FG3M'];
+  const totals = new Map();
   for (const row of rows) {
-    map.set(get(row, 'PLAYER_ID'), {
-      pts: +Number(get(row, 'PTS', 0)).toFixed(1),
-      reb: +Number(get(row, 'REB', 0)).toFixed(1),
-      ast: +Number(get(row, 'AST', 0)).toFixed(1),
-      stl: +Number(get(row, 'STL', 0)).toFixed(1),
-      blk: +Number(get(row, 'BLK', 0)).toFixed(1),
-      min: +Number(get(row, 'MIN', 0)).toFixed(1),
-      gp:  Number(get(row, 'GP', 0)),
+    const teamId = NBA_ID_TO_TEAM_ID[String(get(row, 'TEAM_ID', ''))];
+    if (!teamId) continue;
+    const playerId = get(row, 'PLAYER_ID');
+    const key = `${playerId}:${teamId}`;
+    let acc = totals.get(key);
+    if (!acc) {
+      acc = { playerId, teamId, name: get(row, 'PLAYER_NAME', '—') || '—', gp: 0 };
+      for (const k of SUMMED) acc[k] = 0;
+      totals.set(key, acc);
+    }
+    acc.gp++;
+    for (const k of SUMMED) acc[k] += Number(get(row, k, 0));
+  }
+
+  // fg3m stays a season total; everything else becomes a per-game average.
+  const map = new Map();
+  for (const [key, acc] of totals) {
+    const per = k => +(acc[k] / acc.gp).toFixed(1);
+    map.set(key, {
+      playerId: acc.playerId, teamId: acc.teamId, name: acc.name,
+      stats: {
+        pts: per('PTS'), reb: per('REB'), ast: per('AST'),
+        stl: per('STL'), blk: per('BLK'), min: per('MIN'),
+        gp: acc.gp,
+        fg3m: acc.FG3M,
+      },
     });
   }
-  return map;
-}
-
-// Season 3PM totals (the per-game call only carries the average).
-async function fetch3pmTotals(season) {
-  const { rows, get } = await fetchResultSet(
-    `${STATS}/leaguedashplayerstats?Season=${season}&SeasonType=Regular+Season&PerMode=Totals`
-    + `&MeasureType=Base&LastNGames=0&Month=0&OpponentTeamID=0&PaceAdjust=N&PlusMinus=N&Rank=N`
-    + `&Period=0&LeagueID=00&TwoWay=0`
-  );
-  const map = new Map();
-  for (const row of rows) map.set(get(row, 'PLAYER_ID'), Number(get(row, 'FG3M', 0)));
   return map;
 }
 
@@ -108,19 +123,41 @@ export default async function handler(req, res) {
   const season = req.query?.season || getCurrentSeason();
 
   try {
-    const [teams, perGame, totals, standings] = await Promise.all([
+    const [teams, perTeam, standings] = await Promise.all([
       fetchLeagueRosters(season),
-      fetchPerGameStats(season),
-      fetch3pmTotals(season),
+      fetchPerTeamStats(season),
       fetchStandings(season),
     ]);
 
+    // playerindex lists a player only under the team he is on NOW, so a traded player
+    // is missing from his former team. His position still comes from there.
+    const positionById = new Map();
+    for (const players of Object.values(teams)) {
+      for (const p of players) if (!positionById.has(p.id)) positionById.set(p.id, p.position);
+    }
+
     let playerCount = 0;
-    for (const [teamId, players] of Object.entries(teams)) {
-      teams[teamId] = players
-        .map(p => ({ ...p, ...(perGame.get(p.id) || {}), fg3m: totals.get(p.id) ?? 0 }))
-        .sort((a, b) => a.name.localeCompare(b.name));
-      playerCount += teams[teamId].length;
+    for (const teamId of Object.keys(TEAMS)) {
+      const players = teams[teamId] || [];
+      const onRoster = new Set(players.map(p => p.id));
+      const merged = players.map(p => ({ ...p, ...(perTeam.get(`${p.id}:${teamId}`)?.stats || {}) }));
+
+      // Anyone who played for this team and has since moved on. No endpoint reports the
+      // jersey he wore here, so it is left blank rather than carrying his current one.
+      for (const entry of perTeam.values()) {
+        if (entry.teamId !== teamId || onRoster.has(entry.playerId)) continue;
+        merged.push({
+          id: entry.playerId,
+          name: entry.name,
+          position: positionById.get(entry.playerId) ?? '—',
+          number: '',
+          ...entry.stats,
+        });
+      }
+
+      if (!merged.length) continue;
+      teams[teamId] = merged.sort((a, b) => a.name.localeCompare(b.name));
+      playerCount += merged.length;
     }
 
     const missing = Object.keys(TEAMS).filter(id => !teams[id]?.length);
