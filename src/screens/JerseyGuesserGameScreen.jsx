@@ -1,12 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import styles from './JerseyGuesserGameScreen.module.css'
 import { playerWeight, weightedShuffle, weightedPick } from '../utils/playerSelection.js'
+import { headshotUrl } from '../data/backfilledHeadshots.js'
 
 const CURRENT_SEASON = '2025-26'
-
-function getHeadshotUrl(id) {
-  return `https://cdn.nba.com/headshots/nba/latest/1040x760/${id}.png`
-}
 
 function shuffle(arr) {
   const a = [...arr]
@@ -16,7 +13,6 @@ function shuffle(arr) {
   }
   return a
 }
-
 
 function buildWrongChoices(correct, players, weights) {
   const chosen = new Set()
@@ -195,7 +191,7 @@ export default function JerseyGuesserGameScreen({ players, rounds, onBack, onSav
       <div className={styles.playerCard}>
         {!imgError ? (
           <img
-            src={getHeadshotUrl(currentNbaPlayer.id)}
+            src={headshotUrl(currentNbaPlayer.id)}
             alt={currentNbaPlayer.name}
             className={styles.headshot}
             onError={() => setImgError(true)}

@@ -1,3 +1,5 @@
+import { hasBackfilledHeadshot } from './backfilledHeadshots'
+
 // Player IDs whose NBA CDN headshot is the generic silhouette, not a real photo.
 //
 // cdn.nba.com answers 200 for every ID, serving a 12430-byte placeholder when it
@@ -6,6 +8,11 @@
 //
 // 488 of 2061 players (verified against the CDN on 2026-10-24).
 // Regenerate by HEAD-ing every roster ID and flagging content-length 12430.
+//
+// Most of them now have a portrait anyway: ./backfilledHeadshots.js ships committed
+// ESPN and Basketball-Reference images for 357 of the 488, so this set is no longer
+// the same thing as "cannot be shown". Use `hasRealHeadshot` for that question and
+// `headshotUrl` to resolve the image.
 
 export const MISSING_HEADSHOT_IDS = new Set([
   109, 239, 243, 278, 283, 361, 384, 436, 441, 452,
@@ -59,7 +66,7 @@ export const MISSING_HEADSHOT_IDS = new Set([
   1629091, 1629341, 1629353, 1629541, 1630994, 1641945, 1642379, 1642490,
 ])
 
-/** True when this player has a real CDN portrait (not the silhouette). */
+/** True when a real portrait exists for this player, from the CDN or the backfill. */
 export function hasRealHeadshot(id) {
-  return !MISSING_HEADSHOT_IDS.has(Number(id))
+  return !MISSING_HEADSHOT_IDS.has(Number(id)) || hasBackfilledHeadshot(id)
 }

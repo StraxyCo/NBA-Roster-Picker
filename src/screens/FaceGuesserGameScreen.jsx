@@ -6,10 +6,7 @@ import {
   createMatch, resolveRound, drawRound, markFacesUsed,
   currentTier, isMatchOver, ROUND_SCHEDULE,
 } from '../utils/faceGuessRounds.js'
-
-function getHeadshotUrl(id) {
-  return `https://cdn.nba.com/headshots/nba/latest/1040x760/${id}.png`
-}
+import { headshotUrl, headshotSource, CREDITS } from '../data/backfilledHeadshots.js'
 
 const TIER_LABEL = Object.fromEntries(TIERS.map(t => [t.key, t.label]))
 
@@ -48,11 +45,24 @@ function Headshot({ face }) {
     <div className={styles.headshotFallback}>{face.name[0]}</div>
   ) : (
     <img
-      src={getHeadshotUrl(face.id)}
+      src={headshotUrl(face.id)}
       alt="Guess this player"
       className={styles.headshot}
       onError={() => setImgError(true)}
     />
+  )
+}
+
+// Backfilled portraits are press images from ESPN and Basketball-Reference rather
+// than the NBA CDN, so they carry a credit. It appears only once the answer is out:
+// on the guessing screen a source name would narrow down the era, which is a hint.
+function PhotoCredit({ id }) {
+  const credit = CREDITS.find(c => c.source === headshotSource(id))
+  if (!credit) return null
+  return (
+    <a className={styles.photoCredit} href={credit.url} target="_blank" rel="noreferrer">
+      Photo: {credit.label}
+    </a>
   )
 }
 
@@ -212,6 +222,7 @@ export default function FaceGuesserGameScreen({ players, startTier, onBack, onSa
                 <div className={styles.revealWho}>
                   {byName[pid]} {answers[pid] ? '✓' : '✗'}
                 </div>
+                <PhotoCredit id={face.id} />
               </div>
             ))}
           </div>
