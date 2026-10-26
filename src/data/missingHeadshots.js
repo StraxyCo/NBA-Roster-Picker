@@ -10,7 +10,7 @@ import { hasBackfilledHeadshot } from './backfilledHeadshots'
 // Regenerate by HEAD-ing every roster ID and flagging content-length 12430.
 //
 // Most of them now have a portrait anyway: ./backfilledHeadshots.js ships committed
-// ESPN and Basketball-Reference images for 357 of the 488, so this set is no longer
+// ESPN, Basketball-Reference and Wikimedia images for 406 of the 488, so this set is no longer
 // the same thing as "cannot be shown". Use `hasRealHeadshot` for that question and
 // `headshotUrl` to resolve the image.
 

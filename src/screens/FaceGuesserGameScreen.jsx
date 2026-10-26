@@ -6,7 +6,7 @@ import {
   createMatch, resolveRound, drawRound, markFacesUsed,
   currentTier, isMatchOver, ROUND_SCHEDULE,
 } from '../utils/faceGuessRounds.js'
-import { headshotUrl, headshotSource, CREDITS } from '../data/backfilledHeadshots.js'
+import { headshotUrl, headshotCredit } from '../data/backfilledHeadshots.js'
 
 const TIER_LABEL = Object.fromEntries(TIERS.map(t => [t.key, t.label]))
 
@@ -53,15 +53,16 @@ function Headshot({ face }) {
   )
 }
 
-// Backfilled portraits are press images from ESPN and Basketball-Reference rather
-// than the NBA CDN, so they carry a credit. It appears only once the answer is out:
-// on the guessing screen a source name would narrow down the era, which is a hint.
+// Backfilled portraits come from outside the NBA CDN, so they carry a credit: the
+// publication for the press photos, and the photographer and licence for the
+// Commons ones, whose CC terms require it. It appears only once the answer is out —
+// on the guessing screen a credit would narrow down the era, which is a hint.
 function PhotoCredit({ id }) {
-  const credit = CREDITS.find(c => c.source === headshotSource(id))
+  const credit = headshotCredit(id)
   if (!credit) return null
   return (
     <a className={styles.photoCredit} href={credit.url} target="_blank" rel="noreferrer">
-      Photo: {credit.label}
+      Photo: {credit.text}
     </a>
   )
 }
