@@ -161,7 +161,9 @@ export default function TeamLeadersGuessScreen({ team, season, roster, categorie
                     disabled={!isEligible}
                     title={`${player.gp ?? 0} games · ${player.min ?? 0} mpg${isEligible ? '' : ` — needs ${minGames} games to qualify`}`}
                   >
-                    <span className={styles.rosterNum}>#{player.number}</span>
+                    {/* A player his team traded away has no known jersey for that
+                        team, so the column stays blank rather than showing a bare #. */}
+                    <span className={styles.rosterNum}>{player.number ? `#${player.number}` : ''}</span>
                     <span className={styles.rosterName}>{player.name}</span>
                     <span className={styles.rosterGames}>{player.gp ?? 0} GP</span>
                     <span className={styles.rosterPos}>{player.position}</span>

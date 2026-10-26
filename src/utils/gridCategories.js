@@ -136,7 +136,9 @@ export function buildRosterIndex(rosters) {
         if (player.position && !index[id].positions.includes(player.position)) {
           index[id].positions.push(player.position)
         }
-        if (player.number != null) index[id].numbers.add(String(player.number))
+        // '' means the jersey is unknown — a player his team traded away, whose
+        // number for that team no roster endpoint reports. Not a number to index.
+        if (player.number != null && player.number !== '') index[id].numbers.add(String(player.number))
       }
     }
   }

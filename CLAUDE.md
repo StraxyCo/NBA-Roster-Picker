@@ -54,7 +54,7 @@ Vercel ignores files in `/api` whose name starts with `_`, so the shared modules
 
 Persistence is **Upstash Redis** via the KV REST API (`UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` env vars required). Without these, all API calls fail silently.
 
-`api/sync-rosters.js` also needs `CRON_SECRET`; it accepts `Authorization: Bearer $CRON_SECRET` (what Vercel cron sends) or an `x-cron-secret` header / `?secret=` query for manual runs, and returns 500 if the variable is unset. It builds every roster from four league-wide NBA calls (`playerindex`, `leaguedashplayerstats` per-game and totals, `leaguestandings`) rather than one request per team, which would not fit in a serverless function's time budget. It writes three keys:
+`api/sync-rosters.js` also needs `CRON_SECRET`; it accepts `Authorization: Bearer $CRON_SECRET` (what Vercel cron sends) or an `x-cron-secret` header / `?secret=` query for manual runs, and returns 500 if the variable is unset. It builds every roster from three league-wide NBA calls (`playerindex`, `playergamelogs`, `leaguestandings`) rather than one request per team, which would not fit in a serverless function's time budget. Stats come from the game logs, aggregated by player **and team**, because that is the only league-wide way to get the per-team splits described under Static Data: `leaguedashplayerstats` splits by team only when called once per team, and league-wide it reports a traded player as a single full-season row on the team he finished with. It writes three keys:
 
 | Key | Contents |
 |---|---|
@@ -66,7 +66,11 @@ A failed sync leaves the last good slice in place and only updates `rosters:sync
 
 ### Static Data
 
-`/public/rosters.json` (~2.8 MB) contains player rosters from 2005-06 onward, keyed as `season → team → players[]`. `/public/standings.json` contains win/loss records by season. Both are fetched at runtime and cached in the `useRoster` hook.
+`/public/rosters.json` (~3.2 MB) contains player rosters from 2005-06 onward, keyed as `season → team → players[]`. `/public/standings.json` contains win/loss records by season. Both are fetched at runtime and cached in the `useRoster` hook.
+
+Stats are **per team, not per season**: a player traded mid-season appears under each team he played for, and his `gp` and averages there cover only the games he played for that team. This is what makes a team-relative question answerable — the Team Leaders answer is a player who actually led that team, and a Roster Picker draft credits you the stats the player produced for the team you drafted him from. Entries for a player a team traded away carry `number: ''`, since no endpoint reports the jersey he wore there.
+
+A **season-level** question needs the other thing. [`src/utils/seasonTotals.js`](src/utils/seasonTotals.js) merges a player's entries back into one full-season line (`gp` and `fg3m` add up; the averages recombine as a mean weighted by `gp`); Who Has More uses it. Picking a single entry instead would show a traded player's partial stint as his season.
 
 The static files are the **historical base and the offline fallback**; the weekly cron (`vercel.json` — Mondays 4am UTC) keeps only the current season fresh, in Redis. `loadRosters()` overlays that slice on top, adding the season key if the static file does not have it yet, so a new season appears without a commit. If the sync or Redis is unavailable the app simply runs on the static data.
 
