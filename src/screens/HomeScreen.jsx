@@ -79,6 +79,12 @@ const GAMES = [
     desc: 'Take turns naming players from a drawn team-season.',
     active: true,
   },
+  {
+    path: '/face-guesser',
+    name: "Who's That Face?",
+    desc: 'Name the player from their photo — last one standing wins.',
+    active: true,
+  },
 ]
 
 export default function HomeScreen() {
