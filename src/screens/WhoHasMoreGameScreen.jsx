@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import styles from './WhoHasMoreGameScreen.module.css'
 import { pickNWeightedPlayers } from '../utils/playerSelection.js'
+import { getSeasonPlayers } from '../utils/seasonTotals.js'
+import { loadRosters } from '../hooks/useRoster.js'
 import { headshotUrl } from '../data/backfilledHeadshots.js'
 
 const REEL_DURATION = 2800
@@ -19,18 +21,6 @@ const STAT_CONFIG = {
 
 function formatSeason(s) {
   return s.replace('-', '/')
-}
-
-function getSeasonPlayers(rostersData, season) {
-  const seasonData = rostersData[season] || {}
-  const seen = new Set()
-  const all = []
-  for (const teamPlayers of Object.values(seasonData)) {
-    for (const p of teamPlayers) {
-      if (!seen.has(p.id)) { seen.add(p.id); all.push(p) }
-    }
-  }
-  return all
 }
 
 // ── Player card button ───────────────────────────────────────────────────────
@@ -91,9 +81,9 @@ export default function WhoHasMoreGameScreen({ players, seasons, stats, rounds, 
   const timerRef = useRef(null)
 
   useEffect(() => {
-    fetch('/rosters.json')
-      .then(r => r.json())
+    loadRosters()
       .then(data => { setRostersData(data); setPhase('season_draw') })
+      .catch(e => console.error('rosters load', e))
     return () => clearTimeout(timerRef.current)
   }, [])
 

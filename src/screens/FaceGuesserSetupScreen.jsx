@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react'
-import styles from './FaceGuesserSetupScreen.module.css'
+// The setup chrome is the shared sheet the other setup screens use; this one adds
+// no styles of its own.
+import styles from './StatsOverUnderSetupScreen.module.css'
 import { usePlayers } from '../hooks/useProfiles.js'
 import { useGameDefaults } from '../hooks/useGameDefaults.js'
 import SaveDefaultButton from '../components/SaveDefaultButton.jsx'
@@ -305,11 +307,11 @@ function FaceGuesserSetupInner({ onBack, onStart, savedGames, onDeleteGame, save
                   : 'Skip the warm-up — shorter, harsher match'}
               </span>
             </div>
-            <div className={styles.tierToggle} role="group" aria-label="Starting tier">
+            <div className={styles.modeToggle} role="group" aria-label="Starting tier">
               {START_TIERS.map(t => (
                 <button
                   key={t.key}
-                  className={`${styles.tierBtn} ${startTier === t.key ? styles.tierBtnActive : ''}`}
+                  className={`${styles.modeBtn} ${startTier === t.key ? styles.modeBtnOn : ''}`}
                   onClick={() => setStartTier(t.key)}
                   aria-pressed={startTier === t.key}
                 >

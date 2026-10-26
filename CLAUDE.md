@@ -9,6 +9,9 @@ npm install       # Install dependencies
 npm run dev       # Start Vite dev server with hot reload
 npm run build     # Production build → dist/
 npm run preview   # Preview production build locally
+
+npm run sync:rosters        # Refresh public/rosters.json + standings.json from NBA.com
+npm run sync:rosters:stats  # Same, stats & standings only (no roster re-fetch)
 ```
 
 There are no test or lint commands configured.
@@ -24,7 +27,8 @@ A single-page React app driven by one central state machine in [`src/App.jsx`](s
 Screens live in `src/screens/`, each paired with a `.module.css` file (CSS Modules, no component library). Global styles and CSS custom properties (navy/gold theme, Barlow fonts) are in [`src/index.css`](src/index.css).
 
 Custom hooks abstract the two data concerns:
-- [`src/hooks/useRoster.js`](src/hooks/useRoster.js) — loads and caches `rosters.json` + `standings.json` from `/public/`
+- [`src/hooks/useRoster.js`](src/hooks/useRoster.js) — loads and caches `rosters.json` + `standings.json` from `/public/`, then overlays the live current-season slice from `/api/current-rosters`. **Every consumer of roster data must call its `loadRosters()`** — a direct `fetch('/rosters.json')` silently misses the overlay.
+- [`src/data/seasons.js`](src/data/seasons.js) — `CURRENT_SEASON` / `ALL_SEASONS` are derived from the date (season flips in October), not hardcoded. Use `getLatestSeason()` from `useRoster` when indexing into roster data, since the calendar season only has data once the cron has published it.
 - [`src/hooks/useProfiles.js`](src/hooks/useProfiles.js) — fetches/saves player profiles and game records via `/api/*`
 
 [`src/data/teams.js`](src/data/teams.js) is the authoritative source for all 30 NBA teams, roster slot labels (PG, SG, SF, PF, C, bench), and logo URLs.
@@ -41,13 +45,53 @@ Vercel serverless functions in `/api/`. Each file is an independent Node.js hand
 | `api/games.js` | Roster Picker game records + per-player stats |
 | `api/jersey-games.js` | Jersey Guesser game records |
 | `api/who-has-more-games.js` | Who Has More game records |
-| `api/sync-rosters.js` | Weekly cron — fetches current season rosters from NBA.com Stats API |
+| `api/sync-rosters.js` | Weekly cron — rebuilds the current-season slice from NBA.com Stats, then calls `syncCareers()` |
+| `api/current-rosters.js` | Public read of that slice for `useRoster`; `?kind=careers` serves the careers slice for `useCareers` |
+| `api/_nba.js` | Shared NBA team-id map, request headers, season helper (not a route) |
+| `api/_careers.js` | `syncCareers()` — the current-season careers rebuild (not a route) |
+
+Vercel ignores files in `/api` whose name starts with `_`, so the shared modules cost nothing. That matters because the Hobby plan caps a deployment at **12 serverless functions** and this project is exactly at it. Adding an endpoint means removing one — which is why the careers slice is served by `api/current-rosters.js?kind=careers` rather than by an endpoint of its own. A deployment over the cap fails with a bare "Deployment has failed" and no detail in the GitHub check.
 
 Persistence is **Upstash Redis** via the KV REST API (`UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` env vars required). Without these, all API calls fail silently.
 
+`api/sync-rosters.js` also needs `CRON_SECRET`; it accepts `Authorization: Bearer $CRON_SECRET` (what Vercel cron sends) or an `x-cron-secret` header / `?secret=` query for manual runs, and returns 500 if the variable is unset. It builds every roster from three league-wide NBA calls (`playerindex`, `playergamelogs`, `leaguestandings`) rather than one request per team, which would not fit in a serverless function's time budget. Stats come from the game logs, aggregated by player **and team**, because that is the only league-wide way to get the per-team splits described under Static Data: `leaguedashplayerstats` splits by team only when called once per team, and league-wide it reports a traded player as a single full-season row on the team he finished with. It writes three keys:
+
+| Key | Contents |
+|---|---|
+| `rosters:current` | `{ season, teams: { teamId: players[] } }` — one season in `rosters.json` shape |
+| `standings:current` | `{ season, teams: { teamId: { w, l } } }` |
+| `rosters:sync_status` | `{ ok, season, syncedAt, playerCount, teamCount, error }` |
+
+A failed sync leaves the last good slice in place and only updates `rosters:sync_status`.
+
 ### Static Data
 
-`/public/rosters.json` (~2.8 MB) contains player rosters for seasons 2005–2026, keyed as `season → team → players[]`. `/public/standings.json` contains win/loss records by season. These are fetched at runtime by the frontend and cached in the `useRoster` hook. The cron job (`vercel.json` — Mondays 4am UTC) updates the current season slice in Redis, but the static file covers historical seasons.
+`/public/rosters.json` (~3.2 MB) contains player rosters from 2005-06 onward, keyed as `season → team → players[]`. `/public/standings.json` contains win/loss records by season. Both are fetched at runtime and cached in the `useRoster` hook.
+
+Stats are **per team, not per season**: a player traded mid-season appears under each team he played for, and his `gp` and averages there cover only the games he played for that team. This is what makes a team-relative question answerable — the Team Leaders answer is a player who actually led that team, and a Roster Picker draft credits you the stats the player produced for the team you drafted him from. Entries for a player a team traded away carry `number: ''`, since no endpoint reports the jersey he wore there.
+
+A **season-level** question needs the other thing. [`src/utils/seasonTotals.js`](src/utils/seasonTotals.js) merges a player's entries back into one full-season line (`gp` and `fg3m` add up; the averages recombine as a mean weighted by `gp`); Who Has More uses it. Picking a single entry instead would show a traded player's partial stint as his season.
+
+The static files are the **historical base and the offline fallback**; the weekly cron (`vercel.json` — Mondays 4am UTC) keeps only the current season fresh, in Redis. `loadRosters()` overlays that slice on top, adding the season key if the static file does not have it yet, so a new season appears without a commit. If the sync or Redis is unavailable the app simply runs on the static data.
+
+Players with no games yet (`gp: 0`) have their `min`/`gp` carried over from their most recent prior season during the overlay merge: `weightedShuffle()` in [`src/utils/playerSelection.js`](src/utils/playerSelection.js) drops zero-weight entries, so without this the draw pools would be empty before opening night.
+
+The merge also carries **hand-added fields** across. The sync publishes a fixed set of keys (`id`, `name`, `position`, `number` and the stats); any other key on a player in `rosters.json` — a backfilled headshot, say — is indexed by player id, newest season wins, and merged underneath the live data, so a live slice never drops it and never overwrites a field the sync does publish. Add such a field to `rosters.json` and it survives the overlay, including for a season the static file does not have yet.
+
+Historical seasons still change only by running `npm run sync:rosters` and committing the result. `/public/careers.json` has a current-season refresh of its own (below). `allstars.json`, `nicknames.json`, `playerdle.json` and `nickname-meta.json` have no automatic refresh at all — they are rebuilt by the scripts in `scripts/`.
+
+`/public/careers.json` (~1.9 MB) is per-player career history — `{ playerId: { name, seasons: [{ season, teamAbbr, gp, min, pts, reb, ast, stl, blk, fg3m }] } }`, regular season only, oldest season first. It feeds Teammate Chain, Who Did They Have, Who's That Guy, Playerdle, Stats Over/Under and the Grid. `fg3m` is a season **total**; every other stat is a per-game average.
+
+#### Automatic careers refresh
+
+A full rebuild (`scripts/fetch-careers.mjs`) is one `playercareerstats` call per player — thousands of requests, far too slow for a serverless function. So the cron only rebuilds the **current season's** rows, from three league-wide calls:
+
+- `syncCareers()` in `api/_careers.js` runs at the end of the Monday 4am `api/sync-rosters.js` cron. It reads `playerindex` (everyone under contract, with the team they are on now) plus `leaguedashplayerstats` in `PerGame` and `Totals` mode, and writes `careers:current` = `{ season, players: { playerId: { name, seasons: [one row] } } }` and `careers:sync_status`. It refuses to publish a slice with fewer than 25 teams or 300 players, so a partial NBA response leaves the last good slice in place, and it never throws — a careers failure cannot lose the roster sync.
+- `api/current-rosters.js?kind=careers` serves that slice publicly (edge-cached 1h).
+- [`src/hooks/useCareers.js`](src/hooks/useCareers.js) is the **only** place that loads careers data. `loadCareers()` fetches the static file and overlays the slice: rows for the synced season are replaced, earlier seasons are untouched, unseen players are added. If Redis or the NBA API is down the overlay is empty and every game runs on the static file unchanged. All six consumers go through it — never `fetch('/careers.json')` directly. As in `useRoster`, **hand-added player-level fields survive**: the sync publishes only `name` and `seasons`, so any other key on a player in `careers.json` — a backfilled headshot, say — is kept from the static entry. Add such a field to `careers.json` and the overlay never drops it.
+
+What this does **not** keep fresh: any season before the current one (commit a `scripts/fetch-careers.mjs` rebuild for that), mid-season trades (the slice carries one row per player — their current team, with whole-season stats — so a stint with a former team disappears until the next full rebuild), and anyone not under contract at sync time (free agents, G-League-only, retired mid-season).
+
 
 Team logo SVGs live in `/public/media/` named by team abbreviation (e.g. `LAL.svg`). Missing logos degrade gracefully.
 
