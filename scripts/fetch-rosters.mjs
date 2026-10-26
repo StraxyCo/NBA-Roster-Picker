@@ -181,13 +181,13 @@ console.log(`📂 rosters.json: ${Object.keys(rosters).length} seasons | standin
 // decided separately: a season needs the pass if it is missing, in progress, still
 // on pre-split data, or explicitly targeted.
 const needsPass = SEASONS_TO_CONSIDER.filter(s =>
-  REBUILD || TARGET_SEASON === s || !rosters[s] || s === CURRENT_SEASON || !seasonHasSplitStats(rosters[s])
+  REBUILD || STATS_ONLY || TARGET_SEASON === s || !rosters[s] || s === CURRENT_SEASON || !seasonHasSplitStats(rosters[s])
 );
 const needsStandings = SEASONS_TO_CONSIDER.filter(s => REBUILD || TARGET_SEASON === s || s === CURRENT_SEASON || !standings[s]);
 
 console.log(`📋 Seasons to fetch: ${needsPass.length ? needsPass.join(', ') : 'all up to date'}`);
 console.log(`🏆 Standings to update: ${needsStandings.length}`);
-if (STATS_ONLY) console.log('   (--stats-only has no effect now that stats and membership come from one pass)');
+if (STATS_ONLY) console.log('   (--stats-only: reusing cached rosters, fetching stats only)');
 console.log('');
 
 // ── Process ──────────────────────────────────────────────────────────────────
@@ -222,20 +222,40 @@ for (const season of SEASONS_TO_CONSIDER) {
 
   // Pass 1: end-of-season rosters, which also give the season-wide position map used
   // for players their team traded away.
+  //
+  // --stats-only reuses the membership, positions and jersey numbers already in
+  // rosters.json instead, halving the requests. Positions and numbers for a finished
+  // season never change, so this is the cheap way to refresh stats alone; it needs an
+  // existing slice, so a season the file does not have yet is fetched in full.
   const rostersByTeam = new Map();
   const positionBySeason = new Map();
-  for (const [teamId, { nbaId, name }] of Object.entries(TEAMS)) {
-    process.stdout.write(`  roster ${name}... `);
-    try {
-      await delay(450);
-      const players = await fetchTeamRoster(nbaId, season);
-      rostersByTeam.set(teamId, players);
-      for (const p of players) if (!positionBySeason.has(p.id)) positionBySeason.set(p.id, p.position);
-      console.log(`✓ ${players.length}`);
-    } catch (e) {
-      rostersByTeam.set(teamId, []);
-      console.log(`✗ ${e.message}`);
-      teamsFailed++;
+  const cached = rosters[season] || {};
+  const reuseRosters = STATS_ONLY && Object.values(cached).some(players => (players || []).length > 0);
+
+  if (reuseRosters) {
+    for (const teamId of Object.keys(TEAMS)) {
+      rostersByTeam.set(teamId, (cached[teamId] || []).map(({ id, name, position, number }) => ({
+        id, name, position: position ?? '—', number: number ?? '',
+      })));
+    }
+    for (const players of Object.values(cached)) {
+      for (const p of (players || [])) if (!positionBySeason.has(p.id)) positionBySeason.set(p.id, p.position);
+    }
+    console.log(`  rosters reused from ${ROSTERS_OUT} (--stats-only)`);
+  } else {
+    for (const [teamId, { nbaId, name }] of Object.entries(TEAMS)) {
+      process.stdout.write(`  roster ${name}... `);
+      try {
+        await delay(450);
+        const players = await fetchTeamRoster(nbaId, season);
+        rostersByTeam.set(teamId, players);
+        for (const p of players) if (!positionBySeason.has(p.id)) positionBySeason.set(p.id, p.position);
+        console.log(`✓ ${players.length}`);
+      } catch (e) {
+        rostersByTeam.set(teamId, []);
+        console.log(`✗ ${e.message}`);
+        teamsFailed++;
+      }
     }
   }
 
