@@ -249,6 +249,18 @@
   letter-spacing: 0.06em;
 }
 
+/* Credit for a backfilled portrait, shown under the revealed answer. */
+.photoCredit {
+  font-size: 0.68rem;
+  color: var(--white-30, rgba(255, 255, 255, 0.3));
+  text-decoration: none;
+  margin-top: 10px;
+}
+
+.photoCredit:hover {
+  text-decoration: underline;
+}
+
 .feedbackSub {
   font-family: var(--font-body);
   font-size: 0.9rem;

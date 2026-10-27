@@ -3,6 +3,7 @@ import styles from './WhoHasMoreGameScreen.module.css'
 import { pickNWeightedPlayers } from '../utils/playerSelection.js'
 import { getSeasonPlayers } from '../utils/seasonTotals.js'
 import { loadRosters } from '../hooks/useRoster.js'
+import { headshotUrl } from '../data/backfilledHeadshots.js'
 
 const REEL_DURATION = 2800
 const TICK_START    = 60
@@ -16,10 +17,6 @@ const STAT_CONFIG = {
   blkg: { key: 'blk',  label: 'BLK/G', questionText: 'had the most blocks per game',        format: v => v.toFixed(1) },
   ming: { key: 'min',  label: 'MIN/G', questionText: 'played the most minutes per game',    format: v => v.toFixed(1) },
   fg3m: { key: 'fg3m', label: 'FG3M',  questionText: 'made the most three-pointers',        format: v => String(Math.round(v)) },
-}
-
-function getHeadshotUrl(id) {
-  return `https://cdn.nba.com/headshots/nba/latest/1040x760/${id}.png`
 }
 
 function formatSeason(s) {
@@ -45,7 +42,7 @@ function PlayerCard({ player, statConf, onClick, highlight, dimmed, chosen, disa
       <div className={styles.headshotWrap}>
         {!imgError ? (
           <img
-            src={getHeadshotUrl(player.id)}
+            src={headshotUrl(player.id)}
             alt={player.name}
             className={styles.headshot}
             onError={() => setImgError(true)}

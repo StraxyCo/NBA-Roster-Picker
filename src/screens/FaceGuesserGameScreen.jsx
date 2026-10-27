@@ -9,12 +9,23 @@ import { buildPlayerIndex, groupByTier, TIERS } from '../utils/playerRecognizabi
 import {
   createMatch, resolveRound, drawRound, markFacesUsed, currentTier, isMatchOver,
 } from '../utils/faceGuessRounds.js'
-
-function getHeadshotUrl(id) {
-  return `https://cdn.nba.com/headshots/nba/latest/1040x760/${id}.png`
-}
+import { headshotUrl, headshotCredit } from '../data/backfilledHeadshots.js'
 
 const TIER_LABEL = Object.fromEntries(TIERS.map(t => [t.key, t.label]))
+
+// Backfilled portraits come from outside the NBA CDN, so they carry a credit: the
+// publication for the press photos, and the photographer and licence for the
+// Commons ones, whose CC terms require it. It appears only once the answer is out —
+// on the guessing screen a credit would narrow down the era, which is a hint.
+function PhotoCredit({ id }) {
+  const credit = headshotCredit(id)
+  if (!credit) return null
+  return (
+    <a className={styles.photoCredit} href={credit.url} target="_blank" rel="noreferrer">
+      Photo: {credit.text}
+    </a>
+  )
+}
 
 function shuffle(arr) {
   const a = [...arr]
@@ -195,7 +206,7 @@ export default function FaceGuesserGameScreen({ players, startTier, onBack, onSa
       <div className={styles.playerCard}>
         {!imgError && shownFace ? (
           <img
-            src={getHeadshotUrl(shownFace.id)}
+            src={headshotUrl(shownFace.id)}
             alt="Guess this player"
             className={styles.headshot}
             onError={() => setImgError(true)}
@@ -259,6 +270,7 @@ export default function FaceGuesserGameScreen({ players, startTier, onBack, onSa
           <button className={styles.primaryBtn} onClick={handleNext}>
             {!outcome.nextMatch ? 'Next player →' : isMatchOver(outcome.nextMatch) ? 'See result →' : 'Next round →'}
           </button>
+          <PhotoCredit id={outcome.face.id} />
         </div>
       )}
     </div>
