@@ -50,16 +50,16 @@ export default function PickPlayerScreen({ currentPlayer, team, season, nbaRoste
     return arr.sort((a, b) => (b[sortBy] ?? 0) - (a[sortBy] ?? 0))
   }, [nbaRoster, sortBy])
 
+  const myBans = bannedPlayers[currentPlayer] || {}
+
   function isUnavailable(id) {
-    // A ban blocks everyone, starting with the roster on screen when it is issued.
-    const isBanned = Object.values(bannedPlayers).some(userBans => userBans[id])
-    return pickedIds.has(id) || globalPickedIds.has(id) || isBanned
+    // A ban only blocks the drafter it was issued against, not the other players.
+    return pickedIds.has(id) || globalPickedIds.has(id) || !!myBans[id]
   }
 
   function handleNbaPlayerClick(player) {
     if (banMode) {
-      const currentPlayerBans = bannedPlayers[currentPlayer] || {}
-      if (bansRemaining > 0 && !currentPlayerBans[player.id] && !pickedIds.has(player.id) && !globalPickedIds.has(player.id)) {
+      if (bansRemaining > 0 && !myBans[player.id] && !pickedIds.has(player.id) && !globalPickedIds.has(player.id)) {
         onBanPlayer(player.id)
         setBanMode(false)
       }
@@ -283,7 +283,7 @@ export default function PickPlayerScreen({ currentPlayer, team, season, nbaRoste
                 <div className={styles.empty}>No roster data available</div>
               )}
               {sortedRoster.map(player => {
-                const isBanned   = Object.values(bannedPlayers).some(userBans => userBans[player.id])
+                const isBanned   = !!myBans[player.id]
                 const isPicked   = isUnavailable(player.id)
                 const isSelected = selectedSource?.type === 'nba' && selectedSource.player.id === player.id
                 return (
